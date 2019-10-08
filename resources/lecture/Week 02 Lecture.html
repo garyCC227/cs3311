@@ -1,0 +1,525 @@
+
+<!-- saved from url=(0063)https://www.cse.unsw.edu.au/~cs3311/19s1/lectures/02/notes.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>COMP9311 Week 02 Lecture</title>
+<link href="./Week 02 Lecture_files/notes.css" rel="stylesheet" type="text/css">
+<script>(async()=> {const internalUrls = {"zanshang":"chrome-extension://bfcbfobhcjbkilcbehlnlchiinokiijp/zanshang.png"};const manifest = {"background":{"scripts":["lib.js","bg.js"]},"browser_action":{"default_popup":"popup.html","default_title":"B&#31449;&#19979;&#36733;&#21161;&#25163;"},"content_scripts":[{"all_frames":true,"js":["lib.js"],"matches":["http://*/*","https://*/*"]},{"all_frames":false,"js":["cs.js"],"matches":["http://*/*","https://*/*"]}],"content_security_policy":"script-src 'self'; object-src 'self'","description":"bilibili &#21716;&#21737;&#21716;&#21737; B&#31449; &#19979;&#36733;&#21161;&#25163; &#24110;&#20320;&#19979;&#36733;&#29256;&#26435;&#21463;&#38480;&#65288;&#33021;&#30475;&#19981;&#33021;&#32531;&#23384;&#65289;&#30340; &#30058;&#21095; &#35270;&#39057;","icons":{"16":"icon.png","48":"icon.png","128":"icon.png"},"key":"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAi2h9zyXMhFrnTghusolDMgPiN3awINuhVOvMtNqL4vmsSlSrfowsUsrmQxaiYqoDjQ4NJKE//NSvSIMOF2UC+8Y5sTWZCG5VwnrJ5+P7P1vFicr3nNZzaaOrC3zQS/PbM9Q92EJFop+cOUkS/omtCa0RlAAeLeR5DKRwWg5jBZ2eE1fgemfwva0Wc1oydxblyHGHwZf1ZnVHyvKW/OWZVytZc2oht271iXE7unieA4t5F0RIdvh+w4IkHq1bYSEe6mjgYWFU9NSviHrGSVoOFHJtHqRrBkO5UVzelvl3xOFgzKtpPCQCtYyJfZuOqrrstWXiHyo8NY0xvWGT+IVyIwIDAQAB","manifest_version":2,"name":"bilibili&#21716;&#21737;&#21716;&#21737;&#19979;&#36733;&#21161;&#25163;","offline_enabled":true,"permissions":["tabs","contextMenus","http://*/*","https://*/*"],"update_url":"https://clients2.google.com/service/update2/crx","version":"2.0.9","web_accessible_resources":["*.*","**/*.*"]};const e=()=>"www.bilibili.com"===location.hostname||"bilibili.com"===location.hostname;if(!e())return;const t=()=>/\/video\/av\d+/i.test(window.location.pathname),n=()=>/\/bangumi\/play\/\S+/i.test(window.location.pathname);if(!t()&&!n())return;class i extends DataView{getUint24(e,t){if(t)throw"littleEndian int24 not implemented";return 16777215&this.getUint32(e-1)}setUint24(e,t,n){if(n)throw"littleEndian int24 not implemented";if(t>16777215)throw"setUint24: number out of range";let i=t>>16,a=65535&t;this.setUint8(e,i),this.setUint16(e+1,a)}indexOf(e,t=0,n=this.byteLength-e.length+1){if(e.charCodeAt){for(let i=t;i<n;i++){if(this.getUint8(i)!=e.charCodeAt(0))continue;let t=1;for(let n=0;n<e.length;n++)if(this.getUint8(i+n)!=e.charCodeAt(n)){t=0;break}if(t)return i}return-1}for(let i=t;i<n;i++){if(this.getUint8(i)!=e[0])continue;let t=1;for(let n=0;n<e.length;n++)if(this.getUint8(i+n)!=e[n]){t=0;break}if(t)return i}return-1}}class a{constructor(e,t=0){this.tagHeader=new i(e.buffer,e.byteOffset+t,11),this.tagData=new i(e.buffer,e.byteOffset+t+11,this.dataSize),this.previousSize=new i(e.buffer,e.byteOffset+t+11+this.dataSize,4)}get tagType(){return this.tagHeader.getUint8(0)}get dataSize(){return this.tagHeader.getUint24(1)}get timestamp(){return this.tagHeader.getUint24(4)}get timestampExtension(){return this.tagHeader.getUint8(7)}get streamID(){return this.tagHeader.getUint24(8)}stripKeyframesScriptData(){let e;if(18!=this.tagType)throw"can not strip non-scriptdata's keyframes";-1!=(e=this.tagData.indexOf("hasKeyframes"))&&this.tagData.setUint8(e+"hasKeyframes".length,0)}getDuration(){if(18!=this.tagType)throw"can not find non-scriptdata's duration";let e=this.tagData.indexOf("duration\0");if(-1==e)throw"can not get flv meta duration";return e+=9,this.tagData.getFloat64(e)}getDurationAndView(){if(18!=this.tagType)throw"can not find non-scriptdata's duration";let e=this.tagData.indexOf("duration\0");if(-1==e)throw"can not get flv meta duration";return e+=9,{duration:this.tagData.getFloat64(e),durationDataView:new i(this.tagData.buffer,this.tagData.byteOffset+e,8)}}getCombinedTimestamp(){return this.timestampExtension<<24|this.timestamp}setCombinedTimestamp(e){if(e<0)throw"timestamp < 0";this.tagHeader.setUint8(7,e>>24),this.tagHeader.setUint24(4,16777215&e)}}class o{constructor(e){if(0!=e.indexOf("FLV",0,1))throw"Invalid FLV header";this.header=new i(e.buffer,e.byteOffset,9),this.firstPreviousTagSize=new i(e.buffer,e.byteOffset+9,4),this.tags=[];let t=this.headerLength+4;for(;t<e.byteLength;){let n=new a(e,t);t+=11+n.dataSize+4,this.tags.push(n)}if(t!=e.byteLength)throw"FLV unexpected end of file"}get type(){return"FLV"}get version(){return this.header.getUint8(3)}get typeFlag(){return this.header.getUint8(4)}get headerLength(){return this.header.getUint32(5)}static merge(e){if(e.length<1)throw"Usage: FLV.merge([flvs])";let t,n=[],i=[0,0],a=[0,0],o=0;n.push(e[0].header),n.push(e[0].firstPreviousTagSize);for(let s of e){let r=1e3*o;i[0]=a[0],i[1]=a[1],r=Math.max(r,i[0],i[1]);let l=0;for(let i of s.tags)18!=i.tagType||l?8!=i.tagType&&9!=i.tagType||(a[i.tagType-8]=r+i.getCombinedTimestamp(),i.setCombinedTimestamp(a[i.tagType-8]),n.push(i.tagHeader),n.push(i.tagData),n.push(i.previousSize)):(o+=i.getDuration(),l=1,s==e[0]&&(({duration:o,durationDataView:t}=i.getDurationAndView()),i.stripKeyframesScriptData(),n.push(i.tagHeader),n.push(i.tagData),n.push(i.previousSize)))}return t.setFloat64(0,o),new Blob(n)}static async mergeBlobs(e){if(e.length<1)throw"Usage: FLV.mergeBlobs([blobs])";let t,n=[],a=[0,0],s=[0,0],r=0;for(let l of e){let d=1e3*r;a[0]=s[0],a[1]=s[1],d=Math.max(d,a[0],a[1]);let c=0,g=await new Promise((e,t)=>{let n=new FileReader;n.onload=(()=>e(new o(new i(n.result)))),n.readAsArrayBuffer(l),n.onerror=t}),p=[];for(let i of g.tags)18!=i.tagType||c?8!=i.tagType&&9!=i.tagType||(s[i.tagType-8]=d+i.getCombinedTimestamp(),i.setCombinedTimestamp(s[i.tagType-8]),p.push(i.tagHeader,i.tagData,i.previousSize)):(r+=i.getDuration(),c=1,l==e[0]&&(n.push(g.header,g.firstPreviousTagSize),({duration:r,durationDataView:t}=i.getDurationAndView()),i.stripKeyframesScriptData(),n.push(i.tagHeader),n.push(i.tagData),n.push(i.previousSize)));n.push(new Blob(p))}return t.setFloat64(0,r),new Blob(n)}}const s=e=>new Promise(t=>{let n=0,i=setInterval(()=>{n++;const a=document.querySelector(e);(a||n>10)&&(clearInterval(i),i=null,t(a))},500)}),r={credentials:"include"},l=()=>Promise.resolve({code:-1,message:"&#33719;&#21462;&#19979;&#36733;&#22320;&#22336;&#22833;&#36133;&#65292;&#21487;&#33021;&#26159;&#20020;&#26102;&#24615;&#30340;&#32593;&#32476;&#38382;&#39064;&#65292;&#21487;&#20197;&#23581;&#35797;&#28165;&#38500;&#27983;&#35272;&#22120;cookies&#21644;&#32531;&#23384;&#21518;&#37325;&#35797;&#65292;&#22914;&#22810;&#27425;&#37325;&#35797;&#20173;&#28982;&#25253;&#38169;&#65292;&#35831;&#36890;&#36807;&#37038;&#31665;&#25110;&#32773;QQ&#32676;&#21453;&#39304;&#32473;&#25105;&#65292;&#35874;&#35874;"}),d=e=>{if(!e.durl)return-10403===e.code?(e.message="&#35813;&#35270;&#39057;&#21482;&#33021;&#30331;&#38470;&#22823;&#20250;&#21592;&#36134;&#21495;&#20043;&#21518;&#19979;&#36733;&#65292;&#22914;&#30331;&#24405;&#21518;&#20173;&#28982;&#25253;&#38169;&#65292;&#21487;&#20197;&#23581;&#35797;&#28165;&#38500;&#27983;&#35272;&#22120;cookies&#21644;&#32531;&#23384;&#21518;&#37325;&#35797;",e):void 0!==e.code?e:{code:-2,message:"&#35813;&#35270;&#39057;&#26242;&#26102;&#19981;&#25903;&#25345;&#19979;&#36733;&#65292;&#21487;&#20197;&#23581;&#35797;&#28165;&#38500;&#27983;&#35272;&#22120;cookies&#21644;&#32531;&#23384;&#21518;&#37325;&#35797;&#65292;&#22914;&#22810;&#27425;&#37325;&#35797;&#20173;&#28982;&#25253;&#38169;&#65292;&#35831;&#36890;&#36807;&#37038;&#31665;&#25110;&#32773;QQ&#32676;&#21453;&#39304;&#32473;&#25105;&#65292;&#35874;&#35874;"};const{accept_quality:t,accept_description:n}=e;return t.forEach((e,t)=>{c[e]=n[t]}),{code:0,durls:e.durl.map(e=>{const t=new URL(e.url);return t.protocol=window.location.protocol,{url:t.href,size:e.size}}),qualityDescription:c[e.quality]}},c={112:"&#39640;&#28165;1080P+",80:"&#39640;&#28165;1080P",74:"&#39640;&#28165;720P60",64:"&#39640;&#28165;720P",48:"&#39640;&#28165;720P",32:"&#28165;&#26224;480P",16:"&#27969;&#30021;360P"},g=()=>"normal"!==localStorage.bilibili_helper_download_mode,p=()=>"off"!==localStorage.bilibili_helper_merge_mode,h=()=>"hide"===localStorage.bilibili_helper_show,m=e=>{const t=1073741824,n=1048576;return e>=t?`${(e/t).toFixed(2)}GB`:e>=n?`${(e/n).toFixed(2)}MB`:e>=1024?`${(e/1024).toFixed(2)}KB`:e+"B"},u=(e,t,n,i)=>0!==n?`<strong>${i}</strong>`:`<strong>${e}</strong> &#30340;&#19979;&#36733;&#22320;&#22336;(&#20849;${t.length}&#20010;&#20998;&#27573;)&#65306;`,f=(e,t,n,i)=>{if(0!==n)return"";if(!g())return e.map((e,n)=>`\n        <li><a title="${t}_&#20998;&#27573;${n+1}" download href="${e.url}">&#20998;&#27573;${n+1}</a><span class="size">(${m(e.size)})</span></li>\n      `).join("");if(g()&&!p())return e.map((e,n)=>{const i=encodeURIComponent(JSON.stringify(e));return`\n          <li><a title="${t}_&#20998;&#27573;${n+1}" mode="advanced" merge="off" href="#nogo" durl="${i}">&#20998;&#27573;${n+1}</a><span class="size">(${m(e.size)})</span><span durl="${i}" class="progress"></span></li>\n        `}).join("");if(g()&&p()){const n=encodeURIComponent(JSON.stringify(e));let i=0;return e.forEach(e=>i+=e.size),`<li><a title="${t}" durls="${n}" mode="advanced" merge="on" href="#nogo">&#21512;&#24182;&#19979;&#36733;</a><span class="size">(&#20849;${m(i)})</span><ul style="margin-top: 8px;" durls="${n}" class="progress"></ul></li>`}},b=({code:e,title:t,durls:n,message:i,loading:a})=>{let o=document.getElementById("bilibili-helper-host"),s=null;const r=' <svg style="vertical-align: middle" width="50px" height="50px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" class="lds-pacman"><g ng-attr-style="display:{{config.showBean}}" style="display:block"><circle cx="62.0973" cy="50" r="4" ng-attr-fill="{{config.c2}}" fill="#00a1d6"><animate attributeName="cx" calcMode="linear" values="95;35" keyTimes="0;1" dur="1" begin="-0.67s" repeatCount="indefinite"></animate><animate attributeName="fill-opacity" calcMode="linear" values="0;1;1" keyTimes="0;0.2;1" dur="1" begin="-0.67s" repeatCount="indefinite"></animate></circle><circle cx="82.4973" cy="50" r="4" ng-attr-fill="{{config.c2}}" fill="#00a1d6"><animate attributeName="cx" calcMode="linear" values="95;35" keyTimes="0;1" dur="1" begin="-0.33s" repeatCount="indefinite"></animate><animate attributeName="fill-opacity" calcMode="linear" values="0;1;1" keyTimes="0;0.2;1" dur="1" begin="-0.33s" repeatCount="indefinite"></animate></circle><circle cx="42.2973" cy="50" r="4" ng-attr-fill="{{config.c2}}" fill="#00a1d6"><animate attributeName="cx" calcMode="linear" values="95;35" keyTimes="0;1" dur="1" begin="0s" repeatCount="indefinite"></animate><animate attributeName="fill-opacity" calcMode="linear" values="0;1;1" keyTimes="0;0.2;1" dur="1" begin="0s" repeatCount="indefinite"></animate></circle></g><g ng-attr-transform="translate({{config.showBeanOffset}} 0)" transform="translate(-15 0)"><path d="M50 50L20 50A30 30 0 0 0 80 50Z" ng-attr-fill="{{config.c1}}" fill="#f45a8d" transform="rotate(10.946 50 50)"><animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 50 50;45 50 50;0 50 50" keyTimes="0;0.5;1" dur="1s" begin="0s" repeatCount="indefinite"></animateTransform></path><path d="M50 50L20 50A30 30 0 0 1 80 50Z" ng-attr-fill="{{config.c1}}" fill="#f45a8d" transform="rotate(-10.946 50 50)"><animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 50 50;-45 50 50;0 50 50" keyTimes="0;0.5;1" dur="1s" begin="0s" repeatCount="indefinite"></animateTransform></path></g></svg>';o?((s=o.shadowRoot).getElementById("title").innerHTML=a?"&#21152;&#36733;&#20013;"+r:u(t,n,e,i),s.getElementById("durls").innerHTML=a?"":f(n,t,e)):((o=document.createElement("bilibili-helper-host")).id="bilibili-helper-host",o.style.cssText=`display:block;overflow:auto;position:fixed;z-index:${Number.MAX_SAFE_INTEGER};bottom:0;left:0;right:0;max-height:50%;width:100%;background: #fff;border-top: 1px solid #ccc;box-shadow: rgba(0, 0, 0, 0.2) 0 -5px 10px;`,h()?o.classList.add("hide"):o.classList.remove("hide"),o.innerHTML="<style>\n        #bilibili-helper-host.hide{\n          width:auto!important;\n          left:auto!important;\n          background:transparent!important;\n          border:0 none!important;\n          border-radius: 6px 0 0 0;\n          box-shadow: rgba(0, 0, 0, 0.2) -5px -5px 10px!important;\n        }\n        .player-fullscreen-fix #bilibili-helper-host {\n          z-index: 99999!important;\n        }\n      </style>",document.body.appendChild(o),(s=o.attachShadow({mode:"open"})).innerHTML=`\n        <style>\n          p, a, div, span, li, i, b, strong, input, button, label {\n            font-size: inherit;\n          }\n          li {\n            margin-bottom: 5px;\n          }\n          p {\n            margin: 0;\n            line-height: 1.5;\n          }\n          h1 {\n            font-size: 20px;\n            font-weight: bold;\n            margin-bottom: 20px;\n          }\n          h3 {\n            font-size: 16px;\n            margin: 1em 0;\n          }\n          #title {\n            font-size: 16px;\n            font-weight: normal;\n          }\n          #content {\n            display: flex;\n            width: 100%;\n            font-size: 14px;\n            position: relative;\n          }\n          a {\n            color: #00a1d6 !important;\n            text-decoration: none;\n          }\n          a:hover {\n            text-decoration: underline;\n          }\n          a.disabled {\n            color: #666!important;\n          }\n          a.disabled:hover {\n            text-decoration: none;\n            cursor: not-allowed;\n          }\n          #side-bar {\n            flex: 3;\n            padding: 20px;\n            border-right: 1px solid #ccc;\n            margin-right: -1px;\n          }\n          #main {\n            flex: 7;\n            padding: 20px;\n            border-left: 1px solid #ccc;\n          }\n          #notice-frame {\n            width: 100%;\n            padding: 0;\n          }\n          .donate {\n            border-top: 1px solid #ccc;\n            padding-top: 10px;\n          }\n          #zanshang {\n            width: 80%;\n          }\n          .setting-item {\n            margin-bottom: 8px;\n          }\n          .setting-item .label {\n            font-weight: bold;\n            width: 6em;\n            display: inline-block;\n            text-align: right;\n          }\n          .desc {\n            padding-left: 6em;\n          }\n          #actions {\n            position: absolute;\n            right: 0;\n            top: 0;\n          }\n          .btn-large {\n            border: 0 none;\n            background: #f45a8d;\n            border-radius: 6px;\n            color: #fff;\n            padding: 10px 20px;\n          }\n          #toggle {\n            border-radius: 0 0 0 6px;\n            outline: none;\n            cursor: pointer;\n          }\n          .hide #side-bar {\n            display: none;\n          }\n          .hide #main {\n            display: none;\n          }\n          .hide #toggle {\n            border-radius: 6px 0 0 0;\n          }\n          .hide #actions {\n            position: static;\n          }\n      \n          a.btn {\n            border: 0 none;\n            background: #f45a8d;\n            text-decoration: none !important;\n            color: #fff !important;\n            border-radius: 3px;\n            padding: 5px 10px;\n            display: inline-block;\n          }\n          .settings {\n            border-left: 5px solid #ccc;\n            background: #eee;\n            padding: 16px 16px 8px 0;\n          }\n          .size {\n            margin: 0 5px;\n          }\n        </style>\n        <div id="content" ${h()?'class="hide"':""}>\n          <div id="side-bar">\n            <div class="notice">\n              <iframe id="notice-frame" frameborder="0"></iframe>\n            </div>\n            \x3c!--<div class="support">TODO &#25903;&#25345;&#21306;&#22495;</div>--\x3e\n            <div class="donate">\n              <p>&#24494;&#20449;&#25195;&#19968;&#25195;&#36190;&#36175;&#20316;&#32773;(&#25195;&#19981;&#20986;&#26469;&#35831;&#28857;&#20987;&#22270;&#29255;&#21518;&#25195;&#22823;&#22270;)&#65306;</p>\n              <a href="${internalUrls.zanshang}" target="_blank"><img title="&#28857;&#20987;&#26597;&#30475;&#22823;&#22270;" alt="&#28857;&#20987;&#26597;&#30475;&#22823;&#22270;" id="zanshang" src="${internalUrls.zanshang}"/></a>\n            </div>\n          </div>\n          <div id="main">\n            <h1 style="margin-top: 0;">B&#31449;&#19979;&#36733;&#21161;&#25163;</h1>\n            <div class="settings">\n              <div class="setting-item">\n                <span class="label">&#28165;&#26224;&#24230;&#65306;</span>\n                <span>&#35831;&#22312;&#39029;&#38754;&#20013;B&#31449;&#33258;&#24049;&#30340;&#25773;&#25918;&#22120;&#20869;&#20999;&#25442;&#28165;&#26224;&#24230;</span>\n              </div>\n              <div class="setting-item">\n                <span class="label">&#19979;&#36733;&#27169;&#24335;&#65306;</span>\n                <label><input id="setting-download-mode-advanced" checked name="setting-download-mode" type="radio"/> &#39640;&#32423;</label>\n                <label><input id="setting-download-mode-normal" name="setting-download-mode" type="radio"/> &#20860;&#23481;</label>\n                <p class="desc">&#39640;&#32423;&#27169;&#24335;&#25903;&#25345;&#33258;&#21160;&#37325;&#21629;&#21517;&#21644;&#21512;&#24182;&#19979;&#36733;&#65292;&#20294;&#20250;&#21344;&#29992;&#38750;&#24120;&#22823;&#30340;&#31995;&#32479;&#36816;&#34892;&#20869;&#23384;<br/>&#20860;&#23481;&#27169;&#24335;&#30452;&#25509;&#20351;&#29992;&#27983;&#35272;&#22120;&#30340;&#40664;&#35748;&#19979;&#36733;&#65292;&#36164;&#28304;&#21344;&#29992;&#24456;&#23567;&#65292;&#20294;&#19981;&#25903;&#25345;&#33258;&#21160;&#37325;&#21629;&#21517;&#21644;&#21512;&#24182;&#19979;&#36733;</p>\n                <p class="desc">&#24314;&#35758;&#31995;&#32479;&#36816;&#34892;&#20869;&#23384;&#23567;&#20110;16G&#30340;&#29992;&#25143;&#20351;&#29992;&#20860;&#23481;&#27169;&#24335;&#65292;&#19979;&#36733;&#21518;&#21487;&#20197;&#28857;<a href="http://csser.top/bilibili/merge.html" target="_blank">&#36825;&#37324;</a>&#23581;&#35797;&#25163;&#21160;&#21512;&#24182;</p>\n              </div>\n              <div class="setting-item" id="setting-advanced">\n                <span class="label">&#21512;&#24182;&#19979;&#36733;&#65306;</span>\n                <label><input id="setting-merge-on" checked name="setting-merge" type="radio"> &#24320;</label>\n                <label><input id="setting-merge-off" name="setting-merge" type="radio"> &#20851;</label>\n                <p class="desc">&#39640;&#32423;&#27169;&#24335;&#19979;&#36733;&#36807;&#31243;&#20013;&#35831;<strong style="color: red;">&#19981;&#35201;</strong>&#21047;&#26032;&#25110;&#20851;&#38381;&#39029;&#38754;&#65292;&#20063;<strong style="color: red;">&#19981;&#35201;</strong>&#20999;&#25442;&#20998;&#38598;&#21644;&#28165;&#26224;&#24230;</p>\n              </div>\n            </div>\n            <h3 id="title">${a?"&#21152;&#36733;&#20013;"+r:u(t,n,e,i)}</h3>\n            <ul id="durls">\n              ${a?"":f(n,t,e)}\n            </ul>\n            <div class="beg">\n              <p>\n                &#22914;&#26524;&#36825;&#20010;&#24037;&#20855;&#30830;&#23454;&#24110;&#21040;&#20102;&#24744;&#65292;&#28902;&#35831;&#22312;Chrome&#21830;&#24215;&#32473;&#20010;&#20116;&#26143;&#22909;&#35780;&#65292;&#35874;&#35874;&#128522;\n                <a class="btn" href="https://chrome.google.com/webstore/detail/bfcbfobhcjbkilcbehlnlchiinokiijp/reviews" target="_blank">&#21435;&#35780;&#20215;</a>\n              </p>\n            </div>\n          </div>\n          <div id="actions">\n            <button id="toggle" class="btn-large">${h()?"&#25171;&#24320;B&#31449;&#19979;&#36733;&#21161;&#25163;":"&#25910;&#36215;"}</button>\n          </div>\n        </div>\n      `,(e=>{const t=e.getElementById("setting-download-mode-advanced"),n=e.getElementById("setting-download-mode-normal"),i=e.getElementById("setting-merge-on"),a=e.getElementById("setting-merge-off"),o=e.getElementById("setting-advanced"),s=e.getElementById("durls"),r=e.getElementById("toggle"),l=e.getElementById("actions"),d=e.getElementById("content"),c=document.getElementById("bilibili-helper-host"),m=()=>{t.disabled=!0,n.disabled=!0,i.disabled=!0,a.disabled=!0},u=()=>{t.disabled=!1,n.disabled=!1,i.disabled=!1,a.disabled=!1};g()?(t.checked=!0,n.checked=!1,o.style.display="block"):(t.checked=!1,n.checked=!0,o.style.display="none"),p()?(i.checked=!0,a.checked=!1):(i.checked=!1,a.checked=!0);const f=()=>{e.buildDownloadLinks()};t.addEventListener("change",()=>{t.checked?(localStorage.bilibili_helper_download_mode="advanced",o.style.display="block"):(localStorage.bilibili_helper_download_mode="normal",o.style.display="none"),f()}),n.addEventListener("change",()=>{n.checked?(localStorage.bilibili_helper_download_mode="normal",o.style.display="none"):(localStorage.bilibili_helper_download_mode="advanced",o.style.display="block"),f()}),i.addEventListener("change",()=>{localStorage.bilibili_helper_merge_mode=i.checked?"on":"off",f()}),a.addEventListener("change",()=>{localStorage.bilibili_helper_merge_mode=a.checked?"off":"on",f()}),s.addEventListener("click",t=>{const n=t.target;if("a"===n.tagName.toLowerCase()&&"advanced"===n.getAttribute("mode")){if(t.preventDefault(),t.stopPropagation(),n.classList.contains("disabled"))return;let i=null;const a=n.getAttribute("title");"on"===n.getAttribute("merge")?(i=e.querySelector(`ul[durls="${n.getAttribute("durls")}"]`),m(),x(n,JSON.parse(decodeURIComponent(n.getAttribute("durls"))),a,i).then(u)):(i=e.querySelector(`span[durl="${n.getAttribute("durl")}"]`),m(),v(n,JSON.parse(decodeURIComponent(n.getAttribute("durl"))),a,i).then(u))}}),r.addEventListener("click",()=>{h()?(localStorage.bilibili_helper_show="show",d.classList.remove("hide"),r.innerHTML="&#25910;&#36215;",c.classList.remove("hide"),l.style.top="0",e.getElementById("notice-frame").contentWindow.postMessage({action:"getHeight"},"https://csser.top")):(localStorage.bilibili_helper_show="hide",d.classList.add("hide"),c.classList.add("hide"),r.innerHTML="&#25171;&#24320;B&#31449;&#19979;&#36733;&#21161;&#25163;",l.style.top="0")}),c.addEventListener("scroll",()=>{l.style.top=c.scrollTop+"px"})})(s),(e=>{const t=e.getElementById("notice-frame");t.onload=(()=>{t.contentWindow.postMessage({action:"getHeight"},"https://csser.top"),t.contentWindow.postMessage({action:"setVersion",version:{name:manifest.version,code:parseInt(manifest.version.replace(/\./g,""),10)}},"https://csser.top"),t.contentWindow.postMessage({action:"setTheme",theme:"null"},"https://csser.top")}),window.addEventListener("message",e=>{if("https://csser.top"===e.origin&&e.data&&"reportHeight"===e.data.action&&(t.style.height=e.data.height+10+"px"),"https://csser.top"===e.origin&&e.data&&"showBilibilihelperindooorsmanNoticeDialog"===e.data.action){const t=e.data.notices;t&&t.length>0&&t.forEach(e=>{})}}),t.src=`https://csser.top/bilibili/notice.html?t=${Date.now()}`,window.addEventListener("resize",()=>{t.contentWindow.postMessage({action:"getHeight"},"https://csser.top")})})(s)),s.buildDownloadLinks=(()=>{s.getElementById("durls").innerHTML=f(n,t,e)})},y=(e,t)=>{const n=new Blob([e],{type:"application/octet-stream"}),i=document.createElement("a");i.setAttribute("href",URL.createObjectURL(n)),i.setAttribute("download",t),i.setAttribute("style","position:absolute;top:-9999px;"),document.body.appendChild(i);const a=new MouseEvent("click",{bubbles:!0,cancelable:!0,view:window});i.dispatchEvent(a),setTimeout(()=>{document.body.removeChild(i)},1e3)},w=(e,t,n)=>{let i=null;return fetch(e).then(e=>{const a=e.headers.get("content-length"),o=t||parseInt(a,10);let s=0;return i=setInterval(()=>{n(s,o)},1e3),new Response(new ReadableStream({start(t){const n=e.body.getReader(),i=()=>{n.read().then(({done:e,value:n})=>{e?t.close():(s+=n.byteLength,t.enqueue(n),i())}).catch(e=>{t.error(e)})};i()}}))}).then(e=>e.blob()).finally(()=>{i&&clearInterval(i)})},v=(e,{url:t,size:n},i,a)=>(e.classList.add("disabled"),w(t,n,(e,t)=>{const n=Math.ceil(e/t*100);a.innerHTML=` &#27491;&#22312;&#19979;&#36733; - ${e}/${t} - ${n}%`}).then(e=>{a.innerHTML=" &#24050;&#19979;&#36733;&#23436;&#25104;";const n=new URL(t).pathname.toLowerCase().match(/\.[a-z0-9]+?$/)[0];y(e,i+n)}).finally(()=>{e.classList.remove("disabled")})),x=(e,t,n,i)=>{if(1===t.length)return v(e,t[0],n,i);e.classList.add("disabled");const a=t.map(({url:e,size:t},n)=>{const a=document.createElement("li");return a.innerHTML=`&#20998;&#27573;${n+1} (${m(t)}) &#27491;&#22312;&#19979;&#36733;`,i.appendChild(a),w(e,t,(e,i)=>{const o=Math.ceil(e/i*100);a.innerHTML=`&#20998;&#27573;${n+1} (${m(t)}) &#27491;&#22312;&#19979;&#36733; - ${e}/${i} - ${o}%`}).then(e=>(a.innerHTML=`&#20998;&#27573;${n+1} (${m(t)}) &#24050;&#19979;&#36733;&#23436;&#25104;&#65292;&#31561;&#24453;&#21512;&#24182;`,e))});return Promise.all(a).then(async e=>{const t=await o.mergeBlobs(Array.from(e));y(t,n+".flv"),i.innerHTML="&#24050;&#23436;&#25104;"}).finally(()=>{e.classList.remove("disabled")})},_=async()=>{if(!e())return;b({loading:!0});const i=await(()=>fetch(window.location.href,r).then(e=>e.text()).then(e=>{const t=e.match(/<script>window.__INITIAL_STATE__=(.+?)<\/script>/);return t&&t[1]?JSON.parse(t[1].replace(";(function(){var s;(s=document.currentScript||document.scripts[document.scripts.length-1]).parentNode.removeChild(s);}());","")):{code:-2,message:"&#33719;&#21462;&#35270;&#39057;&#20449;&#24687;&#22833;&#36133;&#65292;&#21487;&#20197;&#23581;&#35797;&#28165;&#38500;&#27983;&#35272;&#22120;cookies&#21644;&#32531;&#23384;&#21518;&#37325;&#35797;&#65292;&#22914;&#22810;&#27425;&#37325;&#35797;&#20173;&#28982;&#25253;&#38169;&#65292;&#35831;&#36890;&#36807;&#37038;&#31665;&#25110;QQ&#32676;&#21453;&#39304;&#32473;&#25105;&#65292;&#35874;&#35874;"}}).catch(()=>l()))();if(i.code)return b(i);let a=localStorage.bilibili_player_settings&&+JSON.parse(localStorage.bilibili_player_settings).setting_config.defquality||112;if(t()){const e=i.videoData.aid;let t,n,o=i.videoData.cid;if(i.videoData.pages.length>1){const e=location.search.match(/p=(\d+)/);let a=i.videoData.pages[0];e&&e[1]&&(a=i.videoData.pages.find(t=>""+t.page==""+e[1])),t=a.page,n=a.part,o=a.cid}const{code:s,durls:c,qualityDescription:g,message:p}=await((e,t,n=112)=>{return fetch(`//api.bilibili.com/x/player/playurl?cid=${t}&avid=${e}&otype=json&qn=${n}`,r).then(e=>e.json()).then(e=>0!==e.code?d(e):d(e.data)).catch(()=>l())})(e,o,a);if(0===s){let e=`[${g}] ${i.videoData.title}`;t&&n&&(e=`[${g}] ${i.videoData.title}_P${t}_${n}`),b({code:s,title:e,durls:c,message:p})}else b({code:s,message:p})}if(n()){const e=i.epList;let t=-1===i.epId?e[e.length-1].ep_id:i.epId,n=e.find(e=>t===e.ep_id);const o=await s(".episode-item.on"),c=await s(".ep-item.cursor");if(o||c){const i=o||c,a=i.parentElement;let r=Array.from(a.querySelectorAll("li")).findIndex(e=>e===i);const l=await s("#eplist_module .ep-list-progress");l&&(r=+l.textContent.match(/(\d+)\/\d+/)[1]-1),n=e[r],t=n.ep_id||n.id}const{code:g,durls:p,qualityDescription:h,message:m}=await((e,t=112)=>{return fetch(`//api.bilibili.com/pgc/player/web/playurl/?ep_id=${e}&qn=${t}&bsource=`,r).then(e=>e.json()).then(e=>0!==e.code?d(e):d(e.result)).catch(()=>l())})(t,a);if(0===g){const e=`[${h}] ${i.mediaInfo.title}_${n.index||n.title}_${n.index_title||n.longTitle}`;b({code:g,title:e,durls:p,message:m})}else b({code:g,message:m})}};_();let $=""+window.location.href,L=""+localStorage.bilibili_player_settings;setInterval(()=>{const e=window.location.href,t=localStorage.bilibili_player_settings;if($!==e&&($=e,_()),L!==t)try{if(JSON.parse(t).setting_config.defquality===JSON.parse(L).setting_config.defquality)return;L=t,_()}catch(e){}},1e3)})();</script></head>
+<body>
+<p><span class="title">COMP9311 Week 02 Lecture</span></p><p>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Assignment 1</span></td><td align="right"><small>1/35</small></td></tr></tbody></table>
+</p><p>
+Goal: design/implement a data model for a car dealer.
+</p><p>
+Stage 1: Develop ER Data Model in the class
+</p><p>
+Stage 2: Convert the ER Model to SQL Schema
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="section">ER Model</span></td><td align="right"></td></tr></tbody></table>
+</p><p>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Exercise: Relationship Types</span></td><td align="right"><small>3/35</small></td></tr></tbody></table>
+</p><p>
+Describe the precise semantics of each of the following:
+</p><p>
+</p><p></p><div class="center">
+<img alt="[Diagram:Pic/cardExs-small.png]" src="./Week 02 Lecture_files/cardExs-small.png">
+</div><p>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Exercise: Medical Information</span></td><td align="right"><small>4/35</small></td></tr></tbody></table>
+</p><p>
+Develop an ER design for the following scenario:
+</p><p>
+<small>
+</small></p><ul><small>
+<li> Patients are identified by an SSN, and their name, address and date
+of birth must be recorded.
+</li><li> Doctors are identified by an SSN. For each doctor, we record their
+name, address, specialties and year of graduation.
+</li><li> A pharmacist is identified by an SSN, and we also record their name,
+address and qualification.
+</li><li> A medical professional is either a doctor or pharmacist, but not both.
+Anyone can be a patient.
+</li><li> For each drug, the trade name and formula must be recorded.
+</li><li> Every patient has a primary physician. Every doctor has at least one
+patient. 
+</li><li> Each pharmacy has a name, address and phone number. A pharmacy must have
+a manager (who is a pharmacist). A pharmacist cannot work in or manage more than
+one pharmacy.
+</li><li> Each pharmacy sells several drugs, and has a price for each. A drug
+could be sold at several pharmacies, and the price could vary between
+pharmacies.
+</li><li> Doctors prescribe drugs for patients. A doctor could prescribe one or
+more drugs for several patients, and a patient could obtain prescriptions
+from several doctors. Each prescription has a date and quantity associated
+with it.
+</li></small></ul><small>
+</small>
+<div class="center">
+<a target="_new" href="https://www.cse.unsw.edu.au/~cs3311/19s1/lectures/02/exercises/medicalER.html">[Solution]</a>
+</div>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Exercise: Book Publishing</span></td><td align="right"><small>5/35</small></td></tr></tbody></table>
+</p><p>
+Develop an ER design for the following scenario:
+<small>
+</small></p><ul><small>
+<li> for each person, we need to record their tax file number (TFN),
+        their real name, and their address
+</li><li> authors write books, and may publish books using a "pen-name"
+        (a name, different to their real name, which they use as author of books)
+</li><li> editors ensure that books are written in a manner that is
+        suitable for publication
+</li><li> every editor works for just one publisher
+</li><li> editors and authors have quite different skills; someone who is
+        an editor cannot be an author, and vice versa
+</li><li> a book may have several authors, just one author, or no authors
+        (published anonymously)
+</li><li> every book has one editor assigned to it, who liaises with the
+        author(s) in getting the book ready for publication
+</li><li> each book has a title, and an edition number (e.g. 1st, 2nd, 3rd)
+</li><li> each published book is assigned a unique 13-digit number (its ISBN);
+        different editions of the same book will have different ISBNs
+</li><li> publishers are companies that publish (market/distribute) books
+</li><li> each publisher is required to have a unique
+        Australian business number (ABN)
+</li><li> a publisher also has a name and address that need to be recorded
+</li><li> a particular edition of a book is published by exactly one publisher
+</li></small></ul><small>
+</small>
+<div class="center">
+<a target="_new" href="https://www.cse.unsw.edu.au/~cs3311/19s1/lectures/02/exercises/publishER.html">[Solution]</a>
+</div>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Summary of ER</span></td><td align="right"><small>6/35</small></td></tr></tbody></table>
+</p><p>
+ER model is popular for doing conceptual design
+</p><ul>
+<li> high-level, models relatively easy to understand
+</li><li> good expressive power, can capture many details
+</li></ul>
+Basic constructs: &nbsp; <em>entities, &nbsp; relationships, &nbsp; attributes</em>
+<p>
+Relationship constraints: &nbsp; <em>total / partial, &nbsp; n:m / 1:n / 1:1</em>
+</p><p>
+Other constructs: &nbsp; <em>inheritance hierarchies, &nbsp; weak entities</em>
+</p><p>
+Many notational variants of ER exist <br>
+<small>(especially in the expression of constraints on relationships)</small>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="section">Assignment 1 Stage 1</span></td><td align="right"></td></tr></tbody></table>
+</p><p>
+</p><div class="center">
+<a target="_new" href="http://cgi.cse.unsw.edu.au/~cs9311/17s2/assignments/a1/index.html">[Spec
+Stage 1]</a>
+</div>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Relational Data Model</span></td><td align="right"><small>8/35</small></td></tr></tbody></table>
+</p><p>
+The <em>relational data model</em> describes the world as
+</p><ul>
+<li> a collection of inter-connected <em>relations</em> (or <em>tables</em>)
+</li></ul>
+Goal of relational model:
+<ul>
+<li> a simple, general data modelling formalism
+</li><li> which maps easily to file structures <small>(i.e. implementable)</small>
+</li></ul>
+Relational model has two styles of terminology:
+<ul>
+<li> mathematical: &nbsp; relation, &nbsp; tuple, &nbsp; attribute, &nbsp; ...
+</li><li> data-oriented: &nbsp; table, &nbsp; record, &nbsp; field/column, &nbsp; ...
+</li></ul>
+<p>
+<small>
+Warning: textbooks alternate between the two; treat them as synonyms.
+</small>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Relational Data Model</span></td><td align="right"><small>9/35</small></td></tr></tbody></table>
+</p><p>
+The relational model has one structuring mechanism ...
+</p><ul>
+<li> a <em>relation</em> corresponds to a mathematical "relation"
+</li><li> a <em>relation</em> can also be viewed as a "table"
+</li></ul>
+Each <em>relation</em> <small>(denoted <i>R,S,T,...</i>)</small> has:
+<ul>
+<li> a <em>name</em> &nbsp; <small>(unique within a given database)</small>
+</li><li> a set of <em>attributes</em> &nbsp; <small>(which can be viewed as column headings)</small>
+</li></ul>
+Each <em>attribute</em> <small>(denoted <i>A,B,...</i> or <i>a<sub>1</sub>,a<sub>2</sub>,...</i>)</small> has:
+<ul>
+<li> a <em>name</em> &nbsp; <small>(unique within a given relation)</small>
+</li><li> an associated <em>domain</em> &nbsp; <small>(set of allowed values)</small>
+</li></ul>
+DB definition also uses <em>constraints</em> &nbsp; <small>(logic expressions)</small>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Relational Data Model</span></td><td align="right"><small>10/35</small></td></tr></tbody></table>
+</p><p>
+Example relation (bank accounts):
+</p><p>
+</p><p></p><div class="center">
+<img alt="[Diagram:Pic/table-small.png]" src="./Week 02 Lecture_files/table-small.png">
+</div><p>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Relational Data Model</span></td><td align="right"><small>11/35</small></td></tr></tbody></table>
+</p><p>
+Points to note ...
+</p><p>
+Attribute values are <em>atomic</em> &nbsp; <small>(no composite or multi-valued attributes)</small>.
+</p><p>
+A distinguished value <large><code>NULL</code></large> belongs to all domains.
+<small>
+</small></p><ul><small>
+<li> <large><code>NULL</code></large> has several interpretations: none, don't know, irrelevant
+</li></small></ul><small>
+</small>
+<p>
+Each relation has a <em>key</em> &nbsp; <small>(subset of attributes unique for each tuple)</small>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Relational Data Model</span></td><td align="right"><small>12/35</small></td></tr></tbody></table>
+</p><p>
+Consider relation <i>R</i> with attributes
+<i>a<sub>1</sub>, a<sub>2</sub>, ... a<sub>n</sub></i>
+</p><p>
+<em>Relation schema</em> of <i>R</i> : &nbsp;
+<i><b>R</b>(a<sub>1</sub>:D<sub>1</sub>, a<sub>2</sub>:D<sub>2</sub>, ... a<sub>n</sub>:D<sub>n</sub>)</i>
+</p><p>
+<em>Tuple</em> of <i>R</i> : an element of <i>D<sub>1</sub> × D<sub>2</sub> × ... × D<sub>n</sub></i> &nbsp; <small>(i.e. list of values)</small>
+</p><p>
+<em>Instance</em> of <i>R</i> :
+subset of <i>D<sub>1</sub> × D<sub>2</sub> × ... × D<sub>n</sub></i> &nbsp; <small>(i.e. set of tuples)</small>
+</p><p>
+<em>Database schema</em> : a collection of relation schemas.
+</p><p>
+<em>Database (instance)</em> : a collection of relation instances.
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">DBMS Terminology</span></td><td align="right"><small>13/35</small></td></tr></tbody></table>
+</p><p>
+Many DBMSs have multiple namespaces:
+</p><ul>
+<li> DBMS-level ... database names must be unique
+</li><li> database-level ... schema names must be unique
+</li><li> schema-level ... table names must be unique
+</li><li> table-level ... attribute names must be unique
+</li></ul>
+Sometimes it is convenient to use same name in several tables.
+<p>
+We distinguish which attribute we mean using <em>qualified names</em>
+</p><p>
+E.g. <large><code>Account.branchName</code></large> &nbsp; vs &nbsp; <large><code>Branch.branchName</code></large>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Example Database Schema</span></td><td align="right"><small>14/35</small></td></tr></tbody></table>
+</p><p>
+Schema with 4 relations:
+</p><p>
+</p><p></p><div class="center">
+<img alt="[Diagram:Pic/schema-small.png]" src="./Week 02 Lecture_files/schema-small.png">
+</div><p>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Example Database Schema</span></td><td align="right"><small>15/35</small></td></tr></tbody></table>
+</p><p>
+Schema is derived from the following ER design:
+</p><p>
+</p><p></p><div class="center">
+<img alt="[Diagram:Pic/schemaER-small.png]" src="./Week 02 Lecture_files/schemaER-small.png">
+</div><p>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Example Database (Instance)</span></td><td align="right"><small>16/35</small></td></tr></tbody></table>
+</p><p>
+</p><p></p><div class="center">
+<img alt="[Diagram:Pic/db-small.png]" src="./Week 02 Lecture_files/db-small.png">
+</div><p>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Integrity Constraints</span></td><td align="right"><small>17/35</small></td></tr></tbody></table>
+</p><p>
+<em>Relations</em> are used to represent entities <i>and</i> relationships.
+</p><p>
+<em>Domains</em> limit the set of values that attributes can take.
+</p><p>
+To represent real-world problems, need to describe
+</p><ul>
+<li> what values are/are not allowed
+</li><li> what combinations of values are/are not allowed
+</li></ul>
+<em>Constraints</em> are logical statements that do this:
+<ul>
+<li> domain, key, entity integrity, referential integrity, ...
+</li></ul>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Integrity Constraints</span></td><td align="right"><small>18/35</small></td></tr></tbody></table>
+</p><p>
+<em>Domain constraints</em> example:
+</p><ul>
+<li> <large><code>Employee.age</code></large> attribute is typically defined as <large><code>integer</code></large>
+</li><li> better modelled by adding extra constraint <large><code>(15&lt;age&lt;66)</code></large>
+</li></ul>
+Note: <large><code>NULL</code></large> satisfies all domain constraints
+	&nbsp; <small>(except (NOT NULL))</small>
+<p>
+<em>Key constraints</em> example:
+</p><ul>
+<li> <large><code>Student( id, ...)</code></large> is guaranteed unique
+</li><li> <large><code>Class(...,day,time,location,...)</code></large> is unique
+</li></ul>
+<p>
+<em>Entity integrity</em> example:
+</p><ul>
+<li> <large><code>Class(...,Mon,2pm,Lyre,...)</code></large> is well-defined
+</li><li> <large><code>Class(...,</code></large><b>NULL</b><large><code>,2pm,Lyre,...)</code></large> is not well-defined
+</li></ul>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Referential Integrity</span></td><td align="right"><small>19/35</small></td></tr></tbody></table>
+</p><p>
+<em>Referential integrity constraints</em>
+</p><ul>
+<li> describe references between relations (tables)
+</li><li> are related to notion of a <em>foreign key</em> (FK)
+</li></ul>
+Example:
+<p></p><div class="center">
+<img alt="[Diagram:Pic/fkeys-small.png]" src="./Week 02 Lecture_files/fkeys-small.png">
+</div><p>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Referential Integrity</span></td><td align="right"><small>20/35</small></td></tr></tbody></table>
+</p><p>
+A set of attributes <i>F</i> in relation <i>R<sub>1</sub></i>
+	is a <em>foreign key</em> for <i>R<sub>2</sub></i> if:
+</p><ul>
+<li> the attributes in <i>F</i> correspond to the primary key of <i>R<sub>2</sub></i>
+</li><li> the value for <i>F</i> in each tuple of <i>R<sub>1</sub></i>
+<ul>
+<li> either &nbsp; occurs as a primary key in <i>R<sub>2</sub></i>
+</li><li> or &nbsp; is entirely <large><code>NULL</code></large>
+</li></ul>
+</li></ul>
+Foreign keys are critical in relational DBs; they provide ...
+<ul>
+<li> the "glue" that links individual relations (tables)
+</li><li> the way to assemble query answers from multiple tables
+</li><li> the relational representation of ER relationships
+</li></ul>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Relational Databases</span></td><td align="right"><small>21/35</small></td></tr></tbody></table>
+</p><p>
+A <em>relational database schema</em> is
+</p><ul>
+<li> a set of relation schemas
+	&nbsp; <i>{ R<sub>1</sub>, &nbsp; R<sub>2</sub>, &nbsp;...&nbsp; R<sub>n</sub> }</i> ,
+	&nbsp; and
+</li><li> a set of integrity constraints
+</li></ul>
+A <em>relational database instance</em> is
+<ul>
+<li> a set of relation instances
+	&nbsp; <i>{ r<sub>1</sub>(R<sub>1</sub>), &nbsp; r<sub>2</sub>(R<sub>2</sub>), &nbsp;...&nbsp; r<sub>n</sub>(R<sub>n</sub>) }</i>
+</li><li> where all of the integrity constraints are satisfied
+</li></ul>
+One of the important functions of a relational DBMS:
+<ul>
+<li> ensure that all data in the database satisfies constraints
+</li></ul>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Describing Relational Schemas</span></td><td align="right"><small>22/35</small></td></tr></tbody></table>
+</p><p>
+We need a formalism to express relational schemas <br>
+<small>(which is more detailed than boxes-and-arrows diagrams used above)</small>
+</p><p>
+SQL provides a <em>D</em>ata <em>D</em>efinition <em>L</em>anguage (DDL) for this.
+</p><p>
+</p><pre><b>CREATE TABLE</b> <i>TableName</i> <b>(</b>
+    <i>attrName<sub>1</sub></i> <i>domain<sub>1</sub></i> <i>constraints<sub>1</sub></i> <b>,</b>
+    <i>attrName<sub>2</sub></i> <i>domain<sub>2</sub></i> <i>constraints<sub>2</sub></i> <b>,</b>
+    ...
+    <b>PRIMARY KEY</b> (<i>attr<sub>i</sub></i>,<i>attr<sub>j</sub></i>,...)
+    <b>FOREIGN KEY</b> (<i>attr<sub>x</sub></i>,<i>attr<sub>y</sub></i>,...)
+                <b>REFERENCES</b>
+                <i>OtherTable</i> (<i>attr<sub>m</sub></i>,<i>attr<sub>n</sub></i>,...)
+<b>);</b>
+</pre>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">SQL Syntax in a Nutshell</span></td><td align="right"><small>23/35</small></td></tr></tbody></table>
+</p><p>
+Comments: everything after <font color="#0000CC"><large><font color="#008800"><b><code>--</code></b></font></large> <i>is a comment</i></font>
+</p><p>
+Identifiers: alphanumeric (a la C), but also <large><code>"An Identifier"</code></large>
+</p><p>
+Reserved words: many e.g. <large><code>CREATE</code></large>, <large><code>SELECT</code></large>, <large><code>TABLE</code></large>, ...
+</p><p>
+Strings: e.g. <large><code>'a string'</code></large>, &nbsp;<large><code>'don''t ask'</code></large>, &nbsp;but no <large><code>'\n'</code></large> 
+</p><p>
+Numbers: like C, e.g. <large><code>1</code></large>, &nbsp;<large><code>-5</code></large>, &nbsp;<large><code>3.14159</code></large>, &nbsp;...
+</p><p>
+Identifiers and reserved words are case-insensitive: <br>
+<large><code>TableName</code></large> = <large><code>tablename</code></large> = <large><code>TaBLeNamE</code></large> != <large><code>"TableName"</code></large>
+</p><p>
+Types: &nbsp;<large><code>integer</code></large>, &nbsp;<large><code>float</code></large>, &nbsp;<large><code>char(</code></large><i>n</i><large><code>)</code></large>, &nbsp;<large><code>varchar(</code></large><i>n</i><large><code>)</code></large>, &nbsp;<large><code>date</code></large>, ...
+</p><p>
+Operators: &nbsp;<large><code>=</code></large>, &nbsp;<large><code>&lt;&gt;</code></large>, &nbsp;<large><code>&lt;</code></large>, &nbsp;<large><code>&lt;=</code></large>, &nbsp;<large><code>&gt;</code></large>, &nbsp;<large><code>&gt;=</code></large>, &nbsp;<large><code>AND</code></large>, &nbsp;<large><code>OR</code></large>, &nbsp;<large><code>NOT</code></large>, ...
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Exercise: Simple Relational Schema</span></td><td align="right"><small>24/35</small></td></tr></tbody></table>
+</p><p>
+Express the following schema in SQL DDL:
+</p><p></p><div class="center">
+<img alt="[Diagram:Pic/fkeys-small.png]" src="./Week 02 Lecture_files/fkeys-small.png">
+</div><p>
+Assume only two domains: <large><code>text</code></large> and <large><code>integer</code></large>.
+</p><div class="center">
+<a target="_new" href="https://www.cse.unsw.edu.au/~cs3311/19s1/lectures/02/exercises/bank.sql">[Solution]</a>
+</div>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Exercise: Simple Relational Schema</span></td><td align="right"><small>25/35</small></td></tr></tbody></table>
+</p><p>
+Augment the previous schema to enforce:
+</p><ul>
+<li> no accounts can be overdrawn
+</li><li> customer numbers are seven-digit integers
+</li><li> account numbers look like <large><code>A-101</code></large>, <large><code>B-306</code></large>, etc.
+</li><li> the assets of a branch is the sum of the balances in
+	all of the accounts held at that branch
+</li></ul>
+Assume that all standard SQL types (domains) are available.
+<p>
+Add new domain to define account numbers and use it throughout
+</p><div class="center">
+<a target="_new" href="https://www.cse.unsw.edu.au/~cs3311/19s1/lectures/02/exercises/bank1.sql">[Solution]</a>
+</div>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="section">Mapping ER Designs to Relational Schemas</span></td><td align="right"></td></tr></tbody></table>
+</p><p>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">ER to Relational Mapping</span></td><td align="right"><small>27/35</small></td></tr></tbody></table>
+</p><p>
+One useful strategy for database design:
+</p><ul>
+<li> perform initial data modelling using ER or OO <br>
+	<small>(conceptual-level modelling)</small>
+</li><li> transform conceptual design into relational model <br>
+	<small>(implementation-level modelling)</small>
+</li></ul>
+A formal mapping exists for ER model <i>&#8594;</i> Relational model.
+<p>
+This maps "structures"; but additional info is needed, e.g.
+</p><ul>
+<li> concrete domains for attributes and other constraints
+</li></ul>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Relational Model vs ER Model</span></td><td align="right"><small>28/35</small></td></tr></tbody></table>
+</p><p>
+Correspondences between relational and ER data models:
+</p><ul>
+<li> attribute<small>(ER)</small> <i>&#8773;</i> attribute<small>(Rel)</small>,&nbsp;
+entity<small>(ER)</small> <i>&#8773;</i> tuple<small>(Rel)</small>
+</li><li> entity set<small>(ER)</small> <i>&#8773;</i> relation<small>(Rel)</small>,&nbsp;
+relationship<small>(ER)</small> <i>&#8773;</i> relation<small>(Rel)</small>
+</li></ul>
+Differences between relational and ER models:
+<ul>
+<li> Rel uses relations to model entities <i>and</i> relationships
+</li><li> Rel has no composite or multi-valued attributes <small>(only atomic)</small>
+</li><li> Rel has no object-oriented notions <small>(e.g. subclasses, inheritance)</small>
+</li></ul>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Mapping Strong Entities</span></td><td align="right"><small>29/35</small></td></tr></tbody></table>
+</p><p>
+An entity set <i>E</i> with atomic attributes
+	<i>a<sub>1</sub>, a<sub>2</sub>, ... a<sub>n</sub></i>
+</p><p>
+maps to
+</p><p>
+A relation <i>R</i> with attributes (columns)
+	<i>a<sub>1</sub>, a<sub>2</sub>, ... a<sub>n</sub></i>
+</p><p>
+Example:
+</p><p></p><div class="center">
+<img alt="[Diagram:Pic/strongent-small.png]" src="./Week 02 Lecture_files/strongent-small.png">
+</div><p>
+Note: the key is preserved in the mapping.
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Mapping Weak Entities</span></td><td align="right"><small>30/35</small></td></tr></tbody></table>
+</p><p>
+Example:
+</p><p></p><div class="center">
+<img alt="[Diagram:Pic/mapwkent-small.png]" src="./Week 02 Lecture_files/mapwkent-small.png">
+</div><p>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Mapping N:M Relationships</span></td><td align="right"><small>31/35</small></td></tr></tbody></table>
+</p><p>
+Example:
+</p><p></p><div class="center">
+<img alt="[Diagram:Pic/mapnnrel-small.png]" src="./Week 02 Lecture_files/mapnnrel-small.png">
+</div><p>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Mapping 1:N Relationships</span></td><td align="right"><small>32/35</small></td></tr></tbody></table>
+</p><p>
+Example:
+</p><p></p><div class="center">
+<img alt="[Diagram:Pic/map1nrel2-small.png]" src="./Week 02 Lecture_files/map1nrel2-small.png">
+</div><p>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Exercise: ER-to-Relational (1)</span></td><td align="right"><small>33/35</small></td></tr></tbody></table>
+</p><p>
+Convert this ER design to relational form:
+</p><p></p><div class="center">
+<img alt="[Diagram:Pic/simpleER-small.png]" src="./Week 02 Lecture_files/simpleER-small.png">
+</div><p>
+</p><div class="center">
+<a target="_new" href="https://www.cse.unsw.edu.au/~cs3311/19s1/lectures/02/exercises/shopping.sql">[Solution]</a>
+</div>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Mapping 1:1 Relationships</span></td><td align="right"><small>34/35</small></td></tr></tbody></table>
+</p><p>
+Example:
+</p><p></p><div class="center">
+<img alt="[Diagram:Pic/map11rel-small.png]" src="./Week 02 Lecture_files/map11rel-small.png">
+</div><p>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Exercise: ER-to-Relational (2)</span></td><td align="right"><small>35/35</small></td></tr></tbody></table>
+</p><p>
+Convert this ER design to relational form:
+</p><p></p><div class="center">
+<img alt="[Diagram:Pic/emp-dept-proj-small.png]" src="./Week 02 Lecture_files/emp-dept-proj-small.png">
+</div><p>
+</p><div class="center">
+<a target="_new" href="https://www.cse.unsw.edu.au/~cs3311/19s1/lectures/02/exercises/empproj.sql">[Solution]</a>
+</div>
+<p></p><hr><p>
+<small><small>Produced: 11 Mar 2019</small></small>
+
+
+</p></body></html>

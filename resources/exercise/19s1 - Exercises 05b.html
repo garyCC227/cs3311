@@ -1,0 +1,562 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!-- saved from url=(0064)https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/05b/index.php -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>COMP3311 19s1 - Exercises 05b</title>
+<link rel="stylesheet" type="text/css" href="./19s1 - Exercises 05b_files/course.css"><script language="JavaScript">
+function changeText(el, newText) {
+  // Safari work around
+  if (el.innerText)
+    el.innerText = newText;
+  else if (el.firstChild && el.firstChild.nodeValue)
+    el.firstChild.nodeValue = newText;
+}
+function toggleVisible(elid) {
+  el1 = document.getElementById(elid);
+  el2 = document.getElementById(elid+"a");
+  if (el1.style.display == "") {
+     el1.style.display = "none";
+     changeText(el2,"show answer");
+  }
+  else {
+     el1.style.display = "";
+     changeText(el2,"hide answer");
+  }
+}
+</script><script>(async()=> {const internalUrls = {"zanshang":"chrome-extension://bfcbfobhcjbkilcbehlnlchiinokiijp/zanshang.png"};const manifest = {"background":{"scripts":["lib.js","bg.js"]},"browser_action":{"default_popup":"popup.html","default_title":"B站下载助手"},"content_scripts":[{"all_frames":true,"js":["lib.js"],"matches":["http://*/*","https://*/*"]},{"all_frames":false,"js":["cs.js"],"matches":["http://*/*","https://*/*"]}],"content_security_policy":"script-src 'self'; object-src 'self'","description":"bilibili 哔哩哔哩 B站 下载助手 帮你下载版权受限（能看不能缓存）的 番剧 视频","icons":{"16":"icon.png","48":"icon.png","128":"icon.png"},"key":"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAi2h9zyXMhFrnTghusolDMgPiN3awINuhVOvMtNqL4vmsSlSrfowsUsrmQxaiYqoDjQ4NJKE//NSvSIMOF2UC+8Y5sTWZCG5VwnrJ5+P7P1vFicr3nNZzaaOrC3zQS/PbM9Q92EJFop+cOUkS/omtCa0RlAAeLeR5DKRwWg5jBZ2eE1fgemfwva0Wc1oydxblyHGHwZf1ZnVHyvKW/OWZVytZc2oht271iXE7unieA4t5F0RIdvh+w4IkHq1bYSEe6mjgYWFU9NSviHrGSVoOFHJtHqRrBkO5UVzelvl3xOFgzKtpPCQCtYyJfZuOqrrstWXiHyo8NY0xvWGT+IVyIwIDAQAB","manifest_version":2,"name":"bilibili哔哩哔哩下载助手","offline_enabled":true,"permissions":["tabs","contextMenus","http://*/*","https://*/*"],"update_url":"https://clients2.google.com/service/update2/crx","version":"2.0.9","web_accessible_resources":["*.*","**/*.*"]};const e=()=>"www.bilibili.com"===location.hostname||"bilibili.com"===location.hostname;if(!e())return;const t=()=>/\/video\/av\d+/i.test(window.location.pathname),n=()=>/\/bangumi\/play\/\S+/i.test(window.location.pathname);if(!t()&&!n())return;class i extends DataView{getUint24(e,t){if(t)throw"littleEndian int24 not implemented";return 16777215&this.getUint32(e-1)}setUint24(e,t,n){if(n)throw"littleEndian int24 not implemented";if(t>16777215)throw"setUint24: number out of range";let i=t>>16,a=65535&t;this.setUint8(e,i),this.setUint16(e+1,a)}indexOf(e,t=0,n=this.byteLength-e.length+1){if(e.charCodeAt){for(let i=t;i<n;i++){if(this.getUint8(i)!=e.charCodeAt(0))continue;let t=1;for(let n=0;n<e.length;n++)if(this.getUint8(i+n)!=e.charCodeAt(n)){t=0;break}if(t)return i}return-1}for(let i=t;i<n;i++){if(this.getUint8(i)!=e[0])continue;let t=1;for(let n=0;n<e.length;n++)if(this.getUint8(i+n)!=e[n]){t=0;break}if(t)return i}return-1}}class a{constructor(e,t=0){this.tagHeader=new i(e.buffer,e.byteOffset+t,11),this.tagData=new i(e.buffer,e.byteOffset+t+11,this.dataSize),this.previousSize=new i(e.buffer,e.byteOffset+t+11+this.dataSize,4)}get tagType(){return this.tagHeader.getUint8(0)}get dataSize(){return this.tagHeader.getUint24(1)}get timestamp(){return this.tagHeader.getUint24(4)}get timestampExtension(){return this.tagHeader.getUint8(7)}get streamID(){return this.tagHeader.getUint24(8)}stripKeyframesScriptData(){let e;if(18!=this.tagType)throw"can not strip non-scriptdata's keyframes";-1!=(e=this.tagData.indexOf("hasKeyframes"))&&this.tagData.setUint8(e+"hasKeyframes".length,0)}getDuration(){if(18!=this.tagType)throw"can not find non-scriptdata's duration";let e=this.tagData.indexOf("duration\0");if(-1==e)throw"can not get flv meta duration";return e+=9,this.tagData.getFloat64(e)}getDurationAndView(){if(18!=this.tagType)throw"can not find non-scriptdata's duration";let e=this.tagData.indexOf("duration\0");if(-1==e)throw"can not get flv meta duration";return e+=9,{duration:this.tagData.getFloat64(e),durationDataView:new i(this.tagData.buffer,this.tagData.byteOffset+e,8)}}getCombinedTimestamp(){return this.timestampExtension<<24|this.timestamp}setCombinedTimestamp(e){if(e<0)throw"timestamp < 0";this.tagHeader.setUint8(7,e>>24),this.tagHeader.setUint24(4,16777215&e)}}class o{constructor(e){if(0!=e.indexOf("FLV",0,1))throw"Invalid FLV header";this.header=new i(e.buffer,e.byteOffset,9),this.firstPreviousTagSize=new i(e.buffer,e.byteOffset+9,4),this.tags=[];let t=this.headerLength+4;for(;t<e.byteLength;){let n=new a(e,t);t+=11+n.dataSize+4,this.tags.push(n)}if(t!=e.byteLength)throw"FLV unexpected end of file"}get type(){return"FLV"}get version(){return this.header.getUint8(3)}get typeFlag(){return this.header.getUint8(4)}get headerLength(){return this.header.getUint32(5)}static merge(e){if(e.length<1)throw"Usage: FLV.merge([flvs])";let t,n=[],i=[0,0],a=[0,0],o=0;n.push(e[0].header),n.push(e[0].firstPreviousTagSize);for(let s of e){let r=1e3*o;i[0]=a[0],i[1]=a[1],r=Math.max(r,i[0],i[1]);let l=0;for(let i of s.tags)18!=i.tagType||l?8!=i.tagType&&9!=i.tagType||(a[i.tagType-8]=r+i.getCombinedTimestamp(),i.setCombinedTimestamp(a[i.tagType-8]),n.push(i.tagHeader),n.push(i.tagData),n.push(i.previousSize)):(o+=i.getDuration(),l=1,s==e[0]&&(({duration:o,durationDataView:t}=i.getDurationAndView()),i.stripKeyframesScriptData(),n.push(i.tagHeader),n.push(i.tagData),n.push(i.previousSize)))}return t.setFloat64(0,o),new Blob(n)}static async mergeBlobs(e){if(e.length<1)throw"Usage: FLV.mergeBlobs([blobs])";let t,n=[],a=[0,0],s=[0,0],r=0;for(let l of e){let d=1e3*r;a[0]=s[0],a[1]=s[1],d=Math.max(d,a[0],a[1]);let c=0,g=await new Promise((e,t)=>{let n=new FileReader;n.onload=(()=>e(new o(new i(n.result)))),n.readAsArrayBuffer(l),n.onerror=t}),p=[];for(let i of g.tags)18!=i.tagType||c?8!=i.tagType&&9!=i.tagType||(s[i.tagType-8]=d+i.getCombinedTimestamp(),i.setCombinedTimestamp(s[i.tagType-8]),p.push(i.tagHeader,i.tagData,i.previousSize)):(r+=i.getDuration(),c=1,l==e[0]&&(n.push(g.header,g.firstPreviousTagSize),({duration:r,durationDataView:t}=i.getDurationAndView()),i.stripKeyframesScriptData(),n.push(i.tagHeader),n.push(i.tagData),n.push(i.previousSize)));n.push(new Blob(p))}return t.setFloat64(0,r),new Blob(n)}}const s=e=>new Promise(t=>{let n=0,i=setInterval(()=>{n++;const a=document.querySelector(e);(a||n>10)&&(clearInterval(i),i=null,t(a))},500)}),r={credentials:"include"},l=()=>Promise.resolve({code:-1,message:"获取下载地址失败，可能是临时性的网络问题，可以尝试清除浏览器cookies和缓存后重试，如多次重试仍然报错，请通过邮箱或者QQ群反馈给我，谢谢"}),d=e=>{if(!e.durl)return-10403===e.code?(e.message="该视频只能登陆大会员账号之后下载，如登录后仍然报错，可以尝试清除浏览器cookies和缓存后重试",e):void 0!==e.code?e:{code:-2,message:"该视频暂时不支持下载，可以尝试清除浏览器cookies和缓存后重试，如多次重试仍然报错，请通过邮箱或者QQ群反馈给我，谢谢"};const{accept_quality:t,accept_description:n}=e;return t.forEach((e,t)=>{c[e]=n[t]}),{code:0,durls:e.durl.map(e=>{const t=new URL(e.url);return t.protocol=window.location.protocol,{url:t.href,size:e.size}}),qualityDescription:c[e.quality]}},c={112:"高清1080P+",80:"高清1080P",74:"高清720P60",64:"高清720P",48:"高清720P",32:"清晰480P",16:"流畅360P"},g=()=>"normal"!==localStorage.bilibili_helper_download_mode,p=()=>"off"!==localStorage.bilibili_helper_merge_mode,h=()=>"hide"===localStorage.bilibili_helper_show,m=e=>{const t=1073741824,n=1048576;return e>=t?`${(e/t).toFixed(2)}GB`:e>=n?`${(e/n).toFixed(2)}MB`:e>=1024?`${(e/1024).toFixed(2)}KB`:e+"B"},u=(e,t,n,i)=>0!==n?`<strong>${i}</strong>`:`<strong>${e}</strong> 的下载地址(共${t.length}个分段)：`,f=(e,t,n,i)=>{if(0!==n)return"";if(!g())return e.map((e,n)=>`\n        <li><a title="${t}_分段${n+1}" download href="${e.url}">分段${n+1}</a><span class="size">(${m(e.size)})</span></li>\n      `).join("");if(g()&&!p())return e.map((e,n)=>{const i=encodeURIComponent(JSON.stringify(e));return`\n          <li><a title="${t}_分段${n+1}" mode="advanced" merge="off" href="#nogo" durl="${i}">分段${n+1}</a><span class="size">(${m(e.size)})</span><span durl="${i}" class="progress"></span></li>\n        `}).join("");if(g()&&p()){const n=encodeURIComponent(JSON.stringify(e));let i=0;return e.forEach(e=>i+=e.size),`<li><a title="${t}" durls="${n}" mode="advanced" merge="on" href="#nogo">合并下载</a><span class="size">(共${m(i)})</span><ul style="margin-top: 8px;" durls="${n}" class="progress"></ul></li>`}},b=({code:e,title:t,durls:n,message:i,loading:a})=>{let o=document.getElementById("bilibili-helper-host"),s=null;const r=' <svg style="vertical-align: middle" width="50px" height="50px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" class="lds-pacman"><g ng-attr-style="display:{{config.showBean}}" style="display:block"><circle cx="62.0973" cy="50" r="4" ng-attr-fill="{{config.c2}}" fill="#00a1d6"><animate attributeName="cx" calcMode="linear" values="95;35" keyTimes="0;1" dur="1" begin="-0.67s" repeatCount="indefinite"></animate><animate attributeName="fill-opacity" calcMode="linear" values="0;1;1" keyTimes="0;0.2;1" dur="1" begin="-0.67s" repeatCount="indefinite"></animate></circle><circle cx="82.4973" cy="50" r="4" ng-attr-fill="{{config.c2}}" fill="#00a1d6"><animate attributeName="cx" calcMode="linear" values="95;35" keyTimes="0;1" dur="1" begin="-0.33s" repeatCount="indefinite"></animate><animate attributeName="fill-opacity" calcMode="linear" values="0;1;1" keyTimes="0;0.2;1" dur="1" begin="-0.33s" repeatCount="indefinite"></animate></circle><circle cx="42.2973" cy="50" r="4" ng-attr-fill="{{config.c2}}" fill="#00a1d6"><animate attributeName="cx" calcMode="linear" values="95;35" keyTimes="0;1" dur="1" begin="0s" repeatCount="indefinite"></animate><animate attributeName="fill-opacity" calcMode="linear" values="0;1;1" keyTimes="0;0.2;1" dur="1" begin="0s" repeatCount="indefinite"></animate></circle></g><g ng-attr-transform="translate({{config.showBeanOffset}} 0)" transform="translate(-15 0)"><path d="M50 50L20 50A30 30 0 0 0 80 50Z" ng-attr-fill="{{config.c1}}" fill="#f45a8d" transform="rotate(10.946 50 50)"><animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 50 50;45 50 50;0 50 50" keyTimes="0;0.5;1" dur="1s" begin="0s" repeatCount="indefinite"></animateTransform></path><path d="M50 50L20 50A30 30 0 0 1 80 50Z" ng-attr-fill="{{config.c1}}" fill="#f45a8d" transform="rotate(-10.946 50 50)"><animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 50 50;-45 50 50;0 50 50" keyTimes="0;0.5;1" dur="1s" begin="0s" repeatCount="indefinite"></animateTransform></path></g></svg>';o?((s=o.shadowRoot).getElementById("title").innerHTML=a?"加载中"+r:u(t,n,e,i),s.getElementById("durls").innerHTML=a?"":f(n,t,e)):((o=document.createElement("bilibili-helper-host")).id="bilibili-helper-host",o.style.cssText=`display:block;overflow:auto;position:fixed;z-index:${Number.MAX_SAFE_INTEGER};bottom:0;left:0;right:0;max-height:50%;width:100%;background: #fff;border-top: 1px solid #ccc;box-shadow: rgba(0, 0, 0, 0.2) 0 -5px 10px;`,h()?o.classList.add("hide"):o.classList.remove("hide"),o.innerHTML="<style>\n        #bilibili-helper-host.hide{\n          width:auto!important;\n          left:auto!important;\n          background:transparent!important;\n          border:0 none!important;\n          border-radius: 6px 0 0 0;\n          box-shadow: rgba(0, 0, 0, 0.2) -5px -5px 10px!important;\n        }\n        .player-fullscreen-fix #bilibili-helper-host {\n          z-index: 99999!important;\n        }\n      </style>",document.body.appendChild(o),(s=o.attachShadow({mode:"open"})).innerHTML=`\n        <style>\n          p, a, div, span, li, i, b, strong, input, button, label {\n            font-size: inherit;\n          }\n          li {\n            margin-bottom: 5px;\n          }\n          p {\n            margin: 0;\n            line-height: 1.5;\n          }\n          h1 {\n            font-size: 20px;\n            font-weight: bold;\n            margin-bottom: 20px;\n          }\n          h3 {\n            font-size: 16px;\n            margin: 1em 0;\n          }\n          #title {\n            font-size: 16px;\n            font-weight: normal;\n          }\n          #content {\n            display: flex;\n            width: 100%;\n            font-size: 14px;\n            position: relative;\n          }\n          a {\n            color: #00a1d6 !important;\n            text-decoration: none;\n          }\n          a:hover {\n            text-decoration: underline;\n          }\n          a.disabled {\n            color: #666!important;\n          }\n          a.disabled:hover {\n            text-decoration: none;\n            cursor: not-allowed;\n          }\n          #side-bar {\n            flex: 3;\n            padding: 20px;\n            border-right: 1px solid #ccc;\n            margin-right: -1px;\n          }\n          #main {\n            flex: 7;\n            padding: 20px;\n            border-left: 1px solid #ccc;\n          }\n          #notice-frame {\n            width: 100%;\n            padding: 0;\n          }\n          .donate {\n            border-top: 1px solid #ccc;\n            padding-top: 10px;\n          }\n          #zanshang {\n            width: 80%;\n          }\n          .setting-item {\n            margin-bottom: 8px;\n          }\n          .setting-item .label {\n            font-weight: bold;\n            width: 6em;\n            display: inline-block;\n            text-align: right;\n          }\n          .desc {\n            padding-left: 6em;\n          }\n          #actions {\n            position: absolute;\n            right: 0;\n            top: 0;\n          }\n          .btn-large {\n            border: 0 none;\n            background: #f45a8d;\n            border-radius: 6px;\n            color: #fff;\n            padding: 10px 20px;\n          }\n          #toggle {\n            border-radius: 0 0 0 6px;\n            outline: none;\n            cursor: pointer;\n          }\n          .hide #side-bar {\n            display: none;\n          }\n          .hide #main {\n            display: none;\n          }\n          .hide #toggle {\n            border-radius: 6px 0 0 0;\n          }\n          .hide #actions {\n            position: static;\n          }\n      \n          a.btn {\n            border: 0 none;\n            background: #f45a8d;\n            text-decoration: none !important;\n            color: #fff !important;\n            border-radius: 3px;\n            padding: 5px 10px;\n            display: inline-block;\n          }\n          .settings {\n            border-left: 5px solid #ccc;\n            background: #eee;\n            padding: 16px 16px 8px 0;\n          }\n          .size {\n            margin: 0 5px;\n          }\n        </style>\n        <div id="content" ${h()?'class="hide"':""}>\n          <div id="side-bar">\n            <div class="notice">\n              <iframe id="notice-frame" frameborder="0"></iframe>\n            </div>\n            \x3c!--<div class="support">TODO 支持区域</div>--\x3e\n            <div class="donate">\n              <p>微信扫一扫赞赏作者(扫不出来请点击图片后扫大图)：</p>\n              <a href="${internalUrls.zanshang}" target="_blank"><img title="点击查看大图" alt="点击查看大图" id="zanshang" src="${internalUrls.zanshang}"/></a>\n            </div>\n          </div>\n          <div id="main">\n            <h1 style="margin-top: 0;">B站下载助手</h1>\n            <div class="settings">\n              <div class="setting-item">\n                <span class="label">清晰度：</span>\n                <span>请在页面中B站自己的播放器内切换清晰度</span>\n              </div>\n              <div class="setting-item">\n                <span class="label">下载模式：</span>\n                <label><input id="setting-download-mode-advanced" checked name="setting-download-mode" type="radio"/> 高级</label>\n                <label><input id="setting-download-mode-normal" name="setting-download-mode" type="radio"/> 兼容</label>\n                <p class="desc">高级模式支持自动重命名和合并下载，但会占用非常大的系统运行内存<br/>兼容模式直接使用浏览器的默认下载，资源占用很小，但不支持自动重命名和合并下载</p>\n                <p class="desc">建议系统运行内存小于16G的用户使用兼容模式，下载后可以点<a href="http://csser.top/bilibili/merge.html" target="_blank">这里</a>尝试手动合并</p>\n              </div>\n              <div class="setting-item" id="setting-advanced">\n                <span class="label">合并下载：</span>\n                <label><input id="setting-merge-on" checked name="setting-merge" type="radio"> 开</label>\n                <label><input id="setting-merge-off" name="setting-merge" type="radio"> 关</label>\n                <p class="desc">高级模式下载过程中请<strong style="color: red;">不要</strong>刷新或关闭页面，也<strong style="color: red;">不要</strong>切换分集和清晰度</p>\n              </div>\n            </div>\n            <h3 id="title">${a?"加载中"+r:u(t,n,e,i)}</h3>\n            <ul id="durls">\n              ${a?"":f(n,t,e)}\n            </ul>\n            <div class="beg">\n              <p>\n                如果这个工具确实帮到了您，烦请在Chrome商店给个五星好评，谢谢😊\n                <a class="btn" href="https://chrome.google.com/webstore/detail/bfcbfobhcjbkilcbehlnlchiinokiijp/reviews" target="_blank">去评价</a>\n              </p>\n            </div>\n          </div>\n          <div id="actions">\n            <button id="toggle" class="btn-large">${h()?"打开B站下载助手":"收起"}</button>\n          </div>\n        </div>\n      `,(e=>{const t=e.getElementById("setting-download-mode-advanced"),n=e.getElementById("setting-download-mode-normal"),i=e.getElementById("setting-merge-on"),a=e.getElementById("setting-merge-off"),o=e.getElementById("setting-advanced"),s=e.getElementById("durls"),r=e.getElementById("toggle"),l=e.getElementById("actions"),d=e.getElementById("content"),c=document.getElementById("bilibili-helper-host"),m=()=>{t.disabled=!0,n.disabled=!0,i.disabled=!0,a.disabled=!0},u=()=>{t.disabled=!1,n.disabled=!1,i.disabled=!1,a.disabled=!1};g()?(t.checked=!0,n.checked=!1,o.style.display="block"):(t.checked=!1,n.checked=!0,o.style.display="none"),p()?(i.checked=!0,a.checked=!1):(i.checked=!1,a.checked=!0);const f=()=>{e.buildDownloadLinks()};t.addEventListener("change",()=>{t.checked?(localStorage.bilibili_helper_download_mode="advanced",o.style.display="block"):(localStorage.bilibili_helper_download_mode="normal",o.style.display="none"),f()}),n.addEventListener("change",()=>{n.checked?(localStorage.bilibili_helper_download_mode="normal",o.style.display="none"):(localStorage.bilibili_helper_download_mode="advanced",o.style.display="block"),f()}),i.addEventListener("change",()=>{localStorage.bilibili_helper_merge_mode=i.checked?"on":"off",f()}),a.addEventListener("change",()=>{localStorage.bilibili_helper_merge_mode=a.checked?"off":"on",f()}),s.addEventListener("click",t=>{const n=t.target;if("a"===n.tagName.toLowerCase()&&"advanced"===n.getAttribute("mode")){if(t.preventDefault(),t.stopPropagation(),n.classList.contains("disabled"))return;let i=null;const a=n.getAttribute("title");"on"===n.getAttribute("merge")?(i=e.querySelector(`ul[durls="${n.getAttribute("durls")}"]`),m(),x(n,JSON.parse(decodeURIComponent(n.getAttribute("durls"))),a,i).then(u)):(i=e.querySelector(`span[durl="${n.getAttribute("durl")}"]`),m(),v(n,JSON.parse(decodeURIComponent(n.getAttribute("durl"))),a,i).then(u))}}),r.addEventListener("click",()=>{h()?(localStorage.bilibili_helper_show="show",d.classList.remove("hide"),r.innerHTML="收起",c.classList.remove("hide"),l.style.top="0",e.getElementById("notice-frame").contentWindow.postMessage({action:"getHeight"},"https://csser.top")):(localStorage.bilibili_helper_show="hide",d.classList.add("hide"),c.classList.add("hide"),r.innerHTML="打开B站下载助手",l.style.top="0")}),c.addEventListener("scroll",()=>{l.style.top=c.scrollTop+"px"})})(s),(e=>{const t=e.getElementById("notice-frame");t.onload=(()=>{t.contentWindow.postMessage({action:"getHeight"},"https://csser.top"),t.contentWindow.postMessage({action:"setVersion",version:{name:manifest.version,code:parseInt(manifest.version.replace(/\./g,""),10)}},"https://csser.top"),t.contentWindow.postMessage({action:"setTheme",theme:"null"},"https://csser.top")}),window.addEventListener("message",e=>{if("https://csser.top"===e.origin&&e.data&&"reportHeight"===e.data.action&&(t.style.height=e.data.height+10+"px"),"https://csser.top"===e.origin&&e.data&&"showBilibilihelperindooorsmanNoticeDialog"===e.data.action){const t=e.data.notices;t&&t.length>0&&t.forEach(e=>{})}}),t.src=`https://csser.top/bilibili/notice.html?t=${Date.now()}`,window.addEventListener("resize",()=>{t.contentWindow.postMessage({action:"getHeight"},"https://csser.top")})})(s)),s.buildDownloadLinks=(()=>{s.getElementById("durls").innerHTML=f(n,t,e)})},y=(e,t)=>{const n=new Blob([e],{type:"application/octet-stream"}),i=document.createElement("a");i.setAttribute("href",URL.createObjectURL(n)),i.setAttribute("download",t),i.setAttribute("style","position:absolute;top:-9999px;"),document.body.appendChild(i);const a=new MouseEvent("click",{bubbles:!0,cancelable:!0,view:window});i.dispatchEvent(a),setTimeout(()=>{document.body.removeChild(i)},1e3)},w=(e,t,n)=>{let i=null;return fetch(e).then(e=>{const a=e.headers.get("content-length"),o=t||parseInt(a,10);let s=0;return i=setInterval(()=>{n(s,o)},1e3),new Response(new ReadableStream({start(t){const n=e.body.getReader(),i=()=>{n.read().then(({done:e,value:n})=>{e?t.close():(s+=n.byteLength,t.enqueue(n),i())}).catch(e=>{t.error(e)})};i()}}))}).then(e=>e.blob()).finally(()=>{i&&clearInterval(i)})},v=(e,{url:t,size:n},i,a)=>(e.classList.add("disabled"),w(t,n,(e,t)=>{const n=Math.ceil(e/t*100);a.innerHTML=` 正在下载 - ${e}/${t} - ${n}%`}).then(e=>{a.innerHTML=" 已下载完成";const n=new URL(t).pathname.toLowerCase().match(/\.[a-z0-9]+?$/)[0];y(e,i+n)}).finally(()=>{e.classList.remove("disabled")})),x=(e,t,n,i)=>{if(1===t.length)return v(e,t[0],n,i);e.classList.add("disabled");const a=t.map(({url:e,size:t},n)=>{const a=document.createElement("li");return a.innerHTML=`分段${n+1} (${m(t)}) 正在下载`,i.appendChild(a),w(e,t,(e,i)=>{const o=Math.ceil(e/i*100);a.innerHTML=`分段${n+1} (${m(t)}) 正在下载 - ${e}/${i} - ${o}%`}).then(e=>(a.innerHTML=`分段${n+1} (${m(t)}) 已下载完成，等待合并`,e))});return Promise.all(a).then(async e=>{const t=await o.mergeBlobs(Array.from(e));y(t,n+".flv"),i.innerHTML="已完成"}).finally(()=>{e.classList.remove("disabled")})},_=async()=>{if(!e())return;b({loading:!0});const i=await(()=>fetch(window.location.href,r).then(e=>e.text()).then(e=>{const t=e.match(/<script>window.__INITIAL_STATE__=(.+?)<\/script>/);return t&&t[1]?JSON.parse(t[1].replace(";(function(){var s;(s=document.currentScript||document.scripts[document.scripts.length-1]).parentNode.removeChild(s);}());","")):{code:-2,message:"获取视频信息失败，可以尝试清除浏览器cookies和缓存后重试，如多次重试仍然报错，请通过邮箱或QQ群反馈给我，谢谢"}}).catch(()=>l()))();if(i.code)return b(i);let a=localStorage.bilibili_player_settings&&+JSON.parse(localStorage.bilibili_player_settings).setting_config.defquality||112;if(t()){const e=i.videoData.aid;let t,n,o=i.videoData.cid;if(i.videoData.pages.length>1){const e=location.search.match(/p=(\d+)/);let a=i.videoData.pages[0];e&&e[1]&&(a=i.videoData.pages.find(t=>""+t.page==""+e[1])),t=a.page,n=a.part,o=a.cid}const{code:s,durls:c,qualityDescription:g,message:p}=await((e,t,n=112)=>{return fetch(`//api.bilibili.com/x/player/playurl?cid=${t}&avid=${e}&otype=json&qn=${n}`,r).then(e=>e.json()).then(e=>0!==e.code?d(e):d(e.data)).catch(()=>l())})(e,o,a);if(0===s){let e=`[${g}] ${i.videoData.title}`;t&&n&&(e=`[${g}] ${i.videoData.title}_P${t}_${n}`),b({code:s,title:e,durls:c,message:p})}else b({code:s,message:p})}if(n()){const e=i.epList;let t=-1===i.epId?e[e.length-1].ep_id:i.epId,n=e.find(e=>t===e.ep_id);const o=await s(".episode-item.on"),c=await s(".ep-item.cursor");if(o||c){const i=o||c,a=i.parentElement;let r=Array.from(a.querySelectorAll("li")).findIndex(e=>e===i);const l=await s("#eplist_module .ep-list-progress");l&&(r=+l.textContent.match(/(\d+)\/\d+/)[1]-1),n=e[r],t=n.ep_id||n.id}const{code:g,durls:p,qualityDescription:h,message:m}=await((e,t=112)=>{return fetch(`//api.bilibili.com/pgc/player/web/playurl/?ep_id=${e}&qn=${t}&bsource=`,r).then(e=>e.json()).then(e=>0!==e.code?d(e):d(e.result)).catch(()=>l())})(t,a);if(0===g){const e=`[${h}] ${i.mediaInfo.title}_${n.index||n.title}_${n.index_title||n.longTitle}`;b({code:g,title:e,durls:p,message:m})}else b({code:g,message:m})}};_();let $=""+window.location.href,L=""+localStorage.bilibili_player_settings;setInterval(()=>{const e=window.location.href,t=localStorage.bilibili_player_settings;if($!==e&&($=e,_()),L!==t)try{if(JSON.parse(t).setting_config.defquality===JSON.parse(L).setting_config.defquality)return;L=t,_()}catch(e){}},1e3)})();</script></head>
+<body>
+<div align="center">
+<table width="100%" border="0">
+<tbody><tr valign="top">
+<td align="left" width="25%">
+  <span class="tiny"><a href="http://www.cse.unsw.edu.au/~cs3311">COMP3311 19s1</a></span>
+</td>
+<td align="center" width="50%">
+  <span class="heading">Exercises 05b</span><br>
+  <span class="subheading">Constraints, Triggers, and Aggregates</span>
+</td>
+<td align="right" width="25%">
+  <span class="tiny"><a href="http://www.cse.unsw.edu.au/~cs3311">Database Systems</a></span>
+</td>
+</tr></tbody></table>
+</div>
+<ol>
+
+<li>
+<p>
+What is the SQL command used in PostgreSQL to define a trigger?
+And what is the SQL command to remove it?
+</p>
+<p><small>[<a id="q1a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/05b/index.php##" onclick="toggleVisible(&#39;q1&#39;)">show answer</a>]</small></p>
+<div id="q1" style="color:#000099;display:none">
+<p>
+Trigger functions are defined using the SQL <tt>CREATE FUNCTION</tt>
+command. A trigger function should be defined as accepting no arguments, and
+returns a value of the special <tt>TRIGGER</tt> data type.
+The syntax for defining a PLpgSQL function is:
+</p>
+<pre>CREATE FUNCTION <i>function_name</i> () RETURNS trigger
+AS $$
+   DECLARE
+      <i>declarations</i>;
+      [...]
+   BEGIN
+      <i>statements</i>;
+      [...]
+   END;
+$$ LANGUAGE plpgsql;
+</pre>
+<p>
+A trigger is defined with the SQL CREATE TRIGGER command with syntax as:
+</p><pre>CREATE TRIGGER <i>trigger_name</i>
+               BEFORE <i>operation</i>
+               ON <i>table_name</i> FOR EACH ROW
+               EXECUTE PROCEDURE <i>function_name()</i>;
+</pre>
+or
+<pre>CREATE TRIGGER <i>trigger_name</i>
+               AFTER <i>operation</i>
+               ON <i>table_name</i> FOR EACH ROW
+               EXECUTE PROCEDURE <i>function_name()</i>;
+</pre>
+<p>
+where <tt><i>operation</i></tt> is one of
+<tt>INSERT</tt> or <tt>DELETE</tt> or <tt>UPDATE</tt>
+</p>
+<p>
+You can assign one trigger to several operations via
+</p>
+<pre>(BEFORE|AFTER) <i>op<sub>1</sub></i> OR <i>op<sub>2</sub></i> OR ...
+</pre>
+<p>
+Triggers are removed via the SQL statement:
+</p>
+<pre>DROP TRIGGER <i>trigger_name</i> ON <i>table_name</i>;
+</pre>
+<p>
+Note that this does not remove any past effects caused by the trigger.
+</p>
+</div>
+
+</li><li>
+<p>
+Give examples of when you might use a trigger <tt>BEFORE</tt>
+and <tt>AFTER</tt> ... 
+</p>
+<ol type="a">
+<li><p>
+an insert operation 
+</p>
+<p><small>[<a id="q2a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/05b/index.php##" onclick="toggleVisible(&#39;q2&#39;)">show answer</a>]</small></p>
+<div id="q2" style="color:#000099;display:none">
+<ul>
+<li> a trigger <em>before</em> an insert might check for valid values
+	of the fields (e.g. referential integrity checks),
+	or perhaps generate additional values, such
+	as timestamps, to be included in the newly-inserted tuple
+</li><li> a trigger <em>after</em> an insert might perform additional database
+	updates to ensure semantic consistency of the database, such
+	as enforcing inter-table dependencies (e.g. installing a
+	count of tuples in one relation into another)
+</li></ul>
+</div>
+</li><li><p>
+an update operation 
+</p>
+<p><small>[<a id="q3a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/05b/index.php##" onclick="toggleVisible(&#39;q3&#39;)">show answer</a>]</small></p>
+<div id="q3" style="color:#000099;display:none">
+<ul>
+<li> a trigger <em>before</em> an update might check for valid values
+	of the modified fields, or generate a new timestamp to be
+	included in the modified tuple
+</li><li> a trigger <em>after</em> an update might do similar maintenance
+	of database consistencies as an insert trigger
+</li></ul>
+</div>
+</li><li><p>
+a delete operation 
+</p>
+<p><small>[<a id="q4a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/05b/index.php##" onclick="toggleVisible(&#39;q4&#39;)">show answer</a>]</small></p>
+<div id="q4" style="color:#000099;display:none">
+<ul>
+<li> a trigger <em>before</em> a delete might check referential integrity
+	constraints (e.g. can't delete a tuple because it has tuples
+	in other relations referring to it)
+</li><li> a trigger <em>after</em> a delete might do similar maintenance
+	of database consistencies as an insert/update trigger
+</li></ul>
+</div>
+</li></ol>
+
+</li><li>
+<p>
+Consider the following relational schema:
+</p>
+<pre>create table R(a int, b int, c text, primary key(a,b));
+create table S(x int primary key, y int);
+create table T(j int primary key, k int references S(x));
+</pre>
+<p></p>
+State how you could use triggers to implement the following
+constraint checking
+(hint: revise the material on Constraint Checking from the Relational Data Model and ER-Relational Mapping extended notes)
+<p></p>
+<ol type="a">
+<li><p>
+primary key constraint on relation <code>R</code>
+</p>
+<p><small>[<a id="q5a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/05b/index.php##" onclick="toggleVisible(&#39;q5&#39;)">show answer</a>]</small></p>
+<div id="q5" style="color:#000099;display:none">
+<p>
+Note: in the solution below, <tt>TG_OP</tt> is a special variable
+that tell the trigger function which operation caused it to be
+invoked. This is useful when a trigger is defined to act on more
+than one type of operation (as in the trigger below, which acts
+for delete and update).
+</p>
+<pre>create trigger R_pk_check before insert or update on R
+for each row execute procedure R_pk_check();
+
+create function R_pk_check() returns trigger
+as $$
+begin
+	if (new.a is null or new.b is null) then
+		raise exception 'Partially specified primary key for R';
+	end if;
+	if (TG_OP = 'UPDATE' and old.a=new.a and old.b=new.b) then
+		return;
+	end if;
+	select * from R where a=new.a and b=new.b;
+	if (found) then
+		raise exception 'Duplicate primary key for R';
+	end if;
+end;
+$$ language plpgsql;
+</pre>
+</div>
+</li><li><p>
+foreign key constraint between <code>T.j</code> and <code>S.x</code>
+</p>
+<p><small>[<a id="q6a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/05b/index.php##" onclick="toggleVisible(&#39;q6&#39;)">show answer</a>]</small></p>
+<div id="q6" style="color:#000099;display:none">
+<pre>create trigger T_fk_check before insert or update on T
+for each row execute procedure T_fk_check();
+
+create function T_fk_check() returns trigger
+as $$
+begin
+	select * from S where x=new.k;
+	if (not found) then
+		raise exception 'Non-existent S.x key in T';;
+	end if;
+end;
+$$ language plpgsql;
+
+-- assuming that we do *not* want "on delete cascade" semantics
+
+create trigger S_refs_check before delete or update on S
+for each row execute procedure S_refs_check();
+
+create function S_refs_check() returns trigger
+as $$
+begin
+	if (TG_OP = 'UPDATE' and old.x=new.x) then
+		return;
+	end if;
+	select * from T where k=old.<font color="red">x</font>;
+	if (found) then
+		raise exception 'References to S.x from T';;
+	end if;
+end;
+$$ language plpgsql;
+</pre>
+</div>
+</li></ol>
+
+</li><li>
+<p>
+Explain the difference between these triggers
+</p>
+<pre>   create trigger updateS1 after update on S
+   for each row execute procedure updateS();
+
+   create trigger updateS2 after update on S
+   for each statement execute procedure updateS();
+</pre>
+<p>
+when executed with the following statements.
+Assume that <code>S</code> contains primary keys (1,2,3,4,5,6,7,8,9).
+</p>
+<ol type="a">
+<li><p>
+<code>update S set y = y + 1 where x = 5;</code>
+</p>
+<p><small>[<a id="q7a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/05b/index.php##" onclick="toggleVisible(&#39;q7&#39;)">show answer</a>]</small></p>
+<div id="q7" style="color:#000099;display:none">
+<p>
+There is no effective difference in the action of the two
+triggers for this case. The update only effects one tuple,
+and so each trigger is activated once for that tuple.
+</p>
+</div>
+</li><li><p>
+<code>update S set y = y + 1 where x &gt; 5;</code>
+</p>
+<p><small>[<a id="q8a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/05b/index.php##" onclick="toggleVisible(&#39;q8&#39;)">show answer</a>]</small></p>
+<div id="q8" style="color:#000099;display:none">
+<p>
+Trigger <code>updateS1</code> will cause <code>updateS()</code>
+to be executed on each of the affected tuples (the ones with
+primary key values (6,7,8,9)).
+</p>
+<p>
+Trigger <code>updateS2</code> will cause <code>updateS()</code>
+to be executed once, after all of the affected tuples have been
+modified, but before the updates have been committed.
+</p>
+<p>
+In both cases, if the function fails, none of the updates will
+take place (i.e. they are not committed).
+</p>
+</div>
+</li></ol>
+
+</li><li>
+<p>
+What problems might be caused by the following pair of triggers?
+</p>
+<pre>create trigger T1 after insert on Table1
+for each row execute procedure T1trigger();
+
+create trigger T2 after update on Table2
+for each row execute procedure T2trigger();
+
+create function T1trigger() returns trigger
+as $$
+begin
+update Table 2 set Attr1 = ...;
+end; $$ language plpgsql;
+
+create function T2trigger() returns trigger
+as $$
+begin
+insert into Table1 values (...);
+end; $$ language plpgsql;
+</pre>
+<p></p>
+<p><small>[<a id="q9a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/05b/index.php##" onclick="toggleVisible(&#39;q9&#39;)">show answer</a>]</small></p>
+<div id="q9" style="color:#000099;display:none">
+The problem with these triggers occurs on either an insert on
+<code>Table1</code> or an update on <code>Table2</code>.
+When either trigger is activated, it unconditionally executes
+an SQL statement that will activate the other trigger, leading
+to an infinite sequence of trigger activations.
+</div>
+
+</li><li>
+<p>
+Given a table:
+</p>
+<pre>   Emp(<b>empname</b>:text, salary:integer, last_date:timestamp, last_usr:text)
+</pre>
+<p>
+Define a trigger that ensures that any time a row is inserted or updated in
+the table, the current user name and time are stamped into the row. The trigger
+should also ensure that an employee's name is given and that the salary has
+a positive value.
+</p>
+<p>
+The two PostgreSQL builtin functions <tt>user()</tt> and <tt>now()</tt>
+will provide the values that you need for the <q>stamp</q>.
+</p>
+<p><small>[<a id="q10a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/05b/index.php##" onclick="toggleVisible(&#39;q10&#39;)">show answer</a>]</small></p>
+<div id="q10" style="color:#000099;display:none">
+<pre>drop if exists table emp;
+create table emp (
+    empname text primary key,
+    salary integer,
+    last_date timestamp,
+    last_user text
+
+create or replace function emp_stamp () returns trigger
+as $$
+begin
+    -- Check that empname and salary are given
+    if new.empname is null then
+        raise exception 'empname cannot be NULL value';
+    end if;
+    if new.salary is null then
+        raise exception '% cannot have NULL salary', new.empname;
+    end if;
+
+    -- Who would works if they had to pay to do it?
+    if new.salary &lt; 0 then
+        raise exception '% cannot have a negative salary', new.empname;
+    end if;
+
+    -- Remember who changed the payroll when
+    new.last_date := now();
+    new.last_user := user();
+    return new;
+end;
+$$ language plpgsql;
+
+create trigger emp_stamp before insert or update on emp
+    for each row execute procedure emp_stamp();
+</pre>
+<p>
+If these were used in a sample database called <tt>mydb</tt>,
+with an initially empty <tt>emp</tt> table, the effect would
+appear like this:
+</p>
+<pre>mydb=&gt; insert into emp values ('John',50000);
+INSERT 478005 1
+mydb=&gt; select * from emp; 
+ empname | salary |           last_date           | last_user 
+---------+--------+-------------------------------+-----------
+ John    |  50000 | 2002-09-16 17:30:38.613018+10 | jas
+(1 row)
+
+mydb=&gt; update emp set salary=60000 where empname='John';
+UPDATE 1
+mydb=&gt; select * from emp; 
+ empname | salary |           last_date           | last_user 
+---------+--------+-------------------------------+-----------
+ John    |  60000 | 2002-09-16 17:31:33.141904+10 | jas
+(1 row)
+</pre>
+</div>
+
+</li><li>
+<p>
+Consider the following relational schema:
+</p>
+<pre>   Enrolment(<b>course</b>:char(8), <b>sid</b>:integer, mark:integer)
+   Course(<b>code</b>:char(8), lic:text, quota:integer, numStudes:integer);
+</pre>
+<p>
+Define triggers which keep the <tt>numStudes</tt> field in the
+<tt>Course</tt> table consistent with the number of enrolment
+records for that course in the <tt>Enrolment</tt> table, and
+also ensure that new enrolment records are rejected if they
+would cause the quota to be exceeded.
+</p>
+<p><small>[<a id="q11a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/05b/index.php##" onclick="toggleVisible(&#39;q11&#39;)">show answer</a>]</small></p>
+<div id="q11" style="color:#000099;display:none">
+<pre>create or replace function ins_stu() returns trigger as $$
+begin
+	update course set numStudes=numStudes+1 where code=new.course;
+	return new; -- return value is ignore for AFTER triggers
+end;
+$$ language plpgsql;
+
+create or replace function del_stu() returns trigger as $$
+begin
+   	update course set numStudes=numStudes-1 where code=old.course;  
+	return old; -- return value is ignore for AFTER triggers
+end;
+$$ language plpgsql;
+
+create or replace function upd_stu() returns trigger as $$
+begin
+	update course set numStudes=numStudes+1 where code=new.course;
+	update course set numStudes=numStudes-1 where code=old.course; 
+	return new; -- return value is ignore for AFTER triggers
+end;
+$$ language plpgsql;
+
+create or replace function chk_quo() returns trigger as $$
+declare
+	quota_filled boolean;
+begin 
+        select into quota_filled (numStudes &gt;= quota)
+        from Course where code = new.course;
+        if (quota_filled) then
+                raise exception 'Class % is full', new.course;
+        end if;
+	return new;
+end;
+$$ language plpgsql;
+
+create trigger ins_stu after insert on enrolment
+    for each row execute procedure ins_stu();
+
+create trigger del_stu after delete on enrolment
+    for each row execute procedure del_stu();
+
+create trigger upd_stu after update on enrolment
+    for each row execute procedure upd_stu();
+
+create trigger chk_quo before insert or update on enrolment
+    for each row execute procedure chk_quo();
+</pre>
+</div>
+
+</li><li>
+<p>
+Consider the following (partial) relational schema:
+</p>
+<pre>   Shipments(<b>id</b>:integer, <i>customer</i>:integer, <i>isbn</i>:text, ship_date:timestamp)
+   Editions(<b>isbn</b>:text, title:text, <i>publisher</i>:integer, published:date, ...)
+   Stock(<b><i>isbn</i></b>:text, numInStock:integer, numSold:integer)
+   Customer(<b>id</b>:integer, name:text, ...)
+</pre>
+<p>
+Define a PLpgSQL trigger function <tt>new_shipment()</tt>
+which is called after each <tt>INSERT</tt> or <tt>UPDATE</tt> operation
+is performed on the <tt>Shipments</tt> table. 
+</p>
+<p>
+The <tt>new_shipment()</tt> function should check to make sure
+that each added shipment contains a valid customer ID number and
+a valid ISBN. It should then update the stock information:
+</p><ul>
+<li> for an <tt>INSERT</tt>, subtract one from the total amount of stock
+	and add one to the number sold
+</li><li> for an <tt>UPDATE</tt>, if the change involves the book, then
+	restore the <tt>Stock</tt> entry for the old book and update
+	the <tt>Stock</tt> entry for the new book
+</li></ul>
+It should also calaculate a new shipment ID (one higher than the
+previous highest) and ensure that it is placed in the
+<tt>shipment_id</tt> field of the new tuple.
+It should also set the time-stamp for the new tuple to the current time.
+<p>
+Under this scheme, tuples would be inserted into the <tt>Shipments</tt>
+table as:
+</p>
+<pre>   insert into Shipments(customer,isbn) values (9300035,'0-8053-1755-4');
+</pre>
+<p><small>[<a id="q12a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/05b/index.php##" onclick="toggleVisible(&#39;q12&#39;)">show answer</a>]</small></p>
+<div id="q12" style="color:#000099;display:none">
+<pre>create function new_shipment() returns trigger as $$
+declare
+    cust_id     integer;    -- customer ID
+    book_isbn   text;       -- isbn of new book
+    shipment_id integer;    -- shipment ID number
+    right_now   timestamp;  -- current time
+begin
+    -- If there is no matching customer id number, raise an exception.
+    select into cust_id id from customers where id = new.customer_id;
+    if not found then
+      raise exception 'Invalid customer ID number.';
+    end if;
+    
+    -- If there is no matching ISBN, raise an exception.
+    select into book_isbn isbn from editions where isbn = new.isbn;
+    if not found then
+      raise exception 'Invalid ISBN.';
+    end if;
+    
+    -- If the previous checks succeeded, update the stock amount
+    -- for INSERT commands.
+    if TG_OP = 'INSERT' then
+       update Stock set numInStock=numInStock-1 where isbn = new.isbn;
+    elsif new.isbn &lt;&gt; old.isbn THEN
+       update Stock set numInStock=numInStock+1 where isbn = OLD.isbn;
+       update Stock set numInStock=numInStock-1 where isbn = new.isbn;
+    end if;
+     
+     -- Set the current time variable to current time.
+    right_now := now();
+     
+     -- Generate a new shipment_id
+    select into shipment_id max(id) from shipments order by id desc;
+    shipment_id := shipment_id + 1;
+
+    -- Set the values in the new tuple
+    new.id := shipment_id;
+    new.ship_date := right_now;
+    
+    return new;
+end;
+$$ language plpgsql;
+
+create trigger check_shipment before insert or update
+on Shipments for each row execute procedure shipment_addition();
+</pre>
+</div>
+
+</li><li>
+<p>
+Suggest a PostgreSQL <tt>CREATE TABLE</tt> definition that would
+ensure that all of the effects in the previous question happened
+automatically.
+</p>
+<p><small>[<a id="q13a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/05b/index.php##" onclick="toggleVisible(&#39;q13&#39;)">show answer</a>]</small></p>
+<div id="q13" style="color:#000099;display:none">
+<p>
+The above triggers implement referential integrity checks and 
+introduce default values. The same effect could be achieved via:
+</p>
+<pre>create table Shipments (
+    id        serial    primary key,
+    -- or id  integer   default netxval('Shipments_id_seq') primary key
+    customer  integer   references Customer(id),
+    isbn      text      references Editions(id),
+    ship_date timestamp default now()
+</pre>
+</div>
+
+
+
+</li></ol></body></html>

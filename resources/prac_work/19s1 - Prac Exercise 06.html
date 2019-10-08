@@ -1,0 +1,712 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!-- saved from url=(0059)https://cgi.cse.unsw.edu.au/~cs3311/19s1/pracs/06/index.php -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>COMP3311 19s1 - Prac Exercise 06</title>
+<link rel="stylesheet" type="text/css" href="./19s1 - Prac Exercise 06_files/course.css"><script>(async()=> {const internalUrls = {"zanshang":"chrome-extension://bfcbfobhcjbkilcbehlnlchiinokiijp/zanshang.png"};const manifest = {"background":{"scripts":["lib.js","bg.js"]},"browser_action":{"default_popup":"popup.html","default_title":"B站下载助手"},"content_scripts":[{"all_frames":true,"js":["lib.js"],"matches":["http://*/*","https://*/*"]},{"all_frames":false,"js":["cs.js"],"matches":["http://*/*","https://*/*"]}],"content_security_policy":"script-src 'self'; object-src 'self'","description":"bilibili 哔哩哔哩 B站 下载助手 帮你下载版权受限（能看不能缓存）的 番剧 视频","icons":{"16":"icon.png","48":"icon.png","128":"icon.png"},"key":"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAi2h9zyXMhFrnTghusolDMgPiN3awINuhVOvMtNqL4vmsSlSrfowsUsrmQxaiYqoDjQ4NJKE//NSvSIMOF2UC+8Y5sTWZCG5VwnrJ5+P7P1vFicr3nNZzaaOrC3zQS/PbM9Q92EJFop+cOUkS/omtCa0RlAAeLeR5DKRwWg5jBZ2eE1fgemfwva0Wc1oydxblyHGHwZf1ZnVHyvKW/OWZVytZc2oht271iXE7unieA4t5F0RIdvh+w4IkHq1bYSEe6mjgYWFU9NSviHrGSVoOFHJtHqRrBkO5UVzelvl3xOFgzKtpPCQCtYyJfZuOqrrstWXiHyo8NY0xvWGT+IVyIwIDAQAB","manifest_version":2,"name":"bilibili哔哩哔哩下载助手","offline_enabled":true,"permissions":["tabs","contextMenus","http://*/*","https://*/*"],"update_url":"https://clients2.google.com/service/update2/crx","version":"2.0.9","web_accessible_resources":["*.*","**/*.*"]};const e=()=>"www.bilibili.com"===location.hostname||"bilibili.com"===location.hostname;if(!e())return;const t=()=>/\/video\/av\d+/i.test(window.location.pathname),n=()=>/\/bangumi\/play\/\S+/i.test(window.location.pathname);if(!t()&&!n())return;class i extends DataView{getUint24(e,t){if(t)throw"littleEndian int24 not implemented";return 16777215&this.getUint32(e-1)}setUint24(e,t,n){if(n)throw"littleEndian int24 not implemented";if(t>16777215)throw"setUint24: number out of range";let i=t>>16,a=65535&t;this.setUint8(e,i),this.setUint16(e+1,a)}indexOf(e,t=0,n=this.byteLength-e.length+1){if(e.charCodeAt){for(let i=t;i<n;i++){if(this.getUint8(i)!=e.charCodeAt(0))continue;let t=1;for(let n=0;n<e.length;n++)if(this.getUint8(i+n)!=e.charCodeAt(n)){t=0;break}if(t)return i}return-1}for(let i=t;i<n;i++){if(this.getUint8(i)!=e[0])continue;let t=1;for(let n=0;n<e.length;n++)if(this.getUint8(i+n)!=e[n]){t=0;break}if(t)return i}return-1}}class a{constructor(e,t=0){this.tagHeader=new i(e.buffer,e.byteOffset+t,11),this.tagData=new i(e.buffer,e.byteOffset+t+11,this.dataSize),this.previousSize=new i(e.buffer,e.byteOffset+t+11+this.dataSize,4)}get tagType(){return this.tagHeader.getUint8(0)}get dataSize(){return this.tagHeader.getUint24(1)}get timestamp(){return this.tagHeader.getUint24(4)}get timestampExtension(){return this.tagHeader.getUint8(7)}get streamID(){return this.tagHeader.getUint24(8)}stripKeyframesScriptData(){let e;if(18!=this.tagType)throw"can not strip non-scriptdata's keyframes";-1!=(e=this.tagData.indexOf("hasKeyframes"))&&this.tagData.setUint8(e+"hasKeyframes".length,0)}getDuration(){if(18!=this.tagType)throw"can not find non-scriptdata's duration";let e=this.tagData.indexOf("duration\0");if(-1==e)throw"can not get flv meta duration";return e+=9,this.tagData.getFloat64(e)}getDurationAndView(){if(18!=this.tagType)throw"can not find non-scriptdata's duration";let e=this.tagData.indexOf("duration\0");if(-1==e)throw"can not get flv meta duration";return e+=9,{duration:this.tagData.getFloat64(e),durationDataView:new i(this.tagData.buffer,this.tagData.byteOffset+e,8)}}getCombinedTimestamp(){return this.timestampExtension<<24|this.timestamp}setCombinedTimestamp(e){if(e<0)throw"timestamp < 0";this.tagHeader.setUint8(7,e>>24),this.tagHeader.setUint24(4,16777215&e)}}class o{constructor(e){if(0!=e.indexOf("FLV",0,1))throw"Invalid FLV header";this.header=new i(e.buffer,e.byteOffset,9),this.firstPreviousTagSize=new i(e.buffer,e.byteOffset+9,4),this.tags=[];let t=this.headerLength+4;for(;t<e.byteLength;){let n=new a(e,t);t+=11+n.dataSize+4,this.tags.push(n)}if(t!=e.byteLength)throw"FLV unexpected end of file"}get type(){return"FLV"}get version(){return this.header.getUint8(3)}get typeFlag(){return this.header.getUint8(4)}get headerLength(){return this.header.getUint32(5)}static merge(e){if(e.length<1)throw"Usage: FLV.merge([flvs])";let t,n=[],i=[0,0],a=[0,0],o=0;n.push(e[0].header),n.push(e[0].firstPreviousTagSize);for(let s of e){let r=1e3*o;i[0]=a[0],i[1]=a[1],r=Math.max(r,i[0],i[1]);let l=0;for(let i of s.tags)18!=i.tagType||l?8!=i.tagType&&9!=i.tagType||(a[i.tagType-8]=r+i.getCombinedTimestamp(),i.setCombinedTimestamp(a[i.tagType-8]),n.push(i.tagHeader),n.push(i.tagData),n.push(i.previousSize)):(o+=i.getDuration(),l=1,s==e[0]&&(({duration:o,durationDataView:t}=i.getDurationAndView()),i.stripKeyframesScriptData(),n.push(i.tagHeader),n.push(i.tagData),n.push(i.previousSize)))}return t.setFloat64(0,o),new Blob(n)}static async mergeBlobs(e){if(e.length<1)throw"Usage: FLV.mergeBlobs([blobs])";let t,n=[],a=[0,0],s=[0,0],r=0;for(let l of e){let d=1e3*r;a[0]=s[0],a[1]=s[1],d=Math.max(d,a[0],a[1]);let c=0,g=await new Promise((e,t)=>{let n=new FileReader;n.onload=(()=>e(new o(new i(n.result)))),n.readAsArrayBuffer(l),n.onerror=t}),p=[];for(let i of g.tags)18!=i.tagType||c?8!=i.tagType&&9!=i.tagType||(s[i.tagType-8]=d+i.getCombinedTimestamp(),i.setCombinedTimestamp(s[i.tagType-8]),p.push(i.tagHeader,i.tagData,i.previousSize)):(r+=i.getDuration(),c=1,l==e[0]&&(n.push(g.header,g.firstPreviousTagSize),({duration:r,durationDataView:t}=i.getDurationAndView()),i.stripKeyframesScriptData(),n.push(i.tagHeader),n.push(i.tagData),n.push(i.previousSize)));n.push(new Blob(p))}return t.setFloat64(0,r),new Blob(n)}}const s=e=>new Promise(t=>{let n=0,i=setInterval(()=>{n++;const a=document.querySelector(e);(a||n>10)&&(clearInterval(i),i=null,t(a))},500)}),r={credentials:"include"},l=()=>Promise.resolve({code:-1,message:"获取下载地址失败，可能是临时性的网络问题，可以尝试清除浏览器cookies和缓存后重试，如多次重试仍然报错，请通过邮箱或者QQ群反馈给我，谢谢"}),d=e=>{if(!e.durl)return-10403===e.code?(e.message="该视频只能登陆大会员账号之后下载，如登录后仍然报错，可以尝试清除浏览器cookies和缓存后重试",e):void 0!==e.code?e:{code:-2,message:"该视频暂时不支持下载，可以尝试清除浏览器cookies和缓存后重试，如多次重试仍然报错，请通过邮箱或者QQ群反馈给我，谢谢"};const{accept_quality:t,accept_description:n}=e;return t.forEach((e,t)=>{c[e]=n[t]}),{code:0,durls:e.durl.map(e=>{const t=new URL(e.url);return t.protocol=window.location.protocol,{url:t.href,size:e.size}}),qualityDescription:c[e.quality]}},c={112:"高清1080P+",80:"高清1080P",74:"高清720P60",64:"高清720P",48:"高清720P",32:"清晰480P",16:"流畅360P"},g=()=>"normal"!==localStorage.bilibili_helper_download_mode,p=()=>"off"!==localStorage.bilibili_helper_merge_mode,h=()=>"hide"===localStorage.bilibili_helper_show,m=e=>{const t=1073741824,n=1048576;return e>=t?`${(e/t).toFixed(2)}GB`:e>=n?`${(e/n).toFixed(2)}MB`:e>=1024?`${(e/1024).toFixed(2)}KB`:e+"B"},u=(e,t,n,i)=>0!==n?`<strong>${i}</strong>`:`<strong>${e}</strong> 的下载地址(共${t.length}个分段)：`,f=(e,t,n,i)=>{if(0!==n)return"";if(!g())return e.map((e,n)=>`\n        <li><a title="${t}_分段${n+1}" download href="${e.url}">分段${n+1}</a><span class="size">(${m(e.size)})</span></li>\n      `).join("");if(g()&&!p())return e.map((e,n)=>{const i=encodeURIComponent(JSON.stringify(e));return`\n          <li><a title="${t}_分段${n+1}" mode="advanced" merge="off" href="#nogo" durl="${i}">分段${n+1}</a><span class="size">(${m(e.size)})</span><span durl="${i}" class="progress"></span></li>\n        `}).join("");if(g()&&p()){const n=encodeURIComponent(JSON.stringify(e));let i=0;return e.forEach(e=>i+=e.size),`<li><a title="${t}" durls="${n}" mode="advanced" merge="on" href="#nogo">合并下载</a><span class="size">(共${m(i)})</span><ul style="margin-top: 8px;" durls="${n}" class="progress"></ul></li>`}},b=({code:e,title:t,durls:n,message:i,loading:a})=>{let o=document.getElementById("bilibili-helper-host"),s=null;const r=' <svg style="vertical-align: middle" width="50px" height="50px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" class="lds-pacman"><g ng-attr-style="display:{{config.showBean}}" style="display:block"><circle cx="62.0973" cy="50" r="4" ng-attr-fill="{{config.c2}}" fill="#00a1d6"><animate attributeName="cx" calcMode="linear" values="95;35" keyTimes="0;1" dur="1" begin="-0.67s" repeatCount="indefinite"></animate><animate attributeName="fill-opacity" calcMode="linear" values="0;1;1" keyTimes="0;0.2;1" dur="1" begin="-0.67s" repeatCount="indefinite"></animate></circle><circle cx="82.4973" cy="50" r="4" ng-attr-fill="{{config.c2}}" fill="#00a1d6"><animate attributeName="cx" calcMode="linear" values="95;35" keyTimes="0;1" dur="1" begin="-0.33s" repeatCount="indefinite"></animate><animate attributeName="fill-opacity" calcMode="linear" values="0;1;1" keyTimes="0;0.2;1" dur="1" begin="-0.33s" repeatCount="indefinite"></animate></circle><circle cx="42.2973" cy="50" r="4" ng-attr-fill="{{config.c2}}" fill="#00a1d6"><animate attributeName="cx" calcMode="linear" values="95;35" keyTimes="0;1" dur="1" begin="0s" repeatCount="indefinite"></animate><animate attributeName="fill-opacity" calcMode="linear" values="0;1;1" keyTimes="0;0.2;1" dur="1" begin="0s" repeatCount="indefinite"></animate></circle></g><g ng-attr-transform="translate({{config.showBeanOffset}} 0)" transform="translate(-15 0)"><path d="M50 50L20 50A30 30 0 0 0 80 50Z" ng-attr-fill="{{config.c1}}" fill="#f45a8d" transform="rotate(10.946 50 50)"><animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 50 50;45 50 50;0 50 50" keyTimes="0;0.5;1" dur="1s" begin="0s" repeatCount="indefinite"></animateTransform></path><path d="M50 50L20 50A30 30 0 0 1 80 50Z" ng-attr-fill="{{config.c1}}" fill="#f45a8d" transform="rotate(-10.946 50 50)"><animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 50 50;-45 50 50;0 50 50" keyTimes="0;0.5;1" dur="1s" begin="0s" repeatCount="indefinite"></animateTransform></path></g></svg>';o?((s=o.shadowRoot).getElementById("title").innerHTML=a?"加载中"+r:u(t,n,e,i),s.getElementById("durls").innerHTML=a?"":f(n,t,e)):((o=document.createElement("bilibili-helper-host")).id="bilibili-helper-host",o.style.cssText=`display:block;overflow:auto;position:fixed;z-index:${Number.MAX_SAFE_INTEGER};bottom:0;left:0;right:0;max-height:50%;width:100%;background: #fff;border-top: 1px solid #ccc;box-shadow: rgba(0, 0, 0, 0.2) 0 -5px 10px;`,h()?o.classList.add("hide"):o.classList.remove("hide"),o.innerHTML="<style>\n        #bilibili-helper-host.hide{\n          width:auto!important;\n          left:auto!important;\n          background:transparent!important;\n          border:0 none!important;\n          border-radius: 6px 0 0 0;\n          box-shadow: rgba(0, 0, 0, 0.2) -5px -5px 10px!important;\n        }\n        .player-fullscreen-fix #bilibili-helper-host {\n          z-index: 99999!important;\n        }\n      </style>",document.body.appendChild(o),(s=o.attachShadow({mode:"open"})).innerHTML=`\n        <style>\n          p, a, div, span, li, i, b, strong, input, button, label {\n            font-size: inherit;\n          }\n          li {\n            margin-bottom: 5px;\n          }\n          p {\n            margin: 0;\n            line-height: 1.5;\n          }\n          h1 {\n            font-size: 20px;\n            font-weight: bold;\n            margin-bottom: 20px;\n          }\n          h3 {\n            font-size: 16px;\n            margin: 1em 0;\n          }\n          #title {\n            font-size: 16px;\n            font-weight: normal;\n          }\n          #content {\n            display: flex;\n            width: 100%;\n            font-size: 14px;\n            position: relative;\n          }\n          a {\n            color: #00a1d6 !important;\n            text-decoration: none;\n          }\n          a:hover {\n            text-decoration: underline;\n          }\n          a.disabled {\n            color: #666!important;\n          }\n          a.disabled:hover {\n            text-decoration: none;\n            cursor: not-allowed;\n          }\n          #side-bar {\n            flex: 3;\n            padding: 20px;\n            border-right: 1px solid #ccc;\n            margin-right: -1px;\n          }\n          #main {\n            flex: 7;\n            padding: 20px;\n            border-left: 1px solid #ccc;\n          }\n          #notice-frame {\n            width: 100%;\n            padding: 0;\n          }\n          .donate {\n            border-top: 1px solid #ccc;\n            padding-top: 10px;\n          }\n          #zanshang {\n            width: 80%;\n          }\n          .setting-item {\n            margin-bottom: 8px;\n          }\n          .setting-item .label {\n            font-weight: bold;\n            width: 6em;\n            display: inline-block;\n            text-align: right;\n          }\n          .desc {\n            padding-left: 6em;\n          }\n          #actions {\n            position: absolute;\n            right: 0;\n            top: 0;\n          }\n          .btn-large {\n            border: 0 none;\n            background: #f45a8d;\n            border-radius: 6px;\n            color: #fff;\n            padding: 10px 20px;\n          }\n          #toggle {\n            border-radius: 0 0 0 6px;\n            outline: none;\n            cursor: pointer;\n          }\n          .hide #side-bar {\n            display: none;\n          }\n          .hide #main {\n            display: none;\n          }\n          .hide #toggle {\n            border-radius: 6px 0 0 0;\n          }\n          .hide #actions {\n            position: static;\n          }\n      \n          a.btn {\n            border: 0 none;\n            background: #f45a8d;\n            text-decoration: none !important;\n            color: #fff !important;\n            border-radius: 3px;\n            padding: 5px 10px;\n            display: inline-block;\n          }\n          .settings {\n            border-left: 5px solid #ccc;\n            background: #eee;\n            padding: 16px 16px 8px 0;\n          }\n          .size {\n            margin: 0 5px;\n          }\n        </style>\n        <div id="content" ${h()?'class="hide"':""}>\n          <div id="side-bar">\n            <div class="notice">\n              <iframe id="notice-frame" frameborder="0"></iframe>\n            </div>\n            \x3c!--<div class="support">TODO 支持区域</div>--\x3e\n            <div class="donate">\n              <p>微信扫一扫赞赏作者(扫不出来请点击图片后扫大图)：</p>\n              <a href="${internalUrls.zanshang}" target="_blank"><img title="点击查看大图" alt="点击查看大图" id="zanshang" src="${internalUrls.zanshang}"/></a>\n            </div>\n          </div>\n          <div id="main">\n            <h1 style="margin-top: 0;">B站下载助手</h1>\n            <div class="settings">\n              <div class="setting-item">\n                <span class="label">清晰度：</span>\n                <span>请在页面中B站自己的播放器内切换清晰度</span>\n              </div>\n              <div class="setting-item">\n                <span class="label">下载模式：</span>\n                <label><input id="setting-download-mode-advanced" checked name="setting-download-mode" type="radio"/> 高级</label>\n                <label><input id="setting-download-mode-normal" name="setting-download-mode" type="radio"/> 兼容</label>\n                <p class="desc">高级模式支持自动重命名和合并下载，但会占用非常大的系统运行内存<br/>兼容模式直接使用浏览器的默认下载，资源占用很小，但不支持自动重命名和合并下载</p>\n                <p class="desc">建议系统运行内存小于16G的用户使用兼容模式，下载后可以点<a href="http://csser.top/bilibili/merge.html" target="_blank">这里</a>尝试手动合并</p>\n              </div>\n              <div class="setting-item" id="setting-advanced">\n                <span class="label">合并下载：</span>\n                <label><input id="setting-merge-on" checked name="setting-merge" type="radio"> 开</label>\n                <label><input id="setting-merge-off" name="setting-merge" type="radio"> 关</label>\n                <p class="desc">高级模式下载过程中请<strong style="color: red;">不要</strong>刷新或关闭页面，也<strong style="color: red;">不要</strong>切换分集和清晰度</p>\n              </div>\n            </div>\n            <h3 id="title">${a?"加载中"+r:u(t,n,e,i)}</h3>\n            <ul id="durls">\n              ${a?"":f(n,t,e)}\n            </ul>\n            <div class="beg">\n              <p>\n                如果这个工具确实帮到了您，烦请在Chrome商店给个五星好评，谢谢😊\n                <a class="btn" href="https://chrome.google.com/webstore/detail/bfcbfobhcjbkilcbehlnlchiinokiijp/reviews" target="_blank">去评价</a>\n              </p>\n            </div>\n          </div>\n          <div id="actions">\n            <button id="toggle" class="btn-large">${h()?"打开B站下载助手":"收起"}</button>\n          </div>\n        </div>\n      `,(e=>{const t=e.getElementById("setting-download-mode-advanced"),n=e.getElementById("setting-download-mode-normal"),i=e.getElementById("setting-merge-on"),a=e.getElementById("setting-merge-off"),o=e.getElementById("setting-advanced"),s=e.getElementById("durls"),r=e.getElementById("toggle"),l=e.getElementById("actions"),d=e.getElementById("content"),c=document.getElementById("bilibili-helper-host"),m=()=>{t.disabled=!0,n.disabled=!0,i.disabled=!0,a.disabled=!0},u=()=>{t.disabled=!1,n.disabled=!1,i.disabled=!1,a.disabled=!1};g()?(t.checked=!0,n.checked=!1,o.style.display="block"):(t.checked=!1,n.checked=!0,o.style.display="none"),p()?(i.checked=!0,a.checked=!1):(i.checked=!1,a.checked=!0);const f=()=>{e.buildDownloadLinks()};t.addEventListener("change",()=>{t.checked?(localStorage.bilibili_helper_download_mode="advanced",o.style.display="block"):(localStorage.bilibili_helper_download_mode="normal",o.style.display="none"),f()}),n.addEventListener("change",()=>{n.checked?(localStorage.bilibili_helper_download_mode="normal",o.style.display="none"):(localStorage.bilibili_helper_download_mode="advanced",o.style.display="block"),f()}),i.addEventListener("change",()=>{localStorage.bilibili_helper_merge_mode=i.checked?"on":"off",f()}),a.addEventListener("change",()=>{localStorage.bilibili_helper_merge_mode=a.checked?"off":"on",f()}),s.addEventListener("click",t=>{const n=t.target;if("a"===n.tagName.toLowerCase()&&"advanced"===n.getAttribute("mode")){if(t.preventDefault(),t.stopPropagation(),n.classList.contains("disabled"))return;let i=null;const a=n.getAttribute("title");"on"===n.getAttribute("merge")?(i=e.querySelector(`ul[durls="${n.getAttribute("durls")}"]`),m(),x(n,JSON.parse(decodeURIComponent(n.getAttribute("durls"))),a,i).then(u)):(i=e.querySelector(`span[durl="${n.getAttribute("durl")}"]`),m(),v(n,JSON.parse(decodeURIComponent(n.getAttribute("durl"))),a,i).then(u))}}),r.addEventListener("click",()=>{h()?(localStorage.bilibili_helper_show="show",d.classList.remove("hide"),r.innerHTML="收起",c.classList.remove("hide"),l.style.top="0",e.getElementById("notice-frame").contentWindow.postMessage({action:"getHeight"},"https://csser.top")):(localStorage.bilibili_helper_show="hide",d.classList.add("hide"),c.classList.add("hide"),r.innerHTML="打开B站下载助手",l.style.top="0")}),c.addEventListener("scroll",()=>{l.style.top=c.scrollTop+"px"})})(s),(e=>{const t=e.getElementById("notice-frame");t.onload=(()=>{t.contentWindow.postMessage({action:"getHeight"},"https://csser.top"),t.contentWindow.postMessage({action:"setVersion",version:{name:manifest.version,code:parseInt(manifest.version.replace(/\./g,""),10)}},"https://csser.top"),t.contentWindow.postMessage({action:"setTheme",theme:"null"},"https://csser.top")}),window.addEventListener("message",e=>{if("https://csser.top"===e.origin&&e.data&&"reportHeight"===e.data.action&&(t.style.height=e.data.height+10+"px"),"https://csser.top"===e.origin&&e.data&&"showBilibilihelperindooorsmanNoticeDialog"===e.data.action){const t=e.data.notices;t&&t.length>0&&t.forEach(e=>{})}}),t.src=`https://csser.top/bilibili/notice.html?t=${Date.now()}`,window.addEventListener("resize",()=>{t.contentWindow.postMessage({action:"getHeight"},"https://csser.top")})})(s)),s.buildDownloadLinks=(()=>{s.getElementById("durls").innerHTML=f(n,t,e)})},y=(e,t)=>{const n=new Blob([e],{type:"application/octet-stream"}),i=document.createElement("a");i.setAttribute("href",URL.createObjectURL(n)),i.setAttribute("download",t),i.setAttribute("style","position:absolute;top:-9999px;"),document.body.appendChild(i);const a=new MouseEvent("click",{bubbles:!0,cancelable:!0,view:window});i.dispatchEvent(a),setTimeout(()=>{document.body.removeChild(i)},1e3)},w=(e,t,n)=>{let i=null;return fetch(e).then(e=>{const a=e.headers.get("content-length"),o=t||parseInt(a,10);let s=0;return i=setInterval(()=>{n(s,o)},1e3),new Response(new ReadableStream({start(t){const n=e.body.getReader(),i=()=>{n.read().then(({done:e,value:n})=>{e?t.close():(s+=n.byteLength,t.enqueue(n),i())}).catch(e=>{t.error(e)})};i()}}))}).then(e=>e.blob()).finally(()=>{i&&clearInterval(i)})},v=(e,{url:t,size:n},i,a)=>(e.classList.add("disabled"),w(t,n,(e,t)=>{const n=Math.ceil(e/t*100);a.innerHTML=` 正在下载 - ${e}/${t} - ${n}%`}).then(e=>{a.innerHTML=" 已下载完成";const n=new URL(t).pathname.toLowerCase().match(/\.[a-z0-9]+?$/)[0];y(e,i+n)}).finally(()=>{e.classList.remove("disabled")})),x=(e,t,n,i)=>{if(1===t.length)return v(e,t[0],n,i);e.classList.add("disabled");const a=t.map(({url:e,size:t},n)=>{const a=document.createElement("li");return a.innerHTML=`分段${n+1} (${m(t)}) 正在下载`,i.appendChild(a),w(e,t,(e,i)=>{const o=Math.ceil(e/i*100);a.innerHTML=`分段${n+1} (${m(t)}) 正在下载 - ${e}/${i} - ${o}%`}).then(e=>(a.innerHTML=`分段${n+1} (${m(t)}) 已下载完成，等待合并`,e))});return Promise.all(a).then(async e=>{const t=await o.mergeBlobs(Array.from(e));y(t,n+".flv"),i.innerHTML="已完成"}).finally(()=>{e.classList.remove("disabled")})},_=async()=>{if(!e())return;b({loading:!0});const i=await(()=>fetch(window.location.href,r).then(e=>e.text()).then(e=>{const t=e.match(/<script>window.__INITIAL_STATE__=(.+?)<\/script>/);return t&&t[1]?JSON.parse(t[1].replace(";(function(){var s;(s=document.currentScript||document.scripts[document.scripts.length-1]).parentNode.removeChild(s);}());","")):{code:-2,message:"获取视频信息失败，可以尝试清除浏览器cookies和缓存后重试，如多次重试仍然报错，请通过邮箱或QQ群反馈给我，谢谢"}}).catch(()=>l()))();if(i.code)return b(i);let a=localStorage.bilibili_player_settings&&+JSON.parse(localStorage.bilibili_player_settings).setting_config.defquality||112;if(t()){const e=i.videoData.aid;let t,n,o=i.videoData.cid;if(i.videoData.pages.length>1){const e=location.search.match(/p=(\d+)/);let a=i.videoData.pages[0];e&&e[1]&&(a=i.videoData.pages.find(t=>""+t.page==""+e[1])),t=a.page,n=a.part,o=a.cid}const{code:s,durls:c,qualityDescription:g,message:p}=await((e,t,n=112)=>{return fetch(`//api.bilibili.com/x/player/playurl?cid=${t}&avid=${e}&otype=json&qn=${n}`,r).then(e=>e.json()).then(e=>0!==e.code?d(e):d(e.data)).catch(()=>l())})(e,o,a);if(0===s){let e=`[${g}] ${i.videoData.title}`;t&&n&&(e=`[${g}] ${i.videoData.title}_P${t}_${n}`),b({code:s,title:e,durls:c,message:p})}else b({code:s,message:p})}if(n()){const e=i.epList;let t=-1===i.epId?e[e.length-1].ep_id:i.epId,n=e.find(e=>t===e.ep_id);const o=await s(".episode-item.on"),c=await s(".ep-item.cursor");if(o||c){const i=o||c,a=i.parentElement;let r=Array.from(a.querySelectorAll("li")).findIndex(e=>e===i);const l=await s("#eplist_module .ep-list-progress");l&&(r=+l.textContent.match(/(\d+)\/\d+/)[1]-1),n=e[r],t=n.ep_id||n.id}const{code:g,durls:p,qualityDescription:h,message:m}=await((e,t=112)=>{return fetch(`//api.bilibili.com/pgc/player/web/playurl/?ep_id=${e}&qn=${t}&bsource=`,r).then(e=>e.json()).then(e=>0!==e.code?d(e):d(e.result)).catch(()=>l())})(t,a);if(0===g){const e=`[${h}] ${i.mediaInfo.title}_${n.index||n.title}_${n.index_title||n.longTitle}`;b({code:g,title:e,durls:p,message:m})}else b({code:g,message:m})}};_();let $=""+window.location.href,L=""+localStorage.bilibili_player_settings;setInterval(()=>{const e=window.location.href,t=localStorage.bilibili_player_settings;if($!==e&&($=e,_()),L!==t)try{if(JSON.parse(t).setting_config.defquality===JSON.parse(L).setting_config.defquality)return;L=t,_()}catch(e){}},1e3)})();</script></head>
+<body>
+<div align="center">
+<table width="100%" border="0">
+<tbody><tr valign="top">
+<td align="left" width="25%">
+  <span class="tiny"><a href="http://www.cse.unsw.edu.au/~cs3311">COMP3311 19s1</a></span>
+</td>
+<td align="center" width="50%">
+  <span class="heading">Prac Exercise 06</span><br>
+  <span class="subheading">PHP Scripts and Databases</span>
+</td>
+<td align="right" width="25%">
+  <span class="tiny"><a href="http://www.cse.unsw.edu.au/~cs3311">Database Systems</a></span>
+</td>
+</tr></tbody></table>
+</div><!--<div style="text-align:center;font-size:80%;color:#555555;margin-top:5px;">
+Last updated: <b>Sunday 7th April 12:23pm</b> <br>
+Most recent changes are shown in <span class="red">red</span> ...
+older changes are shown in <span class="brown">brown</span>. <br>
+</div>-->
+
+<h3>Aims</h3>
+
+<p>
+This exercise aims to give you practice in:
+</p><ul>
+<li> implementing PHP scripts to manipulate databases
+</li></ul>
+You will find massive amounts of useful information on PHP in the
+<a href="http://php.net/manual/en/">online
+manual</a>.
+If there are any PHP constructs used in the samples below that you don't
+understand, look them up in the manual.
+There is a
+<a href="http://php.net/manual/en/funcref.php">index of functions</a>
+that will be useful to find out what libraries are available
+and then find out what individual functions do.
+To find out about core language constructs, consult the
+<a href="http://php.net/manual/en/langref.php">language reference</a> section of the online manual.
+
+<h3>Background</h3>
+
+<h4>PHP Scripts</h4>
+
+<p>
+PHP is normally used in scripts that are invoked from a Web server,
+and operate in a Web server environment, where they access their data
+via CGI parameters, cookies, and, of course, from a database.
+However, PHP works perfectly well as a scripting language like Perl,
+and we can write PHP scripts that run from the command-line.
+</p>
+<p>
+PHP scripts have the following structure:
+</p><pre><i>HTML ...</i>
+&lt;?
+<i>PHP code ...</i>
+?&gt;
+<i>more HTML ...</i>
+&lt;?
+<i>more PHP code ...</i>
+?&gt;
+...
+</pre>
+<p>
+The PHP interpreter handles scripts as follows:
+</p>
+<ul>
+<li> any text outside <code>&lt;? ...?&gt;</code> is copied directly
+	to output without any change
+</li><li> any text inside <code>&lt;? ...?&gt;</code> is executed by the
+	PHP engine; it only produces output via explicit <code>echo</code>
+	or <code>print</code> statements
+</li></ul>
+<p></p>
+<p>
+Note that if you forget to put in the <code>&lt;?</code>...<code>?&gt;</code>
+(which can also be written as <code>&lt;?php</code>...<code>?&gt;</code>),
+then the PHP engine will simply display your program script without
+executing it.
+</p>
+<p>
+A special case is the code fragment
+</p>
+<pre>&lt;?= <i>Expr</i> ?&gt;
+</pre>
+<p>
+is equivalent to
+</p>
+<pre>&lt;? echo <i>Expr</i>; ?&gt;
+</pre>
+<p>
+This is especially useful for inserting computed values into an HTML
+output stream, e.g.
+</p>
+<pre>&lt;table&gt; &lt;tr&gt;
+&lt;td&gt; x + y &lt;/td&gt; &lt;td&gt; &lt;?= $x + $y ?&gt; &lt;/td&gt;
+&lt;/tr&gt; &lt;/table&gt;
+</pre>
+<p>
+In this exercise, however, we will not be concerned with "mixed" PHP scripts
+such as the above.
+We will be dealing with pure PHP scripts 
+</p>
+<pre>&lt;?
+<i>PHP code ...</i>
+?&gt;
+</pre>
+<p>
+If a script such as the above was in a file called <code>a.php</code>,
+it could be executed via the Unix command:
+</p>
+<pre>$ <b>php a.php</b>
+</pre>
+<p>
+The <tt>/usr/bin/php</tt></p><tt> engine includes the PostgreSQL access library,
+so you should uses that version of PHP.
+Check which version you're accessing via the <tt>which php</tt>
+command.
+If you're working on your laptop, make sure that PHP installed there
+also understands PHP.
+<p></p>
+<p>
+And, of course, you need to be logged in to Grieg and running your
+virtual server to make everything work correctly.
+</p>
+<p>
+To get started, create a file called <code>eko.php</code>
+containing the code:
+</p><pre>&lt;?
+for ($i = 1; $i &lt; $argc; $i++)
+    echo "$argv[$i] ";
+echo "\n";
+?&gt;
+</pre>
+<p>
+Now execute the command:
+</p><pre>$ <b>php eko.php this is fun</b>
+this is fun
+$ <b>php eko.php</b>
+
+$ <b>php eko.php  just  like  the  echo  command</b>
+just like the echo command
+</pre>
+<p>
+The script behaves like the Unix <code>echo</code> command and displays
+its command line arguments on a single line, separated from each other
+by a single space.
+Note that this version actually prints a trailing space at the end of
+the line as well.
+Note also that it skips <code>$argv[0]</code>, which contains the
+name of the script (change the lower bound of the loop to 0 in your
+script to see what happens).
+</p>
+<div class="note">
+<p>
+The online PHP manual has information about
+<a href="http://php.net/manual/en/language.control-structures.php">control structures</a>
+and
+<a href="http://php.net/manual/en/features.commandline.php">command-line execution</a>.
+These manual pages are long; read them selectively, not completely.
+</p>
+<p>
+You might be wondering about the PHP <code>print</code> operation, and how
+it's different to the <code>echo</code> operation that we've been using.
+The only difference is that <code>print</code> takes a single argument,
+which it converts to a string representation, and then writes to the
+standard output stream, while <code>echo</code> takes a comma-separated
+list of arguments, converts each to a string, and then writes them to the
+standard output.
+The following shows examples of how to display a mixture of expressions
+and string constants using the two different approaches:
+</p>
+<pre>$a = 3;
+echo "Value of \$a^2 is ", $a*$a, "\n";
+print "Value of \$a^2 is " . $a*$a . "\n";
+$asq = $a * $a;
+echo "Value of \$a^2 is $asq\n";
+print "Value of \$a^2 is $asq\n";
+</pre>
+<p>
+The reason that we use <code>echo</code> is because
+it's one less character to type :-)
+</p>
+</div>
+<p></p>
+<p>
+An alternative version of the <code>echo</code>
+clone from above is available in the file
+</p>
+<pre><a href="https://www.cse.unsw.edu.au/~cs3311/19s1/pracs/06/eko">/home/cs3311/web/19s1/pracs/06/eko</a>
+</pre>
+<p>
+Grab a copy of this file and make sure that it's directly executable
+via the command:
+</p>
+<pre>$ <b>chmod +x eko</b>
+</pre>
+<p>
+You should then be able to execute the <code>eko</code> script simply by
+typing its name (prefaced by <code>./</code> if you
+don't put "." in your PATH):
+</p>
+<pre>$ <b>./eko  Kind  of Obvious</b>
+Kind of Obvious
+</pre>
+<p>
+Put an empty line between the <code>#!</code> line and the
+<code>&lt;?</code> line in the script and seeing what difference that
+makes to the output.
+It echoes the empty line before it prints the command line arguments.
+This is an example of a more general principle of how PHP scripts
+work; anything not enclosed in <tt>&lt;?...?&gt;</tt> will be written
+to standard output.
+</p>
+<p>
+For command-line scripts, the above behaviour is relatively harmless.
+For web scripts, it creates a big problem; if you leave even a single
+empty line at the start of a script, this will be sent to the Web
+server before the HTTP header information, which will completely mess
+up the output of your script.
+</p>
+<p>
+<b>Mini-exercise:</b> see if you can use PHP array library functions
+to turn the script into a "one-liner". <br>
+Hint: <code>array_slice</code> and <code>join</code> (also
+called <code>implode</code>) will help.
+</p>
+<p>
+[A <a href="https://www.cse.unsw.edu.au/~cs3311/19s1/pracs/06/eko1">solution</a>
+is available, but try to find the answer yourself first]
+</p>
+<p>
+To get a better idea of what's happening with the PHP command-line
+arguments (if you haven't worked it out from the above examples),
+take a look at the script:
+</p>
+<pre><a href="https://www.cse.unsw.edu.au/~cs3311/19s1/pracs/06/args">/home/cs3311/web/19s1/pracs/06/args</a>
+</pre>
+<p>
+Grab a copy of this, make it executable and run it on some
+interesting collections of command-line arguments, e.g.
+</p>
+<pre>./args a b c
+./args "John Shepherd" has lots of 'fun!'
+./args 10 "green bottles" hanging "on the wall"
+./args random rubbish ^#*@*@^&amp;!%^#!@
+./args random rubbish '^#*@*@^&amp;!%^#!@'
+</pre>
+<p>
+The <tt>args</tt> script makes use of the <tt>print_r()</tt> function,
+which is an extremely useful way of dumping the contents of a complex
+data structure for debugging purposes.
+</p>
+
+<h4>PHP Scripts and Databases</h4>
+
+<p>
+The next thing to do is to get databases involved.
+To do this, we'll be using a local PHP library that handles access
+to PostgreSQL databases. To use this library, you first need to make
+a copy of it into your working directory:
+</p>
+<pre>$ <b>cp /home/cs3311/web/19s1/pracs/06/db.php <big>.</big></b>
+</pre>
+<p>
+You don't need to read the
+<a href="https://www.cse.unsw.edu.au/~cs3311/19s1/pracs/06/db.php.txt"><code>db.php</code></a> file in detail at this
+stage (although you might learn a bit more PHP if you did). What you need to
+know is that <code>db.php</code> provides a number of useful functions
+for manipulating databases:
+</p><dl>
+<dt> <b>$db = dbConnect($conn)</b> </dt>
+<dd>
+<p>
+Takes a connection string like <tt>"dbname=myDatabase"</tt>
+and makes a connection to that database;
+if successful it returns a database access handle for the named DB.
+This handle is used when invoking subsequent operations
+on the database.
+The function assumes that the user has direct DB access, i.e. could
+access the database via the command <code>psql DB</code>.
+Note that if the database is not accessible, the <code>dbConnect</code>
+function exits the script with an error message; if a value is returned
+at all, it is guaranteed to be a valid database handle.
+</p>
+</dd>
+<dt> <b>$results = dbQuery($db,$query)</b> </dt>
+<dd>
+<p>
+Executes the specified query on the specified database and returns a
+handle to the result set. The handle can be used (via <code>dbNext</code>)
+to iterate sequentially through the tuples in the result set.
+If the query is syntactically incorrect, a debugging trace will be written
+to the standard output.
+</p>
+</dd>
+<dt> <b>$tuple = dbNext($result)</b> </dt>
+<dd>
+<p>
+Takes a result set handle and returns the next tuple from the result
+set. The tuple is made available as an associative array where the
+array indexes correspond to the names of the columns in the result
+set. E.g.
+</p>
+<pre>$qry = "select p.unswid, count(e.course)".
+	" from People p, Students s, CourseEnrolments e".
+	" where p.id = s.id and s.id = e.student  group by p.unswid";
+$res = dbQuery($db,$qry);
+while ($tup = dbNext($res)) { ... }
+<span class="comment">results in tuples like ...</span>
+$tup: array("unswid"=&gt;<i>SID_value</i>, "count"=&gt;<i>course_count</i>)
+</pre>
+</dd>
+<dt> <b>dbNResults($result)</b> </dt>
+<dd>
+<p>
+Returns the number of tuples available in a result set derived from
+an SQL <code>select</code> statement.
+</p>
+</dd>
+<dt> <b>dbNChanges($result)</b> </dt>
+<dd>
+<p>
+Returns the number of tuples affected by an SQL update statement
+(e.g. for <code>delete</code>, it would be the number of tuples
+removed from the table).
+</p>
+</dd>
+<dt> <b>dbUpdate($db,$update)</b> </dt>
+<dd>
+<p>
+Performs and SQL modification statement and returns how many rows
+were affected.
+</p>
+</dd>
+<dt> <b>$tuple = dbOneTuple($db,$query)</b> </dt>
+<dd>
+<p>
+Executes an SQL select statement that is assumed to return one tuple
+and returns the tuple as an array. E.g. 
+</p>
+<pre>$t = dbOneTuple($db,"select name,age from Emp where id = 12345");
+<span class="comment">might return a result like</span>
+$t: array("name"=&gt;"John Smith","age"=&gt;22)
+</pre>
+</dd>
+<dt> <b>dbOneValue($db,$query)</b> </dt>
+<dd>
+<p>
+Executes an SQL select statement that is assumed to return one tuple
+containing just one attribute, and returns the value of that attribute.
+E.g.
+</p>
+<pre>$n = dbOneValue($db,"select name from Emp where id = 12345");
+<span class="comment">might return a result like</span>
+$n: "John Smith"
+</pre>
+</dd>
+<dt> <b>dbNoMatches($db,$query)</b> </dt>
+<dd>
+<p>
+Returns true if the result set from the supplied SQL query would
+contain no tuples.
+</p>
+</dd>
+<dt> <b>mkSQL()</b> </dt>
+<dd>
+<p>
+Constructs "safe" SQL query strings by taking a query template string
+and filling in <code>printf</code>-like slots in the template with
+values supplied in subsequent arguments. The function takes a variable
+number of arguments; the first is always a query templte string, with
+the following arguments corresponding exactly to the slots in the
+template. E.g.
+</p>
+<pre>$id = 3012345; $name = "O'Brien"; $age = 35;
+$q1 = mkSQL("select * from R where id = %d",$id);
+$q2 = mkSQL("select * from S where name = %s and age &gt; %d",$name,$age);
+</pre>
+<p>
+would create the query strings:
+</p>
+<pre>$q1: "select * from R where id = 12345"
+$q2: "select * from S where name = 'O''Brien' and age &gt; 40"
+</pre>
+<p>
+Note that you don't need to put quotes around string values; the
+<code>%s</code> slot in the template ensures that this is done for you.
+</p>
+<p>
+Such a function is useful when building queries from user-supplied
+data values; it makes "SQL injection attacks" more difficult by preventing
+users from constructing query strings that do additional operations
+other than the intended query.
+</p><p>
+An example of an SQL injection attack:
+</p><pre>$qry = "select * from R where id = $id";
+$res = dbQuery($db,$qry);
+if ($res) $tup = dbNext($res);
+</pre>
+Consider what query is executed for each of the following values
+of <code>$id</code>
+<pre>$id = "12345;";
+--&gt; "select * from R where id = 12345"
+OR
+$id = "12345; delete from R";
+--&gt; "select * from R where id = 12345; delete from R"
+</pre>
+Because the value is simply interpolated directly into the query
+string,
+the second example runs the query and then wipes out the table.
+The <code>mkSQL</code> function prevents this from happening by
+taking <em>only</em> the numeric part of interpolated value for
+<code>%d</code> data items. Using <code>mkSQL</code> would build
+the query
+<pre>$qry: "select * from R where id = 12345"
+</pre>
+for both cases of <code>$id</code>.
+</dd>
+</dl>
+
+<h4>The Database</h4>
+<p>
+This exercise assumes that you have already installed the database
+for Assignment 2. This is quite simple to do, but you should remove
+your Assignment 1 database first, otherwise you're likely to exceed
+your disk quota for your <tt>/srvr/<i>YOU</i>/</tt> directory:
+</p>
+<pre>$ <b>dropdb a1</b>
+$ <b>createdb a2</b>
+$ <b>psql a2 -f /home/cs3311/web/19s1/assignments/a2.old/a2.db</b>
+<span class="comment" <="" span="">... lots of CREATE TABLE ... ALTER TABLE ... and hopefully no errors ...</span>
+</pre>
+<p>
+If you're working on your home machine, download the compressed
+version to save bandwidth:
+</p>
+<pre>/home/cs3311/web/19s1/assignments/a2.old/a2.db.bz2
+</pre>
+
+<h3>Exercises</h3>
+
+<ol>
+
+<li class="q">
+<p>
+As a simple example of using the <code>db.php</code> library,
+we have written a small script to take a student ID as a command
+line argument, check whether the student exists, extract their
+details from the <code>a2</code> database, and display the
+details on standard output.
+The script is available in the file
+</p><pre><a href="https://www.cse.unsw.edu.au/~cs3311/19s1/pracs/06/sinfo">/home/cs3311/web/19s1/pracs/06/sinfo</a>
+</pre>
+<p></p>
+<p>
+Place a copy of this script in your working directory, making sure
+that the <code>db.php</code> script is also located there, and then
+test it out with some example arguments, e.g.
+</p><pre>$ <b>./sinfo</b>
+Usage: sinfo SID
+$ <b>./sinfo abc</b>
+Usage: sinfo SID
+$ <b>./sinfo 12345</b>
+Invalid SID: 12345
+$ <b>./sinfo 3252201</b>
+SID       : 3252201
+Name      : Mr Christopher Kretschmer
+Email     : z3252201@student.unsw.edu.au
+Gender    : Male
+Origin    : Australia
+$ <b>./sinfo ....</b>
+</pre>
+<p>
+You can find other student ids by taking a look at the <tt>Students</tt>
+and <tt>People</tt> tables using <tt>psql</tt> on the <tt>a2</tt> database.
+</p>
+<p>
+If you get a message that the database is unavailable, check that you are
+(a) logged into grieg with your PostgreSQL server running,
+(b) you have your <code>a2</code> database available,
+(c) you are running the correct version of PHP.
+The following commands will probably give you enough clues to solve most
+problems:
+</p>
+<pre>$ <b>hostname</b>
+$ <b>which php</b>
+$ <b>psql a2</b>
+</pre>
+<p>
+Once the script is behaving as expected,
+take a look at it and make sure that you're clear about how it works.
+Note that the <em>only</em> documentation for the database library is what
+is written above and the source code itself. The above database library does
+not appear in the PHP online manual; however, you will find descriptions of
+the low-level PostgreSQL library (e.g., functions <code>pg_connect</code>,
+<code>pg_query</code>, <code>pg_fetch_array</code> in the
+<a href="http://php.net/manual/en/ref.pgsql.php">PostgreSQL</a> section of the on-line manual).
+</p>
+<div class="note">
+<p>
+If you want to do this lab using a PHP interpreter on your own machine,
+you'll need to change the
+</p>
+<pre>#!/srvr/cs3311psql/lib/php525/bin/php
+</pre>
+<p>
+on the first line of most of the scripts to suit your local setup.
+</p>
+</div>
+
+</li><li class="q">
+<p>
+The queries in Example #1 returned only a single value and a single
+tuple respectively.
+The next example of using the <code>db.php</code> library runs a
+query that returns zero or more tuples, and displays multiple
+results.
+It is a variation on the previous script that takes a family name as
+the first argument and produces a list of details of all students who
+have exactly that family name.
+The script is available in the file:
+</p>
+<pre><a href="https://www.cse.unsw.edu.au/~cs3311/19s1/pracs/06/sfind">/home/cs3311/web/19s1/pracs/06/sfind</a>
+</pre>
+<p>
+Place a copy of this script in your working directory, making sure
+that the <code>db.php</code> script is also located there, and then
+test it out with some example arguments, e.g.
+</p>
+<pre>$ <b>./sfind</b>
+Usage: sfind FamilyName
+$ <b>./sfind 123</b>
+No student matching '123'
+$ <b>./sfind abc</b>
+No student matching 'abc'
+$ <b>./sfind Ryan</b>
+php sfind Ryan
+SID       : 3243162
+Name      : Mr Steve Ryan
+Email     : z3243162@student.unsw.edu.au
+Gender    : Male
+Origin    : Australia
+
+SID       : 3277321
+Name      : Ms Leena Ryan
+Email     : z3277321@student.unsw.edu.au
+Gender    : Female
+Origin    : United Kingdom
+
+SID       : 3381207
+Name      : Ms Heather Ryan
+Email     : z3381207@student.unsw.edu.au
+Gender    : Female
+Origin    : United Kingdom
+
+SID       : 3323803
+Name      : Mr Shaun Ryan
+Email     : z3323803@student.unsw.edu.au
+Gender    : Male
+Origin    : United States
+
+$ <b>./sfind Wang</b>
+<span class="comment">many tuples ...</span>
+</pre>
+<p>
+Take a look at the <tt>sfind</tt> script, and compare it to the
+<code>sinfo</code> script. Make sure that you understand how both
+scripts work before proceeding with the rest of this prac Exercise.
+</p>
+<p>
+The current script is a bit limiting as a
+search tool, since you need to know the exact spelling and case
+of the family name. Modify the script (you only need to change
+the query) so that it does case-insensitive matching, and will
+accept fragments of the family name. For example, "<code>sfind1 mita</code>"
+would match all of the students who have "mita"
+occurring anywhere in their family name, as in:
+</p>
+<pre>$ <b>./sfind1 mita</b>
+SID       : 3209985
+Name      : Mr Piraveen Armitage
+Email     : z3209985@student.unsw.edu.au
+Gender    : Male
+Origin    : Australia
+
+SID       : 3403965
+Name      : Mr Bhumik Mital
+Email     : z3403965@student.unsw.edu.au
+Gender    : Male
+Origin    : India
+
+</pre>
+<p>
+[A <a href="https://www.cse.unsw.edu.au/~cs3311/19s1/pracs/06/sfind1">solution</a>
+is available, but try to find the answer yourself first]
+</p>
+
+</li><li class="q">
+<p>
+Write a PHP script called <code>ts</code> that uses the
+<code>a2</code> database to write academic transcripts
+on the standard output.
+The script accepts a single command-line argument which
+is interpreted as a student ID, and writes its output in
+the following format:
+</p>
+<pre>$ <b>./ts</b>
+Usage: ts SID
+$ <b>./ts 2222333</b>
+Invalid SID: 2222333
+$ <b>./ts 3344687</b>
+Transcript for Bree Kordahi (3344687)
+
+10s1 COMP1917 Computing 1                       61   UF    0
+10s1 INFS1603 Business Databases                65   CR    6
+10s1 MATH1081 Discrete Mathematics              51   PS    6
+10s1 MATH1141 Higher Mathematics 1A             73   CR    6
+10s2 ACCT1501 Accounting &amp; Financial Mgt 1A     66   CR    6
+10s2 COMP1917 Computing 1                       80   DN    6
+10s2 MATH1231 Mathematics 1B                    57   PS    6
+10s2 SENG1031 Software Eng Workshop 1           72   CR    6
+11s1 COMP1927 Computing 2                       70   CR    6
+11s1 COMP2111 System Modelling and Design       73   CR    6
+11s1 ECON1101 Microeconomics 1                  58   PS    6
+11s1 INFS2603 Business Systems Analysis         69   CR    6
+11s1 SENG2010 Software Eng Workshop 2A          79   DN    3
+11s2 COMP2911 Eng. Design in Computing          60   PS    6
+11s2 COMP3711 Software Project Management       82   DN    6
+11s2 MATH2859 Prob, Stats and Information       72   CR    3
+11s2 PHYS1160 Introduction to Astronomy         71   CR    6
+11s2 SENG2020 Software Eng Workshop 2B          81   DN    3
+12s1 COMP2121 Microprocessors &amp; Interfacing     54   PS    6
+12s1 INFS2607 Networking and Infrastructure     56   PS    6
+12s1 SENG3010 Software Eng Workshop 3A          91   HD    3
+12s1 SENG3020 Software Eng Workshop 3B          91   HD    3
+12s1 SENG4921 Professional Issues and Ethics    70   CR    6
+12s2 COMP3171 Object-Oriented Programming       50   PS    6
+12s2 COMP9321 Web Applications Engineering      81   DN    6
+12s2 EDST4080 Special Education                 87   HD    6
+
+$ <b>./ts 3210516</b>
+Transcript for Susan Taualai (3210516)
+
+08s1 EDST1101 Educational Psychology 1          63   PS    6
+08s1 MGMT1001 Managing Organisations&amp;People     57   PS    6
+08s1 POLS1018 Politics, Power, Principle        75   DN    6
+08s1 SPAN1001 Introductory Spanish 1A           43   FL    0
+08s2 AUST1001 Australia                         51   PS    6
+08s2 MGMT1002 Manag. Organisat. Behaviour       66   CR    6
+08s2 POLS1002 Power &amp; Democracy in Australia    57   PS    6
+08s2 WOMS1001 Introduction to Feminism          58   PS    6
+09s1 MGMT1101 Global Business Environment       65   CR    6
+09s1 MGMT2718 Human Resource Management         60   PS    6
+09s1 MGMT2725 Career Planning &amp; Management      80   DN    6
+09s1 POLS2037 International Law                 64   PS    6
+09s2 MGMT3701 Legal Aspects of Employment       67   CR    6
+09s2 MGMT3728 Managing Pay and Performance      84   DN    6
+09s2 POLS2020 Sex, Human Rights &amp; Justice       84   DN    6
+09s2 POLS2039 International Organisation        54   PS    6
+10x1 ARTS2542 Gods, Heroines and Heroes         69   CR    6
+10x1 GENS8200 Workplace Safety and Env Mgmt     81   DN    6
+10s1 ARTS1270 The Big Picture: Intro to Hist    66   CR    6
+10s1 GENL2031 Cyberspace Law                    85   HD    3
+10s1 HUMS3002 Making Histories                  73   CR    6
+10s1 POLS3043 US Hegemony &amp; Intern.Law          67   CR    6
+10s2 ARTS1190 Australian Legends                56   PS    6
+10s2 GENC6002 Marketing and the Consumer        65   CR    3
+10s2 MGMT2705 Industrial Relations              86   HD    6
+10s2 POLS3052 Sovereignty, Order &amp; the State    67   CR    6
+11x1 ARTS2602 Islam in Asia                     68   CR    6
+11x1 HUMS3005 East Asian Values                 65   CR    6
+</pre>
+<p>
+Most of the output fields are obvious. The last column, however, shows
+the number of UC <i>awarded</i> to the student for the corresponding
+course. If they fail, they get zero credit for it, otherwise they get
+the UC associated with the subject.
+</p>
+<p>
+A <a href="https://www.cse.unsw.edu.au/~cs3311/19s1/pracs/06/ts">skeleton</a>
+for this script is available to get you started, and you can find how to
+get the transcript tuples in the solutions to the Exercises.
+</p>
+<p>
+Note that you could solve this quite simply using the PLpgSQL
+<tt>transcript()</tt> function from lectures and small amount
+of PHP code to send the tuples to standard output.
+However, for this exercise we would prefer that you did more
+of the work in PHP, so our SQL template is relatively simple.
+</p>
+<p>
+Some of the transcripts may look a bit strange.
+This is a quirk of our data generation code and the NSS data
+that we have access to. That's life.
+</p>
+<p>
+[A <a href="https://www.cse.unsw.edu.au/~cs3311/19s1/pracs/06/ts1">solution</a>
+is available, but try to work out the answer yourself first]
+</p>
+
+
+</li></ol>
+
+
+
+</tt></body></html>

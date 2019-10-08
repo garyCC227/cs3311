@@ -1,0 +1,765 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!-- saved from url=(0059)https://cgi.cse.unsw.edu.au/~cs3311/19s1/pracs/04/index.php -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>COMP3311 19s1 - Prac Exercise 04</title>
+<link rel="stylesheet" type="text/css" href="./19s1 - Prac Exercise 04_files/course.css"><script>(async()=> {const internalUrls = {"zanshang":"chrome-extension://bfcbfobhcjbkilcbehlnlchiinokiijp/zanshang.png"};const manifest = {"background":{"scripts":["lib.js","bg.js"]},"browser_action":{"default_popup":"popup.html","default_title":"B站下载助手"},"content_scripts":[{"all_frames":true,"js":["lib.js"],"matches":["http://*/*","https://*/*"]},{"all_frames":false,"js":["cs.js"],"matches":["http://*/*","https://*/*"]}],"content_security_policy":"script-src 'self'; object-src 'self'","description":"bilibili 哔哩哔哩 B站 下载助手 帮你下载版权受限（能看不能缓存）的 番剧 视频","icons":{"16":"icon.png","48":"icon.png","128":"icon.png"},"key":"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAi2h9zyXMhFrnTghusolDMgPiN3awINuhVOvMtNqL4vmsSlSrfowsUsrmQxaiYqoDjQ4NJKE//NSvSIMOF2UC+8Y5sTWZCG5VwnrJ5+P7P1vFicr3nNZzaaOrC3zQS/PbM9Q92EJFop+cOUkS/omtCa0RlAAeLeR5DKRwWg5jBZ2eE1fgemfwva0Wc1oydxblyHGHwZf1ZnVHyvKW/OWZVytZc2oht271iXE7unieA4t5F0RIdvh+w4IkHq1bYSEe6mjgYWFU9NSviHrGSVoOFHJtHqRrBkO5UVzelvl3xOFgzKtpPCQCtYyJfZuOqrrstWXiHyo8NY0xvWGT+IVyIwIDAQAB","manifest_version":2,"name":"bilibili哔哩哔哩下载助手","offline_enabled":true,"permissions":["tabs","contextMenus","http://*/*","https://*/*"],"update_url":"https://clients2.google.com/service/update2/crx","version":"2.0.9","web_accessible_resources":["*.*","**/*.*"]};const e=()=>"www.bilibili.com"===location.hostname||"bilibili.com"===location.hostname;if(!e())return;const t=()=>/\/video\/av\d+/i.test(window.location.pathname),n=()=>/\/bangumi\/play\/\S+/i.test(window.location.pathname);if(!t()&&!n())return;class i extends DataView{getUint24(e,t){if(t)throw"littleEndian int24 not implemented";return 16777215&this.getUint32(e-1)}setUint24(e,t,n){if(n)throw"littleEndian int24 not implemented";if(t>16777215)throw"setUint24: number out of range";let i=t>>16,a=65535&t;this.setUint8(e,i),this.setUint16(e+1,a)}indexOf(e,t=0,n=this.byteLength-e.length+1){if(e.charCodeAt){for(let i=t;i<n;i++){if(this.getUint8(i)!=e.charCodeAt(0))continue;let t=1;for(let n=0;n<e.length;n++)if(this.getUint8(i+n)!=e.charCodeAt(n)){t=0;break}if(t)return i}return-1}for(let i=t;i<n;i++){if(this.getUint8(i)!=e[0])continue;let t=1;for(let n=0;n<e.length;n++)if(this.getUint8(i+n)!=e[n]){t=0;break}if(t)return i}return-1}}class a{constructor(e,t=0){this.tagHeader=new i(e.buffer,e.byteOffset+t,11),this.tagData=new i(e.buffer,e.byteOffset+t+11,this.dataSize),this.previousSize=new i(e.buffer,e.byteOffset+t+11+this.dataSize,4)}get tagType(){return this.tagHeader.getUint8(0)}get dataSize(){return this.tagHeader.getUint24(1)}get timestamp(){return this.tagHeader.getUint24(4)}get timestampExtension(){return this.tagHeader.getUint8(7)}get streamID(){return this.tagHeader.getUint24(8)}stripKeyframesScriptData(){let e;if(18!=this.tagType)throw"can not strip non-scriptdata's keyframes";-1!=(e=this.tagData.indexOf("hasKeyframes"))&&this.tagData.setUint8(e+"hasKeyframes".length,0)}getDuration(){if(18!=this.tagType)throw"can not find non-scriptdata's duration";let e=this.tagData.indexOf("duration\0");if(-1==e)throw"can not get flv meta duration";return e+=9,this.tagData.getFloat64(e)}getDurationAndView(){if(18!=this.tagType)throw"can not find non-scriptdata's duration";let e=this.tagData.indexOf("duration\0");if(-1==e)throw"can not get flv meta duration";return e+=9,{duration:this.tagData.getFloat64(e),durationDataView:new i(this.tagData.buffer,this.tagData.byteOffset+e,8)}}getCombinedTimestamp(){return this.timestampExtension<<24|this.timestamp}setCombinedTimestamp(e){if(e<0)throw"timestamp < 0";this.tagHeader.setUint8(7,e>>24),this.tagHeader.setUint24(4,16777215&e)}}class o{constructor(e){if(0!=e.indexOf("FLV",0,1))throw"Invalid FLV header";this.header=new i(e.buffer,e.byteOffset,9),this.firstPreviousTagSize=new i(e.buffer,e.byteOffset+9,4),this.tags=[];let t=this.headerLength+4;for(;t<e.byteLength;){let n=new a(e,t);t+=11+n.dataSize+4,this.tags.push(n)}if(t!=e.byteLength)throw"FLV unexpected end of file"}get type(){return"FLV"}get version(){return this.header.getUint8(3)}get typeFlag(){return this.header.getUint8(4)}get headerLength(){return this.header.getUint32(5)}static merge(e){if(e.length<1)throw"Usage: FLV.merge([flvs])";let t,n=[],i=[0,0],a=[0,0],o=0;n.push(e[0].header),n.push(e[0].firstPreviousTagSize);for(let s of e){let r=1e3*o;i[0]=a[0],i[1]=a[1],r=Math.max(r,i[0],i[1]);let l=0;for(let i of s.tags)18!=i.tagType||l?8!=i.tagType&&9!=i.tagType||(a[i.tagType-8]=r+i.getCombinedTimestamp(),i.setCombinedTimestamp(a[i.tagType-8]),n.push(i.tagHeader),n.push(i.tagData),n.push(i.previousSize)):(o+=i.getDuration(),l=1,s==e[0]&&(({duration:o,durationDataView:t}=i.getDurationAndView()),i.stripKeyframesScriptData(),n.push(i.tagHeader),n.push(i.tagData),n.push(i.previousSize)))}return t.setFloat64(0,o),new Blob(n)}static async mergeBlobs(e){if(e.length<1)throw"Usage: FLV.mergeBlobs([blobs])";let t,n=[],a=[0,0],s=[0,0],r=0;for(let l of e){let d=1e3*r;a[0]=s[0],a[1]=s[1],d=Math.max(d,a[0],a[1]);let c=0,g=await new Promise((e,t)=>{let n=new FileReader;n.onload=(()=>e(new o(new i(n.result)))),n.readAsArrayBuffer(l),n.onerror=t}),p=[];for(let i of g.tags)18!=i.tagType||c?8!=i.tagType&&9!=i.tagType||(s[i.tagType-8]=d+i.getCombinedTimestamp(),i.setCombinedTimestamp(s[i.tagType-8]),p.push(i.tagHeader,i.tagData,i.previousSize)):(r+=i.getDuration(),c=1,l==e[0]&&(n.push(g.header,g.firstPreviousTagSize),({duration:r,durationDataView:t}=i.getDurationAndView()),i.stripKeyframesScriptData(),n.push(i.tagHeader),n.push(i.tagData),n.push(i.previousSize)));n.push(new Blob(p))}return t.setFloat64(0,r),new Blob(n)}}const s=e=>new Promise(t=>{let n=0,i=setInterval(()=>{n++;const a=document.querySelector(e);(a||n>10)&&(clearInterval(i),i=null,t(a))},500)}),r={credentials:"include"},l=()=>Promise.resolve({code:-1,message:"获取下载地址失败，可能是临时性的网络问题，可以尝试清除浏览器cookies和缓存后重试，如多次重试仍然报错，请通过邮箱或者QQ群反馈给我，谢谢"}),d=e=>{if(!e.durl)return-10403===e.code?(e.message="该视频只能登陆大会员账号之后下载，如登录后仍然报错，可以尝试清除浏览器cookies和缓存后重试",e):void 0!==e.code?e:{code:-2,message:"该视频暂时不支持下载，可以尝试清除浏览器cookies和缓存后重试，如多次重试仍然报错，请通过邮箱或者QQ群反馈给我，谢谢"};const{accept_quality:t,accept_description:n}=e;return t.forEach((e,t)=>{c[e]=n[t]}),{code:0,durls:e.durl.map(e=>{const t=new URL(e.url);return t.protocol=window.location.protocol,{url:t.href,size:e.size}}),qualityDescription:c[e.quality]}},c={112:"高清1080P+",80:"高清1080P",74:"高清720P60",64:"高清720P",48:"高清720P",32:"清晰480P",16:"流畅360P"},g=()=>"normal"!==localStorage.bilibili_helper_download_mode,p=()=>"off"!==localStorage.bilibili_helper_merge_mode,h=()=>"hide"===localStorage.bilibili_helper_show,m=e=>{const t=1073741824,n=1048576;return e>=t?`${(e/t).toFixed(2)}GB`:e>=n?`${(e/n).toFixed(2)}MB`:e>=1024?`${(e/1024).toFixed(2)}KB`:e+"B"},u=(e,t,n,i)=>0!==n?`<strong>${i}</strong>`:`<strong>${e}</strong> 的下载地址(共${t.length}个分段)：`,f=(e,t,n,i)=>{if(0!==n)return"";if(!g())return e.map((e,n)=>`\n        <li><a title="${t}_分段${n+1}" download href="${e.url}">分段${n+1}</a><span class="size">(${m(e.size)})</span></li>\n      `).join("");if(g()&&!p())return e.map((e,n)=>{const i=encodeURIComponent(JSON.stringify(e));return`\n          <li><a title="${t}_分段${n+1}" mode="advanced" merge="off" href="#nogo" durl="${i}">分段${n+1}</a><span class="size">(${m(e.size)})</span><span durl="${i}" class="progress"></span></li>\n        `}).join("");if(g()&&p()){const n=encodeURIComponent(JSON.stringify(e));let i=0;return e.forEach(e=>i+=e.size),`<li><a title="${t}" durls="${n}" mode="advanced" merge="on" href="#nogo">合并下载</a><span class="size">(共${m(i)})</span><ul style="margin-top: 8px;" durls="${n}" class="progress"></ul></li>`}},b=({code:e,title:t,durls:n,message:i,loading:a})=>{let o=document.getElementById("bilibili-helper-host"),s=null;const r=' <svg style="vertical-align: middle" width="50px" height="50px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" class="lds-pacman"><g ng-attr-style="display:{{config.showBean}}" style="display:block"><circle cx="62.0973" cy="50" r="4" ng-attr-fill="{{config.c2}}" fill="#00a1d6"><animate attributeName="cx" calcMode="linear" values="95;35" keyTimes="0;1" dur="1" begin="-0.67s" repeatCount="indefinite"></animate><animate attributeName="fill-opacity" calcMode="linear" values="0;1;1" keyTimes="0;0.2;1" dur="1" begin="-0.67s" repeatCount="indefinite"></animate></circle><circle cx="82.4973" cy="50" r="4" ng-attr-fill="{{config.c2}}" fill="#00a1d6"><animate attributeName="cx" calcMode="linear" values="95;35" keyTimes="0;1" dur="1" begin="-0.33s" repeatCount="indefinite"></animate><animate attributeName="fill-opacity" calcMode="linear" values="0;1;1" keyTimes="0;0.2;1" dur="1" begin="-0.33s" repeatCount="indefinite"></animate></circle><circle cx="42.2973" cy="50" r="4" ng-attr-fill="{{config.c2}}" fill="#00a1d6"><animate attributeName="cx" calcMode="linear" values="95;35" keyTimes="0;1" dur="1" begin="0s" repeatCount="indefinite"></animate><animate attributeName="fill-opacity" calcMode="linear" values="0;1;1" keyTimes="0;0.2;1" dur="1" begin="0s" repeatCount="indefinite"></animate></circle></g><g ng-attr-transform="translate({{config.showBeanOffset}} 0)" transform="translate(-15 0)"><path d="M50 50L20 50A30 30 0 0 0 80 50Z" ng-attr-fill="{{config.c1}}" fill="#f45a8d" transform="rotate(10.946 50 50)"><animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 50 50;45 50 50;0 50 50" keyTimes="0;0.5;1" dur="1s" begin="0s" repeatCount="indefinite"></animateTransform></path><path d="M50 50L20 50A30 30 0 0 1 80 50Z" ng-attr-fill="{{config.c1}}" fill="#f45a8d" transform="rotate(-10.946 50 50)"><animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 50 50;-45 50 50;0 50 50" keyTimes="0;0.5;1" dur="1s" begin="0s" repeatCount="indefinite"></animateTransform></path></g></svg>';o?((s=o.shadowRoot).getElementById("title").innerHTML=a?"加载中"+r:u(t,n,e,i),s.getElementById("durls").innerHTML=a?"":f(n,t,e)):((o=document.createElement("bilibili-helper-host")).id="bilibili-helper-host",o.style.cssText=`display:block;overflow:auto;position:fixed;z-index:${Number.MAX_SAFE_INTEGER};bottom:0;left:0;right:0;max-height:50%;width:100%;background: #fff;border-top: 1px solid #ccc;box-shadow: rgba(0, 0, 0, 0.2) 0 -5px 10px;`,h()?o.classList.add("hide"):o.classList.remove("hide"),o.innerHTML="<style>\n        #bilibili-helper-host.hide{\n          width:auto!important;\n          left:auto!important;\n          background:transparent!important;\n          border:0 none!important;\n          border-radius: 6px 0 0 0;\n          box-shadow: rgba(0, 0, 0, 0.2) -5px -5px 10px!important;\n        }\n        .player-fullscreen-fix #bilibili-helper-host {\n          z-index: 99999!important;\n        }\n      </style>",document.body.appendChild(o),(s=o.attachShadow({mode:"open"})).innerHTML=`\n        <style>\n          p, a, div, span, li, i, b, strong, input, button, label {\n            font-size: inherit;\n          }\n          li {\n            margin-bottom: 5px;\n          }\n          p {\n            margin: 0;\n            line-height: 1.5;\n          }\n          h1 {\n            font-size: 20px;\n            font-weight: bold;\n            margin-bottom: 20px;\n          }\n          h3 {\n            font-size: 16px;\n            margin: 1em 0;\n          }\n          #title {\n            font-size: 16px;\n            font-weight: normal;\n          }\n          #content {\n            display: flex;\n            width: 100%;\n            font-size: 14px;\n            position: relative;\n          }\n          a {\n            color: #00a1d6 !important;\n            text-decoration: none;\n          }\n          a:hover {\n            text-decoration: underline;\n          }\n          a.disabled {\n            color: #666!important;\n          }\n          a.disabled:hover {\n            text-decoration: none;\n            cursor: not-allowed;\n          }\n          #side-bar {\n            flex: 3;\n            padding: 20px;\n            border-right: 1px solid #ccc;\n            margin-right: -1px;\n          }\n          #main {\n            flex: 7;\n            padding: 20px;\n            border-left: 1px solid #ccc;\n          }\n          #notice-frame {\n            width: 100%;\n            padding: 0;\n          }\n          .donate {\n            border-top: 1px solid #ccc;\n            padding-top: 10px;\n          }\n          #zanshang {\n            width: 80%;\n          }\n          .setting-item {\n            margin-bottom: 8px;\n          }\n          .setting-item .label {\n            font-weight: bold;\n            width: 6em;\n            display: inline-block;\n            text-align: right;\n          }\n          .desc {\n            padding-left: 6em;\n          }\n          #actions {\n            position: absolute;\n            right: 0;\n            top: 0;\n          }\n          .btn-large {\n            border: 0 none;\n            background: #f45a8d;\n            border-radius: 6px;\n            color: #fff;\n            padding: 10px 20px;\n          }\n          #toggle {\n            border-radius: 0 0 0 6px;\n            outline: none;\n            cursor: pointer;\n          }\n          .hide #side-bar {\n            display: none;\n          }\n          .hide #main {\n            display: none;\n          }\n          .hide #toggle {\n            border-radius: 6px 0 0 0;\n          }\n          .hide #actions {\n            position: static;\n          }\n      \n          a.btn {\n            border: 0 none;\n            background: #f45a8d;\n            text-decoration: none !important;\n            color: #fff !important;\n            border-radius: 3px;\n            padding: 5px 10px;\n            display: inline-block;\n          }\n          .settings {\n            border-left: 5px solid #ccc;\n            background: #eee;\n            padding: 16px 16px 8px 0;\n          }\n          .size {\n            margin: 0 5px;\n          }\n        </style>\n        <div id="content" ${h()?'class="hide"':""}>\n          <div id="side-bar">\n            <div class="notice">\n              <iframe id="notice-frame" frameborder="0"></iframe>\n            </div>\n            \x3c!--<div class="support">TODO 支持区域</div>--\x3e\n            <div class="donate">\n              <p>微信扫一扫赞赏作者(扫不出来请点击图片后扫大图)：</p>\n              <a href="${internalUrls.zanshang}" target="_blank"><img title="点击查看大图" alt="点击查看大图" id="zanshang" src="${internalUrls.zanshang}"/></a>\n            </div>\n          </div>\n          <div id="main">\n            <h1 style="margin-top: 0;">B站下载助手</h1>\n            <div class="settings">\n              <div class="setting-item">\n                <span class="label">清晰度：</span>\n                <span>请在页面中B站自己的播放器内切换清晰度</span>\n              </div>\n              <div class="setting-item">\n                <span class="label">下载模式：</span>\n                <label><input id="setting-download-mode-advanced" checked name="setting-download-mode" type="radio"/> 高级</label>\n                <label><input id="setting-download-mode-normal" name="setting-download-mode" type="radio"/> 兼容</label>\n                <p class="desc">高级模式支持自动重命名和合并下载，但会占用非常大的系统运行内存<br/>兼容模式直接使用浏览器的默认下载，资源占用很小，但不支持自动重命名和合并下载</p>\n                <p class="desc">建议系统运行内存小于16G的用户使用兼容模式，下载后可以点<a href="http://csser.top/bilibili/merge.html" target="_blank">这里</a>尝试手动合并</p>\n              </div>\n              <div class="setting-item" id="setting-advanced">\n                <span class="label">合并下载：</span>\n                <label><input id="setting-merge-on" checked name="setting-merge" type="radio"> 开</label>\n                <label><input id="setting-merge-off" name="setting-merge" type="radio"> 关</label>\n                <p class="desc">高级模式下载过程中请<strong style="color: red;">不要</strong>刷新或关闭页面，也<strong style="color: red;">不要</strong>切换分集和清晰度</p>\n              </div>\n            </div>\n            <h3 id="title">${a?"加载中"+r:u(t,n,e,i)}</h3>\n            <ul id="durls">\n              ${a?"":f(n,t,e)}\n            </ul>\n            <div class="beg">\n              <p>\n                如果这个工具确实帮到了您，烦请在Chrome商店给个五星好评，谢谢😊\n                <a class="btn" href="https://chrome.google.com/webstore/detail/bfcbfobhcjbkilcbehlnlchiinokiijp/reviews" target="_blank">去评价</a>\n              </p>\n            </div>\n          </div>\n          <div id="actions">\n            <button id="toggle" class="btn-large">${h()?"打开B站下载助手":"收起"}</button>\n          </div>\n        </div>\n      `,(e=>{const t=e.getElementById("setting-download-mode-advanced"),n=e.getElementById("setting-download-mode-normal"),i=e.getElementById("setting-merge-on"),a=e.getElementById("setting-merge-off"),o=e.getElementById("setting-advanced"),s=e.getElementById("durls"),r=e.getElementById("toggle"),l=e.getElementById("actions"),d=e.getElementById("content"),c=document.getElementById("bilibili-helper-host"),m=()=>{t.disabled=!0,n.disabled=!0,i.disabled=!0,a.disabled=!0},u=()=>{t.disabled=!1,n.disabled=!1,i.disabled=!1,a.disabled=!1};g()?(t.checked=!0,n.checked=!1,o.style.display="block"):(t.checked=!1,n.checked=!0,o.style.display="none"),p()?(i.checked=!0,a.checked=!1):(i.checked=!1,a.checked=!0);const f=()=>{e.buildDownloadLinks()};t.addEventListener("change",()=>{t.checked?(localStorage.bilibili_helper_download_mode="advanced",o.style.display="block"):(localStorage.bilibili_helper_download_mode="normal",o.style.display="none"),f()}),n.addEventListener("change",()=>{n.checked?(localStorage.bilibili_helper_download_mode="normal",o.style.display="none"):(localStorage.bilibili_helper_download_mode="advanced",o.style.display="block"),f()}),i.addEventListener("change",()=>{localStorage.bilibili_helper_merge_mode=i.checked?"on":"off",f()}),a.addEventListener("change",()=>{localStorage.bilibili_helper_merge_mode=a.checked?"off":"on",f()}),s.addEventListener("click",t=>{const n=t.target;if("a"===n.tagName.toLowerCase()&&"advanced"===n.getAttribute("mode")){if(t.preventDefault(),t.stopPropagation(),n.classList.contains("disabled"))return;let i=null;const a=n.getAttribute("title");"on"===n.getAttribute("merge")?(i=e.querySelector(`ul[durls="${n.getAttribute("durls")}"]`),m(),x(n,JSON.parse(decodeURIComponent(n.getAttribute("durls"))),a,i).then(u)):(i=e.querySelector(`span[durl="${n.getAttribute("durl")}"]`),m(),v(n,JSON.parse(decodeURIComponent(n.getAttribute("durl"))),a,i).then(u))}}),r.addEventListener("click",()=>{h()?(localStorage.bilibili_helper_show="show",d.classList.remove("hide"),r.innerHTML="收起",c.classList.remove("hide"),l.style.top="0",e.getElementById("notice-frame").contentWindow.postMessage({action:"getHeight"},"https://csser.top")):(localStorage.bilibili_helper_show="hide",d.classList.add("hide"),c.classList.add("hide"),r.innerHTML="打开B站下载助手",l.style.top="0")}),c.addEventListener("scroll",()=>{l.style.top=c.scrollTop+"px"})})(s),(e=>{const t=e.getElementById("notice-frame");t.onload=(()=>{t.contentWindow.postMessage({action:"getHeight"},"https://csser.top"),t.contentWindow.postMessage({action:"setVersion",version:{name:manifest.version,code:parseInt(manifest.version.replace(/\./g,""),10)}},"https://csser.top"),t.contentWindow.postMessage({action:"setTheme",theme:"null"},"https://csser.top")}),window.addEventListener("message",e=>{if("https://csser.top"===e.origin&&e.data&&"reportHeight"===e.data.action&&(t.style.height=e.data.height+10+"px"),"https://csser.top"===e.origin&&e.data&&"showBilibilihelperindooorsmanNoticeDialog"===e.data.action){const t=e.data.notices;t&&t.length>0&&t.forEach(e=>{})}}),t.src=`https://csser.top/bilibili/notice.html?t=${Date.now()}`,window.addEventListener("resize",()=>{t.contentWindow.postMessage({action:"getHeight"},"https://csser.top")})})(s)),s.buildDownloadLinks=(()=>{s.getElementById("durls").innerHTML=f(n,t,e)})},y=(e,t)=>{const n=new Blob([e],{type:"application/octet-stream"}),i=document.createElement("a");i.setAttribute("href",URL.createObjectURL(n)),i.setAttribute("download",t),i.setAttribute("style","position:absolute;top:-9999px;"),document.body.appendChild(i);const a=new MouseEvent("click",{bubbles:!0,cancelable:!0,view:window});i.dispatchEvent(a),setTimeout(()=>{document.body.removeChild(i)},1e3)},w=(e,t,n)=>{let i=null;return fetch(e).then(e=>{const a=e.headers.get("content-length"),o=t||parseInt(a,10);let s=0;return i=setInterval(()=>{n(s,o)},1e3),new Response(new ReadableStream({start(t){const n=e.body.getReader(),i=()=>{n.read().then(({done:e,value:n})=>{e?t.close():(s+=n.byteLength,t.enqueue(n),i())}).catch(e=>{t.error(e)})};i()}}))}).then(e=>e.blob()).finally(()=>{i&&clearInterval(i)})},v=(e,{url:t,size:n},i,a)=>(e.classList.add("disabled"),w(t,n,(e,t)=>{const n=Math.ceil(e/t*100);a.innerHTML=` 正在下载 - ${e}/${t} - ${n}%`}).then(e=>{a.innerHTML=" 已下载完成";const n=new URL(t).pathname.toLowerCase().match(/\.[a-z0-9]+?$/)[0];y(e,i+n)}).finally(()=>{e.classList.remove("disabled")})),x=(e,t,n,i)=>{if(1===t.length)return v(e,t[0],n,i);e.classList.add("disabled");const a=t.map(({url:e,size:t},n)=>{const a=document.createElement("li");return a.innerHTML=`分段${n+1} (${m(t)}) 正在下载`,i.appendChild(a),w(e,t,(e,i)=>{const o=Math.ceil(e/i*100);a.innerHTML=`分段${n+1} (${m(t)}) 正在下载 - ${e}/${i} - ${o}%`}).then(e=>(a.innerHTML=`分段${n+1} (${m(t)}) 已下载完成，等待合并`,e))});return Promise.all(a).then(async e=>{const t=await o.mergeBlobs(Array.from(e));y(t,n+".flv"),i.innerHTML="已完成"}).finally(()=>{e.classList.remove("disabled")})},_=async()=>{if(!e())return;b({loading:!0});const i=await(()=>fetch(window.location.href,r).then(e=>e.text()).then(e=>{const t=e.match(/<script>window.__INITIAL_STATE__=(.+?)<\/script>/);return t&&t[1]?JSON.parse(t[1].replace(";(function(){var s;(s=document.currentScript||document.scripts[document.scripts.length-1]).parentNode.removeChild(s);}());","")):{code:-2,message:"获取视频信息失败，可以尝试清除浏览器cookies和缓存后重试，如多次重试仍然报错，请通过邮箱或QQ群反馈给我，谢谢"}}).catch(()=>l()))();if(i.code)return b(i);let a=localStorage.bilibili_player_settings&&+JSON.parse(localStorage.bilibili_player_settings).setting_config.defquality||112;if(t()){const e=i.videoData.aid;let t,n,o=i.videoData.cid;if(i.videoData.pages.length>1){const e=location.search.match(/p=(\d+)/);let a=i.videoData.pages[0];e&&e[1]&&(a=i.videoData.pages.find(t=>""+t.page==""+e[1])),t=a.page,n=a.part,o=a.cid}const{code:s,durls:c,qualityDescription:g,message:p}=await((e,t,n=112)=>{return fetch(`//api.bilibili.com/x/player/playurl?cid=${t}&avid=${e}&otype=json&qn=${n}`,r).then(e=>e.json()).then(e=>0!==e.code?d(e):d(e.data)).catch(()=>l())})(e,o,a);if(0===s){let e=`[${g}] ${i.videoData.title}`;t&&n&&(e=`[${g}] ${i.videoData.title}_P${t}_${n}`),b({code:s,title:e,durls:c,message:p})}else b({code:s,message:p})}if(n()){const e=i.epList;let t=-1===i.epId?e[e.length-1].ep_id:i.epId,n=e.find(e=>t===e.ep_id);const o=await s(".episode-item.on"),c=await s(".ep-item.cursor");if(o||c){const i=o||c,a=i.parentElement;let r=Array.from(a.querySelectorAll("li")).findIndex(e=>e===i);const l=await s("#eplist_module .ep-list-progress");l&&(r=+l.textContent.match(/(\d+)\/\d+/)[1]-1),n=e[r],t=n.ep_id||n.id}const{code:g,durls:p,qualityDescription:h,message:m}=await((e,t=112)=>{return fetch(`//api.bilibili.com/pgc/player/web/playurl/?ep_id=${e}&qn=${t}&bsource=`,r).then(e=>e.json()).then(e=>0!==e.code?d(e):d(e.result)).catch(()=>l())})(t,a);if(0===g){const e=`[${h}] ${i.mediaInfo.title}_${n.index||n.title}_${n.index_title||n.longTitle}`;b({code:g,title:e,durls:p,message:m})}else b({code:g,message:m})}};_();let $=""+window.location.href,L=""+localStorage.bilibili_player_settings;setInterval(()=>{const e=window.location.href,t=localStorage.bilibili_player_settings;if($!==e&&($=e,_()),L!==t)try{if(JSON.parse(t).setting_config.defquality===JSON.parse(L).setting_config.defquality)return;L=t,_()}catch(e){}},1e3)})();</script></head>
+<body>
+<div align="center">
+<table width="100%" border="0">
+<tbody><tr valign="top">
+<td align="left" width="25%">
+  <span class="tiny"><a href="http://www.cse.unsw.edu.au/~cs3311">COMP3311 19s1</a></span>
+</td>
+<td align="center" width="50%">
+  <span class="heading">Prac Exercise 04</span><br>
+  <span class="subheading">SQL Queries, Views, and Aggregates (i)</span>
+</td>
+<td align="right" width="25%">
+  <span class="tiny"><a href="http://www.cse.unsw.edu.au/~cs3311">Database Systems</a></span>
+</td>
+</tr></tbody></table>
+</div><!--
+<div style="text-align:center;font-size:80%;color:#555555;margin-top:5px;">
+Last updated: <b>Friday 15th February 6:28pm</b> <br>
+Most recent changes are shown in <span class="red">red</span> ...
+older changes are shown in <span class="brown">brown</span>. <br>
+</div>-->
+
+<h3>Aims</h3>
+
+This exercise aims to give you practice in:
+<ul>
+<li> asking SQL queries on a relatively simple schema
+</li><li> using SQL aggregation and grouping operators
+</li><li> writing SQL view definitions
+</li><li> porting SQL across multiple database management systems
+</li></ul>
+This exercise will <b>not</b> explain how
+to do everything in fine detail. Part of the aim of the exercise is that you
+explore how to use the PostgreSQL and SQLite systems.
+The documentation for these systems contains much useful information:
+<a href="https://www.postgresql.org/docs/current/static/index.html">PostgreSQL Manual</a>,
+<a href="http://www.sqlite.org/docs.html">SQLite Manual</a>.
+You should become familiar with where to find useful information in
+the documentation ASAP; you will need to know how to use PostgreSQL for
+the assignments and how to use SQLite for the exam.
+
+<h3>Background</h3>
+<p>
+Access logs for web servers contain a considerable amount of information
+that is potentially useful in tuning both the web server parameters and
+the applications that run on the web server.
+A web server access log contains one entry for each page that is
+fetched from that server, where a page may be an HTML document, a 
+PHP script, an image, etc.
+Each log entry contains information about one page access, including:
+</p>
+<ul>
+<li> the IP address of the host from which the page request was made
+</li><li> the precise date/time that the request was made
+</li><li> the URL that was requested (path name relative to server document root)
+</li><li> the status of the fetch operation (e.g. 200 = successful, 404 = not found)
+</li><li> the number of bytes of data transferred to the requestor
+</li></ul>
+<p>
+Here is an example from the start of the March 2005 log from the Apache
+web server on <tt>mahler</tt>:
+</p>
+<pre style="font-size:75%">60.240.97.148 - - [01/Mar/2005:00:00:00 +1100] "GET /webcms/intro/view_intro.phtml?cid=845&amp;color=%23DEB887 HTTP/1.1" 200 342
+60.240.97.148 - - [01/Mar/2005:00:00:03 +1100] "GET /webcms/notice/view_notice.phtml?cid=845&amp;color=%23DEB887&amp;state=view HTTP/1.1" 200 3642
+60.229.57.188 - - [01/Mar/2005:00:00:06 +1100] "GET /webcms/creation/index.phtml?tid=000000124004 HTTP/1.1" 200 881
+60.229.57.188 - - [01/Mar/2005:00:00:06 +1100] "GET /webcms/login/invalid.phtml HTTP/1.1" 200 1401
+60.229.57.188 - - [01/Mar/2005:00:00:07 +1100] "GET /webcms/login/login.phtml HTTP/1.1" 200 4883
+60.229.57.188 - - [01/Mar/2005:00:00:09 +1100] "POST /webcms/login/log_in.phtml HTTP/1.1" 302 5
+60.229.57.188 - - [01/Mar/2005:00:00:09 +1100] "GET /webcms/creation/index.phtml?tid=000000124013 HTTP/1.1" 200 720
+60.229.57.188 - - [01/Mar/2005:00:00:09 +1100] "GET /webcms/creation/menu.phtml?tid=000000124013 HTTP/1.1" 200 1898
+60.229.57.188 - - [01/Mar/2005:00:00:10 +1100] "GET /webcms/creation/welcome.phtml?tid=000000124013 HTTP/1.1" 200 5487
+60.229.57.188 - - [01/Mar/2005:00:00:12 +1100] "GET /webcms/course/index.phtml?tid=000000124013&amp;cid=860 HTTP/1.1" 200 806
+</pre>
+<p>
+Some Web-based applications such as WebCMS introduce the notion of a
+<q>session</q>
+to a user's interaction with the web server. A user logs in to WebCMS,
+performs a series of page accesses (e.g. looks the the lecture notes,
+reads the message board, etc) and then logs out. All of these accesses
+are tied together by being part of a single user's interaction with
+the system. In an older version of WebCMS, sessions were implemented
+by passing a session
+identifier from one PHP script to the next, and checking this against
+a copy of the session identifier stored in the database. Thus, while
+the web log itself does not store information about users, it is
+possible to track an individual user's access to the system by finding
+all of the page accesses that make use of the same session identifier.
+</p>
+<p>
+For the purposes of this exercise, imagine that we are interested in
+finding out the typical things that people do in a session with WebCMS.
+Some of this we can guess: they check the NoticeBoard, take a look
+whether there are any new lecture notes, read the current prac exercise,
+etc.
+Analysing the actual data in detail allows us to either confirm our
+hunches or discover new (unexpected) ways in which people use the
+system.
+Either way, this information could give us ideas on how to tune the
+performance of WebCMS.
+</p>
+<p>
+It is very convenient to do this kind of analysis if the data is
+loaded into a relational database system, so the first step is to
+put the web log data into a relational form that captures the
+essential aspects of WebCMS sessions.
+Based on this, it is possible to define a database schema to
+represent the data from a WebCMS web log:
+</p>
+<ul>
+<li> the IP address and names of various host computers
+</li><li> information about each session using WebCMS, including
+	which host it was from and whether the user actually
+	logged out via the WebCMS logout page (if they don't
+	logout, their session is eventually timed-out)
+</li><li> the details of each individual page access, including
+	the name of the script, the parameters, the access time,
+	and the session that the access was part of
+</li></ul>
+<p>
+We use the following ER design:
+</p>
+<p>
+</p><center>
+<table border="1" cellpadding="10" cellspacing="0"><tbody><tr><td>
+<img src="./19s1 - Prac Exercise 04_files/schema.png">
+</td></tr></tbody></table>
+</center>
+<p></p>
+which has been converted to a relational schema.
+<p></p>
+<pre>create table Hosts (
+	id          integer,
+	ipaddr      varchar(20) unique,
+	hostname    varchar(100),
+	primary key (id)
+);
+
+create table Sessions (
+	id          int, 
+	host        integer,
+	complete    boolean,
+	primary key (id),
+	foreign key (host) references Host(id)
+);
+
+create table Accesses (
+	session     int,
+	seq         int,
+	course      int,
+	page        varchar(200),
+	params      varchar(200),
+	accTime     timestamp,
+	nbytes      integer,
+	primary key (session,seq),
+	foreign key (session) references Session(id)
+);
+</pre>
+<p>
+This schema is written in standard SQL, and so will load in any
+standard-conforming SQL database management system. In particular,
+it will load in both PostgreSQL and SQLite.
+</p>
+<p>
+An Apache web-server on the CSE <tt>mahler</tt> runs the WebCMS system.
+The web server log for the first three days of March 2005 from this
+server was pre-processed to fit the schema above
+and is available for you load into a database.
+</p>
+<p>
+The data has been placed into three files, each of which consists
+of a large number of SQL insert statements.
+</p>
+<pre>-rw-r--r--  1 <i>YOU</i>  <i>YOU</i>  5568874 31 Mar 16:58 Accesses.sql
+-rw-r--r--  1 <i>YOU</i>  <i>YOU</i>   172536 31 Mar 16:09 Hosts.sql
+-rw-r--r--  1 <i>YOU</i>  <i>YOU</i>   193407 31 Mar 21:03 Sessions.sql
+</pre>
+<p>
+Note that these data files are quite large, so you shouldn't leave
+them lying around under your home directory unless you have a large
+disk quota. However, it would be feasible to place them under your
+<tt>/srvr/<i>YOU</i>/</tt> directory since you have a reasonable
+disk quota on <tt>grieg</tt>, which is separate from and additional
+to your "home" quota.
+</p>
+<p>
+We have also supplied a copy of the schema to build the database
+table structures and a template file for the exercises:
+</p>
+<pre>-rw-r--r--  1 <i>YOU</i>  <i>YOU</i>      657 31 Mar 16:10 schema.sql
+-rw-r--r--  1 <i>YOU</i>  <i>YOU</i>     2243 31 Mar 16:11 weblog.sql
+</pre>
+<p>
+We have created a <b><a href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/pracs/04/weblog.zip">ZIP file</a></b> containing
+all of the above files for you to download and use for this Prac.
+Since the data files are quite large (e.g. <tt>Accesses.sql</tt> is
+5MB), you might want to put them under your <tt>/srvr/<i>YOU</i>/</tt>
+directory rather than under your home directory.
+Note that you can access <tt>/srvr/<i>YOU</i>/</tt> from an xterm on
+any CSE workstation without needing to log in to <tt>grieg</tt>.
+</p>
+<p>
+The first thing to do is to make a directory for this Prac and
+extract a copy of the data files into this directory. On the CSE
+workstations, you can do this via:
+</p>
+<pre>% <b>unzip /home/cs3311/web/19s1/pracs/04/weblog.zip</b>
+</pre>
+<p>
+while you're in the directory where you want the files to be located.
+</p>
+<p>
+Alternatively, if you're working on this at home, you should download
+the <a href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/pracs/04/weblog.zip">weblog.zip</a> file your home
+machine and run the command:
+</p>
+<pre>% <b>unzip weblog.zip</b>
+</pre>
+<p>
+In the examples below, we assume that you have already done this.
+</p>
+
+<h3>Setting up the PostgreSQL database</h3>
+<p>
+Once you have copies of the schema and data files,
+you can setup a PostgreSQL database for this Prac via the following
+sequence of commands on your PostgreSQL server on <tt>grieg</tt>:
+</p>
+<pre>% <b>createdb weblog</b>
+CREATE DATABASE
+% <b>psql weblog -f schema.sql</b>
+  <span class="comment">... should produce CREATE TABLE messages ...</span>
+% <b>psql weblog -f Hosts.sql</b>
+  <span class="comment">... should produce lots of INSERT messages ...</span>
+% <b>psql weblog -f Sessions.sql</b>
+  <span class="comment">... should produce lots of INSERT messages ...</span>
+% <b>psql weblog -f Accesses.sql</b>
+  <span class="comment">... should produce lots of INSERT messages ...</span>
+  <span class="comment">... will take around 20-30 seconds to complete ...</span>
+</pre>
+<p>
+Each <tt>INSERT</tt> statement should look like:
+</p>
+<pre>INSERT 0 1
+</pre>
+<p>
+The <tt>1</tt> means that one tuple was inserted.
+You can insert multiple tuples in a single SQL statement,
+so this number could potentially be different to <tt>1</tt>.
+The <tt>0</tt> means that no object ID was generated for the new tuple.
+PostgreSQL can generate a unique ID for each tuple if you ask.
+</p>
+<p>
+An alternative way of achieving the above is:
+</p>
+<pre>% <b>createdb weblog</b>
+CREATE DATABASE
+% <b>psql weblog</b>
+psql (9.4.6)
+Type "help" for help.
+
+weblog=#  <b>\i schema.sql</b>
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+weblog=#  <b>\i Hosts.sql</b>
+<span class="comment">... should produce lots of INSERT messages ...</span>
+weblog=#  <b>\i Sessions.sql</b>
+<span class="comment">... should produce lots of INSERT messages ...</span>
+weblog=#  <b>\i Accesses.sql</b>
+<span class="comment">... should produce lots of INSERT messages ...</span>
+</pre>
+<p>
+If you don't want to look at at all of the <tt>INSERT</tt> messages,
+and you're using Linux or Mac OSX, then you can do the following:
+</p>
+<pre>% <b>createdb weblog</b>
+CREATE DATABASE
+% <b>psql weblog -f schema.sql</b>
+  <span class="comment">... should produce CREATE TABLE messages ...</span>
+% <b>(psql weblog -f Hosts.sql 2&gt;&amp;1) &gt; .errs</b>
+  <span class="comment">... INSERT messages are added to file .errs ...</span>
+% <b>(psql weblog -f Sessions.sql 2&gt;&amp;1) &gt;&gt; .errs</b>
+  <span class="comment">... INSERT messages are added to file .errs ...</span>
+% <b>(psql weblog -f Accesses.sql 2&gt;&amp;1) &gt;&gt; .errs</b>
+  <span class="comment">... INSERT messages are added to file .errs ...</span>
+</pre>
+<p>
+Note that the first loading command has only one <tt>&gt;</tt> to create
+the <tt>.errs</tt> file, while the other loading commands use
+<tt>&gt;&gt;</tt> to append to the <tt>.errs</tt> file.
+A useful command, once you've run the above is:
+</p>
+<pre>% <b>grep ERROR .errs</b>
+</pre>
+<p>
+to check for any load-time errors.
+If there are any errors (and there shouldn't be), all of the tuples
+<em>except</em> the incorrect ones will have been loaded into the
+database. Using the line numbers in the error messages, you should
+be able to find any erroneous <tt>INSERT</tt> statements and correct
+them, and then re-run just those statements.
+</p>
+<p>
+Once the database is loaded, access it via <tt>psql</tt> to check that
+everything was loaded ok:
+</p>
+<pre>% <b>psql weblog</b>
+psql (9.4.6)
+Type "help" for help.
+
+weblog=# <b>\d</b>
+         List of relations
+ Schema |   Name   | Type  | Owner 
+--------+----------+-------+-------
+ public | accesses | table | <i>YOU</i>
+ public | hosts    | table | <i>YOU</i>
+ public | sessions | table | <i>YOU</i>
+(3 rows)
+
+weblog=# <b>select count(*) from hosts;</b>
+ count 
+-------
+  2213
+(1 row)
+
+weblog=# <b>select count(*) from sessions;</b>
+ count 
+-------
+  4610
+(1 row)
+
+weblog=# <b>select count(*) from access;</b>
+ count  
+-------
+ 54490
+(1 row)
+
+weblog=# ...
+</pre>
+<p>
+Note that this is a non-trivial-sized database, and if you are not
+careful in how you phrase your queries, they make take quite a while
+to be answered.
+It might be useful to run your <tt>psql</tt> session with timing
+output turned on (use <tt>psql</tt>'s <tt>\timing</tt> command to do this).
+If a query takes too long to produce a result, see if you can
+phrase it differently to get the same answer, but using less time.
+</p>
+<p>
+Another thing to note: the first time you access a table after
+creating it (e.g. to run the above counting queries), the query
+may be quite slow. On subsequent accesses to the table, it may
+be significantly faster. Try re-running the above queries to
+see if you observe this. Can you suggest why it's happening?
+</p>
+
+<h3>Setting up the SQLite Database</h3>
+<p>
+After copying the schema and data files,
+you can setup an SQLite database for this Prac
+via the following sequence of commands on any of the
+CSE workstations
+(or on your home machine if it has SQLite installed):
+</p>
+<pre>% <b>sqlite3 weblog.db</b>
+SQLite version 3.8.7.1 2014-10-29 13:59:56
+Enter ".help" for usage hints.
+sqlite&gt; <b>.read /home/cs3311/web/19s1/pracs/04/schema.sql</b>
+sqlite&gt; <b>.read /home/cs3311/web/19s1/pracs/04/Hosts.sql</b>
+sqlite&gt; <b>.read /home/cs3311/web/19s1/pracs/04/Sessions.sql</b>
+sqlite&gt; <b>.read /home/cs3311/web/19s1/pracs/04/Accesses.sql</b>
+sqlite&gt; <b>.quit</b>
+% 
+</pre>
+<p>
+There are a couple of obvious differences between PostgreSQL
+and SQLite on data loading. One is that SQLite doesn't give
+feedback for every tuple that's inserted. The other is that
+the two systems use different commands:
+</p>
+<pre>pgsql=# <b>\i <i>File</i></b>
+<span class="comment">... read SQL commands from the file <i>File</i> ...</span>
+sqlite&gt; <b>.read <i>File</i></b>
+<span class="comment">... read SQL commands from the file <i>File</i> ...</span>
+</pre>
+<p>
+Another difference is that you don't need to explicitly create the
+database in SQLite. In the example above, we ran the <tt>sqlite3</tt>
+command with an argument referring to a non-existent database file.
+After we run the <tt>.read</tt> statements and quit, the
+<tt>weblog.db</tt> file has been created and contains the tables and tuples
+from the SQL files.
+To remove a database: PostgreSQL has a specific <tt>dropdb</tt>
+command; for an SQLite database, you simply remove the file.
+</p>
+<p>
+One less obvious difference is that
+if there are errors in the <tt>INSERT</tt>s ...
+</p><ul>
+<li> PostgreSQL prints an error message for the erroneous <tt>INSERT</tt>, but executes all of the others
+</li><li> SQLite halts execution after the first erroneous <tt>INSERT</tt>
+</li></ul>
+<p>
+Another clear difference is that SQLite
+takes significantly longer to do the insertions than PostgreSQL.
+</p>
+<p>
+There is also a lurking problem with what SQLite has done that we will
+consider later.
+</p>
+
+<h3>Exercises</h3>
+<p>
+In the questions below, you are required to produce SQL queries
+to solve a range of data retrieval problems on this schema.
+For each problem, create a view called <tt>Q</tt><i>n</i>
+which holds the <q>top-level</q> SQL statement that produces
+the answer (this SQL statement may make use of any views defined
+earlier in the Prac Exercise). 
+In producing a solution for each problem, you may define as many
+auxiliary views as you like.
+</p>
+<p>
+To simplify the process of producing these views, a template
+file (<a href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/pracs/04/weblog.sql"><tt>weblog.sql</tt></a>) is available.
+While you're developing your views, you might find it convenient
+to edit the views in one window (i.e. edit the <tt>weblog.sql</tt>
+file containing the views) and copy-and-paste the view definitions
+into another window running <tt>psql</tt>.
+</p>
+<p>
+Note that the order of the results does not matter (except for the
+examples where you are imposing an order using <tt>order by</tt>).
+As long as you have the same set of tuples, your view is correct.
+Remember that, in theory, the output from an SQL query is a set.
+</p>
+<p>
+Once you have completed each of the view definitions, you can
+test it simply by typing:
+</p>
+<pre>weblog=# <b>select * from Q<i>n</i>;</b>
+</pre>
+<p>
+and observing whether the result matches the expected result
+given below.
+</p>
+
+<h3>Queries in PostgreSQL</h3>
+<ol start="1">
+<li>
+<p>
+How many of the page accesses occurred on March 2?
+</p>
+<p>
+The results should look like:
+</p>
+<pre>   weblog=# <b>select * from Q1;</b>
+    nacc  
+   -------
+    20144
+   (1 row)
+</pre>
+</li><li>
+<p>
+How many times was the main WebCMS MessageBoard search facility used?
+You can recognise this by the fact that the page contains <tt>messageboard</tt>
+and the parameters string contains <tt>state=search</tt>.
+</p>
+<p>
+The result should look like:
+</p>
+<pre>weblog=# <b>select * from Q2;</b>
+ nsearches 
+-----------
+         0
+(1 row)
+</pre>
+<p>
+(Note: if you get 1 as the count, you're probably picking up a search
+on one of the Web<b>G</b>MS messageboards, which is not a usage of
+the main WebCMS MessageBoard.)
+</p>
+</li><li>
+<p>
+On which (distinct) machines in the Tuba Lab were WebCMS sessions run
+that were not terminated correctly (i.e. were uncompleted)?
+</p>
+<p>
+The result should look like:
+</p>
+<pre>weblog=# <b>select * from Q3;</b>
+             hostname             
+----------------------------------
+ tuba00.orchestra.cse.unsw.edu.au
+ tuba04.orchestra.cse.unsw.edu.au
+ tuba05.orchestra.cse.unsw.edu.au
+ tuba06.orchestra.cse.unsw.edu.au
+ tuba07.orchestra.cse.unsw.edu.au
+ tuba16.orchestra.cse.unsw.edu.au
+ tuba18.orchestra.cse.unsw.edu.au
+ tuba20.orchestra.cse.unsw.edu.au
+ tuba21.orchestra.cse.unsw.edu.au
+(9 rows)
+</pre>
+<p>
+(Hint: the <tt>Sessions.complete</tt> attribute tells you whether
+a given session was completed)
+</p>
+</li><li>
+<p>
+What are the minimum, average and maximum number of bytes
+transferred in a single page access?
+Produce all three values in a single tuple, and make sure
+that they are all integers.
+</p>
+<p>
+The result should look like:
+</p>
+<pre>weblog=# <b>select * from Q4;</b>
+ min | avg  |  max   
+-----+------+--------
+   0 | 3412 | 425253
+(1 row)
+</pre>
+</li><li>
+<p>
+How many of the sessions were run from CSE hosts?
+A CSE host is one whose host name ends in <tt>cse.unsw.edu.au</tt>.
+Ignore any machines whose hostname is not known.
+</p>
+<p>
+The result should look like:
+</p>
+<pre>weblog=# <b>select * from Q5;</b>
+ nhosts 
+--------
+   1380
+(1 row)
+</pre>
+</li><li>
+<p>
+How many of the sessions were run from non-CSE hosts?
+A non-CSE host is one whose host name does not end in
+<tt>cse.unsw.edu.au</tt>.
+Ignore any machines whose hostname is not known.
+</p>
+<p>
+The result should look like:
+</p>
+<pre>weblog=# <b>select * from Q6;</b>
+ nhosts 
+--------
+   2785
+(1 row)
+</pre>
+</li><li>
+<p>
+How many page accesses were there in the longest session?
+</p>
+<p>
+The result should look like:
+</p>
+<pre>weblog=# <b>select * from Q7;</b>
+ session | length 
+---------+--------
+    2945 |    576
+(1 row)
+</pre>
+</li><li>
+<p>
+Each <tt>Accesses</tt> tuple indicates an access to a single WebCMS
+page/script.
+Produce a list of pages and their access frequency (i.e. how
+many times each is accessed).
+<b>Do not</b> use <q><tt>order by</tt></q> or
+<q><tt>limit</tt></q> in the view.
+</p>
+<p>
+The result should look like:
+</p>
+<pre>weblog=# <b>select * from Q8 order by freq desc limit 10;</b>
+              page              | freq 
+--------------------------------+------
+ notice/view_notice             | 9707
+ course/index                   | 9288
+ course/menu                    | 9133
+ lecture/view_lecture           | 2969
+ intro/view_intro               | 1627
+ class/view_class               | 1303
+ webgms/group/view_group        | 1205
+ lab/view_lab                   | 1047
+ messageboard/view_messagetopic |  735
+ webgms/overview/view_intro     |  692
+(10 rows)
+</pre>
+</li><li>
+<p>
+WebCMS is divided into modules, where the PHP scripts for each module
+is contained in a subdirectory. We can work out the module name by
+looking at the first component of the script name (e.g. in the sample
+output above, <tt>notice</tt>, <tt>course</tt>, <tt>lecture</tt>, etc.
+are modules).
+Produce a table of modules and their access frequency (i.e. how
+many times each is accessed).
+<b>Do not</b> incorporate <q><tt>order by</tt></q> or
+<q><tt>limit</tt></q> into the view.
+</p>
+<p>
+The result should look like:
+</p>
+<pre>weblog=# <b>select * from Q9 order by freq desc limit 10;</b>
+    module    | freq  
+--------------+-------
+ course       | 18602
+ notice       |  9859
+ webgms       |  8122
+ lecture      |  3903
+ messageboard |  2354
+ creation     |  1884
+ login        |  1776
+ intro        |  1720
+ class        |  1375
+ lab          |  1216
+(10 rows)
+</pre>
+<p>
+<b>Hint:</b> you'll need to find out more about PostgreSQL
+<a href="https://www.postgresql.org/docs/current/static/functions-string.html">string operators</a>
+and
+<a href="https://www.postgresql.org/docs/current/static/functions-matching.html#FUNCTIONS-POSIX-REGEXP">regular expressions</a>.<br>
+<b>Note:</b> not all page URLs contain the '/' character;
+a page URL that looks simply like <tt>'lecture'</tt> should be treated
+as a reference to the lecture module.
+</p>
+</li><li>
+<p>
+The script that maps the web log into relational tuples isn't perfect.
+Has it produced any sessions that have no corresponding accesses?
+Write a view to print the session IDs of any such sessions.
+</p>
+<p>
+The result should look like:
+</p>
+<pre>weblog=# <b>select * from Q10;</b>
+ session 
+---------
+    3992
+    3998
+    4610
+(3 rows)
+</pre>
+</li><li>
+<p>
+Which hosts were not involved with any accesses to WebCMS?
+</p>
+<p>
+The result should look like:
+</p>
+<pre>weblog=# <b>select * from Q11;</b>
+              unused               
+-----------------------------------
+ tm.net.my
+ 203.199.51.148.static.vsnl.net.in
+ mahler.cse.unsw.edu.au
+(3 rows)
+</pre>
+</li></ol>
+<p>
+You should attempt the above exercises before looking at the
+<a href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/pracs/04/soln1.sql">PostgreSQL sample solutions</a>.
+</p>
+
+<h3>Queries in SQLite</h3>
+<p>
+Now that you've attempted the above exercises in PostgreSQL,
+let's consider how things would work in SQLite.
+This provides an interesting exercise in SQL portability,
+since both databases support "standard SQL".
+</p><p>
+</p><p>
+Make a copy of your <tt>weblog.sql</tt> file and start testing
+the views that you created for PostgreSQL for SQLite.
+</p>
+<p>
+The first problem you will notice is that SQLite doesn't support
+</p>
+<pre>create or replace view <i>ViewName</i> as ...
+</pre>
+<p>
+The fix for this is simple enough. Change all of the view definitions
+to something like:
+</p>
+<pre>drop view if exists <i>ViewName</i>;
+create view <i>ViewName</i> as ...
+</pre>
+<p>
+Another problem relating to view definitions is that SQLite does
+not support the naming of view attributes in the header of the
+<tt>create view</tt> statement.
+PostgreSQL allows you to define views as:
+</p>
+<pre>create view <i>ViewName</i>(<i>attr<sub>1</sub></i>, <i>attr<sub>2</sub></i>, ...)
+as
+select <i>expr<sub>1</sub></i>, <i>expr<sub>2</sub></i>, ...
+</pre>
+<p>
+This is just a convenient (but standard) shorthand for:
+</p>
+<pre>create view <i>ViewName</i>
+as
+select <i>expr<sub>1</sub></i> as <i>attr<sub>1</sub></i>, <i>expr<sub>2</sub></i> as <i>attr<sub>2</sub></i>, ...
+</pre>
+<p>
+and so you will need to change all of the view definitions to this
+form. (If you need a hint, some of the view definitions in the
+PostgreSQL solutions already use this form.)
+</p>
+<p>
+Once you've made the above changes, many of the views will work
+correctly in both PostgreSQL and SQLite.
+</p>
+<p>
+The next problem you will notice is that the "obvious" solution
+for view <tt>Q3</tt> doesn't seem to work. It produces <em>all</em>
+of the workstations rather than just the ones where sessions were
+not terminated correctly.
+The problem here is that SQLite doesn't support distinguished
+boolean values like <tt>true</tt> or <tt>'t'</tt> and <tt>false</tt>
+or <tt>'f'</tt>.
+It supports the syntax for a <tt>boolean</tt> data type, but
+actually uses 0 for <tt>false</tt> and 1 for <tt>true</tt>.
+Since these values are written into the <tt>Sessions.sql</tt>
+file, the only way to fix the problem is to modify this file
+and then rebuild the <tt>weblog.db</tt> database.
+</p>
+<p>
+(As an aside: can you explain why the query returns all
+workstations on the original database, with <tt>'t'</tt>
+and <tt>'f'</tt> rather than <tt>1</tt> and <tt>0</tt>?)
+</p>
+<p>
+Finally, while you are trying to write a solution for view
+<tt>Q9</tt>, you will discover that SQLite's string
+processing functions aren't quite as powerful as PostgreSQL's.
+As far as I can tell, there is no way to solve <tt>Q9</tt> in
+SQLite without re-doing the database structure and separating
+out the module name as a separate attribute in the table.
+</p>
+<p>
+The goal now is to get as many queries as you can to work on
+both systems and to understand why some queries can't be made
+to work with the existing data.
+</p>
+<p>
+Once you've attempted the exercises, compare your solutions
+against those in the <a href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/pracs/04/soln2.sql">SQLite sample solutions</a>.
+</p>
+
+
+</body></html>

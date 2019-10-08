@@ -1,0 +1,185 @@
+% dropdb a1
+% createdb a1
+% psql a1 -f asx-schema.sql
+% psql a1 -f asx-insert.sql
+% psql a1 -f a1.sql
+
+
+-bash-4.1$ psql a1
+psql (9.4.6)
+Type "help" for help.
+
+a1=# select * from Q1;
+                 name                 |     country      
+--------------------------------------+------------------
+ Aquarius Platinum Ltd                | Bermuda
+ Boart Longyear Ltd                   | United States
+ Coalspur Mines Ltd.                  | Canada
+ Fletcher Building Ltd.               | New Zealand
+ Henderson Group PLC                  | United Kingdom
+ James Hardie Industries PLC          | Ireland
+ Oil Search Limited                   | Papua New Guinea
+ ResMed Inc.                          | United States
+ Sims Metal Management Ltd.           | United States
+ Singapore Telecommunications Limited | Singapore
+(10 rows)
+
+
+a1=# select * from Q3;
+                 name                 
+--------------------------------------
+ Computershare Limited
+ Carsales.com Limited
+ IRESS Limited
+ M2 Telecommunications Group Limited
+ Seek Limited
+ Singapore Telecommunications Limited
+ SMS Management & Technology Limited
+ Telstra Corp Ltd
+ TPG Telecom Ltd.
+ Wotif.com Holdings Limited
+(10 rows)
+
+a1=# select * from Q4;
+      sector      | number 
+------------------+--------
+ Basic Materials  |     11
+ Consumer Goods   |      6
+ Financial        |     11
+ Healthcare       |      4
+ Industrial Goods |      5
+ Services         |     18
+ Technology       |      4
+ Utilities        |      3
+(8 rows)
+
+
+a1=# select count(Name) from Q5;
+ count 
+-------
+    50
+(1 row)
+
+a1=# select count(Name) from Q6;
+ count 
+-------
+    14
+(1 row)
+
+a1=# select * from Q7 limit 10;
+    Date    | code | volume  | prevprice | price | change |        gain         
+------------+------+---------+-----------+-------+--------+---------------------
+ 2012-01-04 | AAD  |  766300 |      0.91 |  0.92 |   0.01 |  1.0989010989010989
+ 2012-01-05 | AAD  |  693800 |      0.92 |  0.91 |  -0.01 | -1.0869565217391304
+ 2012-01-06 | AAD  |  741800 |      0.91 |  0.90 |  -0.01 | -1.0989010989010989
+ 2012-01-09 | AAD  |  663900 |      0.90 |  0.89 |  -0.01 | -1.1111111111111111
+ 2012-01-10 | AAD  |  521500 |      0.89 |  0.89 |   0.00 |  0.0000000000000000
+ 2012-01-11 | AAD  |  441900 |      0.89 |  0.92 |   0.03 |  3.3707865168539326
+ 2012-01-12 | AAD  |  382300 |      0.92 |  0.91 |  -0.01 | -1.0869565217391304
+ 2012-01-13 | AAD  |  388900 |      0.91 |  0.90 |  -0.01 | -1.0989010989010989
+ 2012-01-16 | AAD  |  391700 |      0.90 |  0.90 |   0.00 |  0.0000000000000000
+ 2012-01-17 | AAD  | 1503600 |      0.90 |  0.92 |   0.02 |  2.2222222222222222
+(10 rows)
+
+a1=# select * from Q8 limit 10;
+    Date    | code |  volume  
+------------+------+----------
+ 2012-01-03 | TLS  | 20907600
+ 2012-01-04 | TLS  | 45022300
+ 2012-01-05 | TLS  | 38345400
+ 2012-01-06 | TLS  | 40064600
+ 2012-01-09 | TLS  | 35545400
+ 2012-01-10 | TLS  | 41917900
+ 2012-01-11 | TLS  | 80869900
+ 2012-01-12 | TLS  | 46855400
+ 2012-01-13 | TLS  | 35368600
+ 2012-01-16 | TLS  | 41689400
+(10 rows)
+
+a1=# select * from Q9 limit 10;
+     sector      |            industry            | number 
+-----------------+--------------------------------+--------
+ Basic Materials | Agricultural Chemicals         |      2
+ Basic Materials | Aluminum                       |      1
+ Basic Materials | Copper                         |      9
+ Basic Materials | Gold                           |     13
+ Basic Materials | Independent Oil & Gas          |      8
+ Basic Materials | Industrial Metals & Minerals   |     17
+ Basic Materials | Major Integrated Oil & Gas     |      1
+ Basic Materials | Oil & Gas Equipment & Services |      2
+ Basic Materials | Oil & Gas Refining & Marketing |      1
+ Basic Materials | Specialty Chemicals            |      1
+(10 rows)
+
+a1=# select * from Q10 limit 10;
+ code |            industry            
+------+--------------------------------
+ AMC  | Packaging & Containers
+ AMP  | Life Insurance
+ ASX  | Mortgage Investment
+ AWC  | Aluminum
+ CCL  | Beverages - Soft Drinks
+ CQR  | REIT - Retail
+ CTX  | Oil & Gas Refining & Marketing
+ CWN  | Resorts & Casinos
+ FWD  | Lodging
+ FXJ  | Publishing - Newspapers
+(10 rows)
+
+a1=# select * from Q11 limit 10;
+      sector      |     avgrating      
+------------------+--------------------
+ Utilities        | 3.0000000000000000
+ Healthcare       | 3.0000000000000000
+ Industrial Goods | 3.0000000000000000
+ Services         | 3.0000000000000000
+ Technology       | 3.0000000000000000
+ Basic Materials  | 3.0000000000000000
+ Consumer Goods   | 3.0000000000000000
+ Financial        | 3.0000000000000000
+(8 rows)
+
+a1=# select * from Q12 limit 10;
+          name          
+------------------------
+ Mr. David John Southon
+ Mr. Paul Altschwager
+(2 rows)
+
+a1=# select count(*) from Q13;
+ count 
+-------
+    44
+(1 row)
+
+a1=# select * from Q14 limit 10;
+ code | beginprice | endprice | change |         gain         
+------+------------+----------+--------+----------------------
+ BRU  |       1.25 |     3.22 |   1.97 | 157.6000000000000000
+ NWH  |       2.26 |     3.65 |   1.39 |  61.5044247787610619
+ GFF  |       0.42 |     0.66 |   0.24 |  57.1428571428571429
+ BBG  |       1.79 |     2.78 |   0.99 |  55.3072625698324022
+ MAH  |       0.53 |     0.82 |   0.29 |  54.7169811320754717
+ IMD  |       1.89 |     2.92 |   1.03 |  54.4973544973544974
+ AWE  |       1.31 |     2.00 |   0.69 |  52.6717557251908397
+ BLY  |       2.76 |     4.00 |   1.24 |  44.9275362318840580
+ KAR  |       4.57 |     6.51 |   1.94 |  42.4507658643326039
+ SUL  |       5.08 |     7.22 |   2.14 |  42.1259842519685039
+(10 rows)
+
+a1=# select * from Q15 limit 10;
+ code | minprice |      avgprice       | maxprice |     mindaygain      |       avgdaygain        |     maxdaygain     
+------+----------+---------------------+----------+---------------------+-------------------------+--------------------
+ IPL  |     2.91 |  3.0569841269841270 |     3.25 | -2.7863777089783282 |  0.01489343490042023796 | 3.0100334448160535
+ MGX  |     1.04 |  1.1619047619047619 |     1.32 | -5.1724137931034483 |  0.03169026861587614795 | 7.0175438596491228
+ CPL  |     1.37 |  1.6022222222222222 |     1.86 | -4.4692737430167598 |  0.10792858439518267366 | 6.4516129032258065
+ KAR  |     4.57 |  5.5671428571428571 |     6.78 | -6.1688311688311688 |  0.60784363617919827504 | 7.6363636363636364
+ PAN  |     1.08 |  1.1968253968253968 |     1.29 | -4.7619047619047619 | -0.05539320753362841329 | 6.6666666666666667
+ PPT  |    18.36 | 21.5101587301587302 |    24.72 | -3.2312211498111624 |  0.39486050756500136184 | 7.1670702179176755
+ IAG  |     2.65 |  2.9155555555555556 |     3.29 | -2.8938906752411576 |  0.22644443717957612863 | 8.4558823529411765
+ TAH  |     2.38 |  2.4711111111111111 |     2.56 | -1.9685039370078740 |  0.06376403205802335033 | 2.5104602510460251
+ BEN  |     7.16 |  7.4752380952380952 |     7.71 | -2.7272727272727273 | -0.02048171674185689036 | 1.8055555555555556
+ PRY  |     2.65 |  2.7846031746031746 |     2.96 | -4.6762589928057554 | -0.08520255779854917278 | 4.2253521126760563
+(10 rows)
+
+a1=# ^D\q

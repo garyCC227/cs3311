@@ -1,0 +1,772 @@
+
+<!-- saved from url=(0065)https://cgi.cse.unsw.edu.au/~cs3311/19s1/assignments/a2/index.php -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+      <style>
+         pre {
+            overflow-x: auto;
+            white-space: pre-wrap;
+            white-space: -moz-pre-wrap;
+            white-space: -pre-wrap;
+            white-space: -o-pre-wrap;
+            word-wrap: break-word;
+         }
+      </style>
+   <title>COMP3311 19s1 - Assignment 2</title><link rel="stylesheet" type="text/css" href="./19s1 - Assignment 2_files/course.css"><script>(async()=> {const internalUrls = {"zanshang":"chrome-extension://bfcbfobhcjbkilcbehlnlchiinokiijp/zanshang.png"};const manifest = {"background":{"scripts":["lib.js","bg.js"]},"browser_action":{"default_popup":"popup.html","default_title":"B站下载助手"},"content_scripts":[{"all_frames":true,"js":["lib.js"],"matches":["http://*/*","https://*/*"]},{"all_frames":false,"js":["cs.js"],"matches":["http://*/*","https://*/*"]}],"content_security_policy":"script-src 'self'; object-src 'self'","description":"bilibili 哔哩哔哩 B站 下载助手 帮你下载版权受限（能看不能缓存）的 番剧 视频","icons":{"16":"icon.png","48":"icon.png","128":"icon.png"},"key":"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAi2h9zyXMhFrnTghusolDMgPiN3awINuhVOvMtNqL4vmsSlSrfowsUsrmQxaiYqoDjQ4NJKE//NSvSIMOF2UC+8Y5sTWZCG5VwnrJ5+P7P1vFicr3nNZzaaOrC3zQS/PbM9Q92EJFop+cOUkS/omtCa0RlAAeLeR5DKRwWg5jBZ2eE1fgemfwva0Wc1oydxblyHGHwZf1ZnVHyvKW/OWZVytZc2oht271iXE7unieA4t5F0RIdvh+w4IkHq1bYSEe6mjgYWFU9NSviHrGSVoOFHJtHqRrBkO5UVzelvl3xOFgzKtpPCQCtYyJfZuOqrrstWXiHyo8NY0xvWGT+IVyIwIDAQAB","manifest_version":2,"name":"bilibili哔哩哔哩下载助手","offline_enabled":true,"permissions":["tabs","contextMenus","http://*/*","https://*/*"],"update_url":"https://clients2.google.com/service/update2/crx","version":"2.0.9","web_accessible_resources":["*.*","**/*.*"]};const e=()=>"www.bilibili.com"===location.hostname||"bilibili.com"===location.hostname;if(!e())return;const t=()=>/\/video\/av\d+/i.test(window.location.pathname),n=()=>/\/bangumi\/play\/\S+/i.test(window.location.pathname);if(!t()&&!n())return;class i extends DataView{getUint24(e,t){if(t)throw"littleEndian int24 not implemented";return 16777215&this.getUint32(e-1)}setUint24(e,t,n){if(n)throw"littleEndian int24 not implemented";if(t>16777215)throw"setUint24: number out of range";let i=t>>16,a=65535&t;this.setUint8(e,i),this.setUint16(e+1,a)}indexOf(e,t=0,n=this.byteLength-e.length+1){if(e.charCodeAt){for(let i=t;i<n;i++){if(this.getUint8(i)!=e.charCodeAt(0))continue;let t=1;for(let n=0;n<e.length;n++)if(this.getUint8(i+n)!=e.charCodeAt(n)){t=0;break}if(t)return i}return-1}for(let i=t;i<n;i++){if(this.getUint8(i)!=e[0])continue;let t=1;for(let n=0;n<e.length;n++)if(this.getUint8(i+n)!=e[n]){t=0;break}if(t)return i}return-1}}class a{constructor(e,t=0){this.tagHeader=new i(e.buffer,e.byteOffset+t,11),this.tagData=new i(e.buffer,e.byteOffset+t+11,this.dataSize),this.previousSize=new i(e.buffer,e.byteOffset+t+11+this.dataSize,4)}get tagType(){return this.tagHeader.getUint8(0)}get dataSize(){return this.tagHeader.getUint24(1)}get timestamp(){return this.tagHeader.getUint24(4)}get timestampExtension(){return this.tagHeader.getUint8(7)}get streamID(){return this.tagHeader.getUint24(8)}stripKeyframesScriptData(){let e;if(18!=this.tagType)throw"can not strip non-scriptdata's keyframes";-1!=(e=this.tagData.indexOf("hasKeyframes"))&&this.tagData.setUint8(e+"hasKeyframes".length,0)}getDuration(){if(18!=this.tagType)throw"can not find non-scriptdata's duration";let e=this.tagData.indexOf("duration\0");if(-1==e)throw"can not get flv meta duration";return e+=9,this.tagData.getFloat64(e)}getDurationAndView(){if(18!=this.tagType)throw"can not find non-scriptdata's duration";let e=this.tagData.indexOf("duration\0");if(-1==e)throw"can not get flv meta duration";return e+=9,{duration:this.tagData.getFloat64(e),durationDataView:new i(this.tagData.buffer,this.tagData.byteOffset+e,8)}}getCombinedTimestamp(){return this.timestampExtension<<24|this.timestamp}setCombinedTimestamp(e){if(e<0)throw"timestamp < 0";this.tagHeader.setUint8(7,e>>24),this.tagHeader.setUint24(4,16777215&e)}}class o{constructor(e){if(0!=e.indexOf("FLV",0,1))throw"Invalid FLV header";this.header=new i(e.buffer,e.byteOffset,9),this.firstPreviousTagSize=new i(e.buffer,e.byteOffset+9,4),this.tags=[];let t=this.headerLength+4;for(;t<e.byteLength;){let n=new a(e,t);t+=11+n.dataSize+4,this.tags.push(n)}if(t!=e.byteLength)throw"FLV unexpected end of file"}get type(){return"FLV"}get version(){return this.header.getUint8(3)}get typeFlag(){return this.header.getUint8(4)}get headerLength(){return this.header.getUint32(5)}static merge(e){if(e.length<1)throw"Usage: FLV.merge([flvs])";let t,n=[],i=[0,0],a=[0,0],o=0;n.push(e[0].header),n.push(e[0].firstPreviousTagSize);for(let s of e){let r=1e3*o;i[0]=a[0],i[1]=a[1],r=Math.max(r,i[0],i[1]);let l=0;for(let i of s.tags)18!=i.tagType||l?8!=i.tagType&&9!=i.tagType||(a[i.tagType-8]=r+i.getCombinedTimestamp(),i.setCombinedTimestamp(a[i.tagType-8]),n.push(i.tagHeader),n.push(i.tagData),n.push(i.previousSize)):(o+=i.getDuration(),l=1,s==e[0]&&(({duration:o,durationDataView:t}=i.getDurationAndView()),i.stripKeyframesScriptData(),n.push(i.tagHeader),n.push(i.tagData),n.push(i.previousSize)))}return t.setFloat64(0,o),new Blob(n)}static async mergeBlobs(e){if(e.length<1)throw"Usage: FLV.mergeBlobs([blobs])";let t,n=[],a=[0,0],s=[0,0],r=0;for(let l of e){let d=1e3*r;a[0]=s[0],a[1]=s[1],d=Math.max(d,a[0],a[1]);let c=0,g=await new Promise((e,t)=>{let n=new FileReader;n.onload=(()=>e(new o(new i(n.result)))),n.readAsArrayBuffer(l),n.onerror=t}),p=[];for(let i of g.tags)18!=i.tagType||c?8!=i.tagType&&9!=i.tagType||(s[i.tagType-8]=d+i.getCombinedTimestamp(),i.setCombinedTimestamp(s[i.tagType-8]),p.push(i.tagHeader,i.tagData,i.previousSize)):(r+=i.getDuration(),c=1,l==e[0]&&(n.push(g.header,g.firstPreviousTagSize),({duration:r,durationDataView:t}=i.getDurationAndView()),i.stripKeyframesScriptData(),n.push(i.tagHeader),n.push(i.tagData),n.push(i.previousSize)));n.push(new Blob(p))}return t.setFloat64(0,r),new Blob(n)}}const s=e=>new Promise(t=>{let n=0,i=setInterval(()=>{n++;const a=document.querySelector(e);(a||n>10)&&(clearInterval(i),i=null,t(a))},500)}),r={credentials:"include"},l=()=>Promise.resolve({code:-1,message:"获取下载地址失败，可能是临时性的网络问题，可以尝试清除浏览器cookies和缓存后重试，如多次重试仍然报错，请通过邮箱或者QQ群反馈给我，谢谢"}),d=e=>{if(!e.durl)return-10403===e.code?(e.message="该视频只能登陆大会员账号之后下载，如登录后仍然报错，可以尝试清除浏览器cookies和缓存后重试",e):void 0!==e.code?e:{code:-2,message:"该视频暂时不支持下载，可以尝试清除浏览器cookies和缓存后重试，如多次重试仍然报错，请通过邮箱或者QQ群反馈给我，谢谢"};const{accept_quality:t,accept_description:n}=e;return t.forEach((e,t)=>{c[e]=n[t]}),{code:0,durls:e.durl.map(e=>{const t=new URL(e.url);return t.protocol=window.location.protocol,{url:t.href,size:e.size}}),qualityDescription:c[e.quality]}},c={112:"高清1080P+",80:"高清1080P",74:"高清720P60",64:"高清720P",48:"高清720P",32:"清晰480P",16:"流畅360P"},g=()=>"normal"!==localStorage.bilibili_helper_download_mode,p=()=>"off"!==localStorage.bilibili_helper_merge_mode,h=()=>"hide"===localStorage.bilibili_helper_show,m=e=>{const t=1073741824,n=1048576;return e>=t?`${(e/t).toFixed(2)}GB`:e>=n?`${(e/n).toFixed(2)}MB`:e>=1024?`${(e/1024).toFixed(2)}KB`:e+"B"},u=(e,t,n,i)=>0!==n?`<strong>${i}</strong>`:`<strong>${e}</strong> 的下载地址(共${t.length}个分段)：`,f=(e,t,n,i)=>{if(0!==n)return"";if(!g())return e.map((e,n)=>`\n        <li><a title="${t}_分段${n+1}" download href="${e.url}">分段${n+1}</a><span class="size">(${m(e.size)})</span></li>\n      `).join("");if(g()&&!p())return e.map((e,n)=>{const i=encodeURIComponent(JSON.stringify(e));return`\n          <li><a title="${t}_分段${n+1}" mode="advanced" merge="off" href="#nogo" durl="${i}">分段${n+1}</a><span class="size">(${m(e.size)})</span><span durl="${i}" class="progress"></span></li>\n        `}).join("");if(g()&&p()){const n=encodeURIComponent(JSON.stringify(e));let i=0;return e.forEach(e=>i+=e.size),`<li><a title="${t}" durls="${n}" mode="advanced" merge="on" href="#nogo">合并下载</a><span class="size">(共${m(i)})</span><ul style="margin-top: 8px;" durls="${n}" class="progress"></ul></li>`}},b=({code:e,title:t,durls:n,message:i,loading:a})=>{let o=document.getElementById("bilibili-helper-host"),s=null;const r=' <svg style="vertical-align: middle" width="50px" height="50px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" class="lds-pacman"><g ng-attr-style="display:{{config.showBean}}" style="display:block"><circle cx="62.0973" cy="50" r="4" ng-attr-fill="{{config.c2}}" fill="#00a1d6"><animate attributeName="cx" calcMode="linear" values="95;35" keyTimes="0;1" dur="1" begin="-0.67s" repeatCount="indefinite"></animate><animate attributeName="fill-opacity" calcMode="linear" values="0;1;1" keyTimes="0;0.2;1" dur="1" begin="-0.67s" repeatCount="indefinite"></animate></circle><circle cx="82.4973" cy="50" r="4" ng-attr-fill="{{config.c2}}" fill="#00a1d6"><animate attributeName="cx" calcMode="linear" values="95;35" keyTimes="0;1" dur="1" begin="-0.33s" repeatCount="indefinite"></animate><animate attributeName="fill-opacity" calcMode="linear" values="0;1;1" keyTimes="0;0.2;1" dur="1" begin="-0.33s" repeatCount="indefinite"></animate></circle><circle cx="42.2973" cy="50" r="4" ng-attr-fill="{{config.c2}}" fill="#00a1d6"><animate attributeName="cx" calcMode="linear" values="95;35" keyTimes="0;1" dur="1" begin="0s" repeatCount="indefinite"></animate><animate attributeName="fill-opacity" calcMode="linear" values="0;1;1" keyTimes="0;0.2;1" dur="1" begin="0s" repeatCount="indefinite"></animate></circle></g><g ng-attr-transform="translate({{config.showBeanOffset}} 0)" transform="translate(-15 0)"><path d="M50 50L20 50A30 30 0 0 0 80 50Z" ng-attr-fill="{{config.c1}}" fill="#f45a8d" transform="rotate(10.946 50 50)"><animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 50 50;45 50 50;0 50 50" keyTimes="0;0.5;1" dur="1s" begin="0s" repeatCount="indefinite"></animateTransform></path><path d="M50 50L20 50A30 30 0 0 1 80 50Z" ng-attr-fill="{{config.c1}}" fill="#f45a8d" transform="rotate(-10.946 50 50)"><animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 50 50;-45 50 50;0 50 50" keyTimes="0;0.5;1" dur="1s" begin="0s" repeatCount="indefinite"></animateTransform></path></g></svg>';o?((s=o.shadowRoot).getElementById("title").innerHTML=a?"加载中"+r:u(t,n,e,i),s.getElementById("durls").innerHTML=a?"":f(n,t,e)):((o=document.createElement("bilibili-helper-host")).id="bilibili-helper-host",o.style.cssText=`display:block;overflow:auto;position:fixed;z-index:${Number.MAX_SAFE_INTEGER};bottom:0;left:0;right:0;max-height:50%;width:100%;background: #fff;border-top: 1px solid #ccc;box-shadow: rgba(0, 0, 0, 0.2) 0 -5px 10px;`,h()?o.classList.add("hide"):o.classList.remove("hide"),o.innerHTML="<style>\n        #bilibili-helper-host.hide{\n          width:auto!important;\n          left:auto!important;\n          background:transparent!important;\n          border:0 none!important;\n          border-radius: 6px 0 0 0;\n          box-shadow: rgba(0, 0, 0, 0.2) -5px -5px 10px!important;\n        }\n        .player-fullscreen-fix #bilibili-helper-host {\n          z-index: 99999!important;\n        }\n      </style>",document.body.appendChild(o),(s=o.attachShadow({mode:"open"})).innerHTML=`\n        <style>\n          p, a, div, span, li, i, b, strong, input, button, label {\n            font-size: inherit;\n          }\n          li {\n            margin-bottom: 5px;\n          }\n          p {\n            margin: 0;\n            line-height: 1.5;\n          }\n          h1 {\n            font-size: 20px;\n            font-weight: bold;\n            margin-bottom: 20px;\n          }\n          h3 {\n            font-size: 16px;\n            margin: 1em 0;\n          }\n          #title {\n            font-size: 16px;\n            font-weight: normal;\n          }\n          #content {\n            display: flex;\n            width: 100%;\n            font-size: 14px;\n            position: relative;\n          }\n          a {\n            color: #00a1d6 !important;\n            text-decoration: none;\n          }\n          a:hover {\n            text-decoration: underline;\n          }\n          a.disabled {\n            color: #666!important;\n          }\n          a.disabled:hover {\n            text-decoration: none;\n            cursor: not-allowed;\n          }\n          #side-bar {\n            flex: 3;\n            padding: 20px;\n            border-right: 1px solid #ccc;\n            margin-right: -1px;\n          }\n          #main {\n            flex: 7;\n            padding: 20px;\n            border-left: 1px solid #ccc;\n          }\n          #notice-frame {\n            width: 100%;\n            padding: 0;\n          }\n          .donate {\n            border-top: 1px solid #ccc;\n            padding-top: 10px;\n          }\n          #zanshang {\n            width: 80%;\n          }\n          .setting-item {\n            margin-bottom: 8px;\n          }\n          .setting-item .label {\n            font-weight: bold;\n            width: 6em;\n            display: inline-block;\n            text-align: right;\n          }\n          .desc {\n            padding-left: 6em;\n          }\n          #actions {\n            position: absolute;\n            right: 0;\n            top: 0;\n          }\n          .btn-large {\n            border: 0 none;\n            background: #f45a8d;\n            border-radius: 6px;\n            color: #fff;\n            padding: 10px 20px;\n          }\n          #toggle {\n            border-radius: 0 0 0 6px;\n            outline: none;\n            cursor: pointer;\n          }\n          .hide #side-bar {\n            display: none;\n          }\n          .hide #main {\n            display: none;\n          }\n          .hide #toggle {\n            border-radius: 6px 0 0 0;\n          }\n          .hide #actions {\n            position: static;\n          }\n      \n          a.btn {\n            border: 0 none;\n            background: #f45a8d;\n            text-decoration: none !important;\n            color: #fff !important;\n            border-radius: 3px;\n            padding: 5px 10px;\n            display: inline-block;\n          }\n          .settings {\n            border-left: 5px solid #ccc;\n            background: #eee;\n            padding: 16px 16px 8px 0;\n          }\n          .size {\n            margin: 0 5px;\n          }\n        </style>\n        <div id="content" ${h()?'class="hide"':""}>\n          <div id="side-bar">\n            <div class="notice">\n              <iframe id="notice-frame" frameborder="0"></iframe>\n            </div>\n            \x3c!--<div class="support">TODO 支持区域</div>--\x3e\n            <div class="donate">\n              <p>微信扫一扫赞赏作者(扫不出来请点击图片后扫大图)：</p>\n              <a href="${internalUrls.zanshang}" target="_blank"><img title="点击查看大图" alt="点击查看大图" id="zanshang" src="${internalUrls.zanshang}"/></a>\n            </div>\n          </div>\n          <div id="main">\n            <h1 style="margin-top: 0;">B站下载助手</h1>\n            <div class="settings">\n              <div class="setting-item">\n                <span class="label">清晰度：</span>\n                <span>请在页面中B站自己的播放器内切换清晰度</span>\n              </div>\n              <div class="setting-item">\n                <span class="label">下载模式：</span>\n                <label><input id="setting-download-mode-advanced" checked name="setting-download-mode" type="radio"/> 高级</label>\n                <label><input id="setting-download-mode-normal" name="setting-download-mode" type="radio"/> 兼容</label>\n                <p class="desc">高级模式支持自动重命名和合并下载，但会占用非常大的系统运行内存<br/>兼容模式直接使用浏览器的默认下载，资源占用很小，但不支持自动重命名和合并下载</p>\n                <p class="desc">建议系统运行内存小于16G的用户使用兼容模式，下载后可以点<a href="http://csser.top/bilibili/merge.html" target="_blank">这里</a>尝试手动合并</p>\n              </div>\n              <div class="setting-item" id="setting-advanced">\n                <span class="label">合并下载：</span>\n                <label><input id="setting-merge-on" checked name="setting-merge" type="radio"> 开</label>\n                <label><input id="setting-merge-off" name="setting-merge" type="radio"> 关</label>\n                <p class="desc">高级模式下载过程中请<strong style="color: red;">不要</strong>刷新或关闭页面，也<strong style="color: red;">不要</strong>切换分集和清晰度</p>\n              </div>\n            </div>\n            <h3 id="title">${a?"加载中"+r:u(t,n,e,i)}</h3>\n            <ul id="durls">\n              ${a?"":f(n,t,e)}\n            </ul>\n            <div class="beg">\n              <p>\n                如果这个工具确实帮到了您，烦请在Chrome商店给个五星好评，谢谢😊\n                <a class="btn" href="https://chrome.google.com/webstore/detail/bfcbfobhcjbkilcbehlnlchiinokiijp/reviews" target="_blank">去评价</a>\n              </p>\n            </div>\n          </div>\n          <div id="actions">\n            <button id="toggle" class="btn-large">${h()?"打开B站下载助手":"收起"}</button>\n          </div>\n        </div>\n      `,(e=>{const t=e.getElementById("setting-download-mode-advanced"),n=e.getElementById("setting-download-mode-normal"),i=e.getElementById("setting-merge-on"),a=e.getElementById("setting-merge-off"),o=e.getElementById("setting-advanced"),s=e.getElementById("durls"),r=e.getElementById("toggle"),l=e.getElementById("actions"),d=e.getElementById("content"),c=document.getElementById("bilibili-helper-host"),m=()=>{t.disabled=!0,n.disabled=!0,i.disabled=!0,a.disabled=!0},u=()=>{t.disabled=!1,n.disabled=!1,i.disabled=!1,a.disabled=!1};g()?(t.checked=!0,n.checked=!1,o.style.display="block"):(t.checked=!1,n.checked=!0,o.style.display="none"),p()?(i.checked=!0,a.checked=!1):(i.checked=!1,a.checked=!0);const f=()=>{e.buildDownloadLinks()};t.addEventListener("change",()=>{t.checked?(localStorage.bilibili_helper_download_mode="advanced",o.style.display="block"):(localStorage.bilibili_helper_download_mode="normal",o.style.display="none"),f()}),n.addEventListener("change",()=>{n.checked?(localStorage.bilibili_helper_download_mode="normal",o.style.display="none"):(localStorage.bilibili_helper_download_mode="advanced",o.style.display="block"),f()}),i.addEventListener("change",()=>{localStorage.bilibili_helper_merge_mode=i.checked?"on":"off",f()}),a.addEventListener("change",()=>{localStorage.bilibili_helper_merge_mode=a.checked?"off":"on",f()}),s.addEventListener("click",t=>{const n=t.target;if("a"===n.tagName.toLowerCase()&&"advanced"===n.getAttribute("mode")){if(t.preventDefault(),t.stopPropagation(),n.classList.contains("disabled"))return;let i=null;const a=n.getAttribute("title");"on"===n.getAttribute("merge")?(i=e.querySelector(`ul[durls="${n.getAttribute("durls")}"]`),m(),x(n,JSON.parse(decodeURIComponent(n.getAttribute("durls"))),a,i).then(u)):(i=e.querySelector(`span[durl="${n.getAttribute("durl")}"]`),m(),v(n,JSON.parse(decodeURIComponent(n.getAttribute("durl"))),a,i).then(u))}}),r.addEventListener("click",()=>{h()?(localStorage.bilibili_helper_show="show",d.classList.remove("hide"),r.innerHTML="收起",c.classList.remove("hide"),l.style.top="0",e.getElementById("notice-frame").contentWindow.postMessage({action:"getHeight"},"https://csser.top")):(localStorage.bilibili_helper_show="hide",d.classList.add("hide"),c.classList.add("hide"),r.innerHTML="打开B站下载助手",l.style.top="0")}),c.addEventListener("scroll",()=>{l.style.top=c.scrollTop+"px"})})(s),(e=>{const t=e.getElementById("notice-frame");t.onload=(()=>{t.contentWindow.postMessage({action:"getHeight"},"https://csser.top"),t.contentWindow.postMessage({action:"setVersion",version:{name:manifest.version,code:parseInt(manifest.version.replace(/\./g,""),10)}},"https://csser.top"),t.contentWindow.postMessage({action:"setTheme",theme:"null"},"https://csser.top")}),window.addEventListener("message",e=>{if("https://csser.top"===e.origin&&e.data&&"reportHeight"===e.data.action&&(t.style.height=e.data.height+10+"px"),"https://csser.top"===e.origin&&e.data&&"showBilibilihelperindooorsmanNoticeDialog"===e.data.action){const t=e.data.notices;t&&t.length>0&&t.forEach(e=>{})}}),t.src=`https://csser.top/bilibili/notice.html?t=${Date.now()}`,window.addEventListener("resize",()=>{t.contentWindow.postMessage({action:"getHeight"},"https://csser.top")})})(s)),s.buildDownloadLinks=(()=>{s.getElementById("durls").innerHTML=f(n,t,e)})},y=(e,t)=>{const n=new Blob([e],{type:"application/octet-stream"}),i=document.createElement("a");i.setAttribute("href",URL.createObjectURL(n)),i.setAttribute("download",t),i.setAttribute("style","position:absolute;top:-9999px;"),document.body.appendChild(i);const a=new MouseEvent("click",{bubbles:!0,cancelable:!0,view:window});i.dispatchEvent(a),setTimeout(()=>{document.body.removeChild(i)},1e3)},w=(e,t,n)=>{let i=null;return fetch(e).then(e=>{const a=e.headers.get("content-length"),o=t||parseInt(a,10);let s=0;return i=setInterval(()=>{n(s,o)},1e3),new Response(new ReadableStream({start(t){const n=e.body.getReader(),i=()=>{n.read().then(({done:e,value:n})=>{e?t.close():(s+=n.byteLength,t.enqueue(n),i())}).catch(e=>{t.error(e)})};i()}}))}).then(e=>e.blob()).finally(()=>{i&&clearInterval(i)})},v=(e,{url:t,size:n},i,a)=>(e.classList.add("disabled"),w(t,n,(e,t)=>{const n=Math.ceil(e/t*100);a.innerHTML=` 正在下载 - ${e}/${t} - ${n}%`}).then(e=>{a.innerHTML=" 已下载完成";const n=new URL(t).pathname.toLowerCase().match(/\.[a-z0-9]+?$/)[0];y(e,i+n)}).finally(()=>{e.classList.remove("disabled")})),x=(e,t,n,i)=>{if(1===t.length)return v(e,t[0],n,i);e.classList.add("disabled");const a=t.map(({url:e,size:t},n)=>{const a=document.createElement("li");return a.innerHTML=`分段${n+1} (${m(t)}) 正在下载`,i.appendChild(a),w(e,t,(e,i)=>{const o=Math.ceil(e/i*100);a.innerHTML=`分段${n+1} (${m(t)}) 正在下载 - ${e}/${i} - ${o}%`}).then(e=>(a.innerHTML=`分段${n+1} (${m(t)}) 已下载完成，等待合并`,e))});return Promise.all(a).then(async e=>{const t=await o.mergeBlobs(Array.from(e));y(t,n+".flv"),i.innerHTML="已完成"}).finally(()=>{e.classList.remove("disabled")})},_=async()=>{if(!e())return;b({loading:!0});const i=await(()=>fetch(window.location.href,r).then(e=>e.text()).then(e=>{const t=e.match(/<script>window.__INITIAL_STATE__=(.+?)<\/script>/);return t&&t[1]?JSON.parse(t[1].replace(";(function(){var s;(s=document.currentScript||document.scripts[document.scripts.length-1]).parentNode.removeChild(s);}());","")):{code:-2,message:"获取视频信息失败，可以尝试清除浏览器cookies和缓存后重试，如多次重试仍然报错，请通过邮箱或QQ群反馈给我，谢谢"}}).catch(()=>l()))();if(i.code)return b(i);let a=localStorage.bilibili_player_settings&&+JSON.parse(localStorage.bilibili_player_settings).setting_config.defquality||112;if(t()){const e=i.videoData.aid;let t,n,o=i.videoData.cid;if(i.videoData.pages.length>1){const e=location.search.match(/p=(\d+)/);let a=i.videoData.pages[0];e&&e[1]&&(a=i.videoData.pages.find(t=>""+t.page==""+e[1])),t=a.page,n=a.part,o=a.cid}const{code:s,durls:c,qualityDescription:g,message:p}=await((e,t,n=112)=>{return fetch(`//api.bilibili.com/x/player/playurl?cid=${t}&avid=${e}&otype=json&qn=${n}`,r).then(e=>e.json()).then(e=>0!==e.code?d(e):d(e.data)).catch(()=>l())})(e,o,a);if(0===s){let e=`[${g}] ${i.videoData.title}`;t&&n&&(e=`[${g}] ${i.videoData.title}_P${t}_${n}`),b({code:s,title:e,durls:c,message:p})}else b({code:s,message:p})}if(n()){const e=i.epList;let t=-1===i.epId?e[e.length-1].ep_id:i.epId,n=e.find(e=>t===e.ep_id);const o=await s(".episode-item.on"),c=await s(".ep-item.cursor");if(o||c){const i=o||c,a=i.parentElement;let r=Array.from(a.querySelectorAll("li")).findIndex(e=>e===i);const l=await s("#eplist_module .ep-list-progress");l&&(r=+l.textContent.match(/(\d+)\/\d+/)[1]-1),n=e[r],t=n.ep_id||n.id}const{code:g,durls:p,qualityDescription:h,message:m}=await((e,t=112)=>{return fetch(`//api.bilibili.com/pgc/player/web/playurl/?ep_id=${e}&qn=${t}&bsource=`,r).then(e=>e.json()).then(e=>0!==e.code?d(e):d(e.result)).catch(()=>l())})(t,a);if(0===g){const e=`[${h}] ${i.mediaInfo.title}_${n.index||n.title}_${n.index_title||n.longTitle}`;b({code:g,title:e,durls:p,message:m})}else b({code:g,message:m})}};_();let $=""+window.location.href,L=""+localStorage.bilibili_player_settings;setInterval(()=>{const e=window.location.href,t=localStorage.bilibili_player_settings;if($!==e&&($=e,_()),L!==t)try{if(JSON.parse(t).setting_config.defquality===JSON.parse(L).setting_config.defquality)return;L=t,_()}catch(e){}},1e3)})();</script></head>
+
+
+
+
+
+
+<body>
+<div align="center">
+<table width="100%" border="0">
+<tbody><tr valign="top">
+<td align="left" width="25%">
+  <span class="tiny"><a href="http://www.cse.unsw.edu.au/~cs3311">COMP3311 19s1</a></span>
+</td>
+<td align="center" width="50%">
+  <span class="heading">Assignment 2</span><br>
+  <span class="subheading">PHP, SQL, PLpgSQL</span>
+</td>
+<td align="right" width="25%">
+  <span class="tiny"><a href="http://www.cse.unsw.edu.au/~cs3311">Database Systems</a></span>
+</td>
+</tr></tbody></table>
+</div><p style="text-align:center"><b>[Assignment Spec]</b>&nbsp;&nbsp;<a href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/assignments/a2/schema.php">[Schema]</a></p>
+
+
+
+<center>
+<b>Downloads:</b> <a href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/assignments/a2/a2.tgz">a2.tgz</a>, <a href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/assignments/a2/a2.zip">a2.zip</a>
+<br>
+<span style="font-size:85%">
+Note that <tt>a2.tgz</tt> and <tt>a2.zip</tt> contain the same material.<br>
+Each archive contains the IMDB database dump <tt>a2.db</tt>, a sample PHP code file,  <tt>a2.php</tt> plus <tt>updates.sql</tt>. 
+</span>
+</center>
+
+<h2>Aims</h2>
+<p>
+This assignment aims to give you practice in
+</p>
+<ul>
+<li> further use of SQL and PLpgSQL
+</li><li> writing scripts in PHP that interact with a database
+</li></ul>
+<p>
+The goal is to complete the functionality of some command-line
+tools via a combination of database code and PHP code.
+</p>
+
+
+<h2>Summary</h2>
+<p>
+<b>Submission</b>:
+&nbsp; Login to Course Web Site &gt; Assignments &gt; Assignment 2 &gt; Assignment 2 Specification 
+        &gt; Make Submission &gt; upload required files &gt; [Submit]
+</p>
+<p>
+<b>Required Files</b>:
+&nbsp; a2.php, updates.sql, acting, title, toprank, similar, shortest, degrees
+</p>
+<p>
+<b>Deadline</b>:
+&nbsp; Friday 19 April 2018 @ 23.59
+</p>
+<p>
+<b>Late Penalty</b>:
+&nbsp; Late submissions will have marks deducted from the maximum achievable mark at the rate of 0.5% of the total mark per hour that they are late (i.e., 12% per day).
+</p>
+<p>
+This assignment contributes <b>15 marks</b> toward your total mark for this course. <br>
+The mark for each question indicates (roughly) its level of difficulty.<br>
+The total marks for the questions sum to 15.<br>
+</p>
+<p>
+How to do this assignment:
+</p>
+<ul>
+<li> read this specification carefully and completely
+</li><li> create a directory for this assignment
+</li><li> unpack the supplied zip file into this directory
+</li><li> login to <tt>grieg</tt> and run your PostgreSQL server
+</li><li> remove your Assignment 1 database (to save space)
+</li><li> create a new database called <tt>a2</tt> for your assignment 2
+</li><li> load the schema and populate the data into the database by <tt>psql -f a2.db a2</tt>
+</li><li> perform any required updates to the database by <tt>psql -f updates.sql a2</tt>
+</li><li> re-acquaint yourself with the database (by browsing the data using psql and/or examine its schema through the link <tt>[Schema]</tt> above)
+</li><li> familiarise (read the code) yourself with the provided sample PHP code file called <tt>pg</tt>
+</li><li> make sure <tt>pg</tt> (by <tt>chmod u+x pg</tt>) and run it
+</li><li> complete the tasks using <tt>pg</tt> as a reference example, you may also want to edit the supplied template files <tt>a2.php</tt> and <tt>updates.sql</tt>
+</li><li> submit all these files (the Required Files) via WebCMS3 as described above
+</li></ul>
+<p>
+Details of the above steps are given below. Note that you can
+put the files wherever you like; they do not have to be under
+your <tt>/srvr</tt> directory. You can also edit the PHP and SQL
+files on hosts other than <tt>grieg</tt>. The only time that
+you need to use <tt>grieg</tt> is to manipulate your database
+or to run your PHP scripts.
+</p>
+<p>
+You will probably not be able to fit both the database for
+Assignment 1 and the database for Assignment 2 into your
+PostgreSQL server on <tt>grieg</tt> (because of your quota
+on <tt>/srvr</tt>).
+
+
+</p><h2>Introduction</h2>
+
+<p>
+A successful movie (or TV show) not only entertains audience, but also enables film companies to gain tremendous profit. A lot of factors (such as good directors, experienced actors) are important for creating good movies. Nevertheless, famous directors and actors usually bring an attractive box-office income, but they do not necessarily guarantee a highly rated imdb score. This assignment is based on an IMDB dataset to build several small PHP commands to show interesting results.
+</p>
+
+<p>
+The dataset itself contains around 5000 movies, spanning across 100 years in 66 countries. There are more than 2000 movie directors, and thousands of actors/actresses. It also contains the IMDB rating score, numbers of votes and various facebook likes.
+                                         To let you feel the kind of data that you are dealing with, a (unordered) glimpse of the dataset is included below:
+</p>
+<pre>a2=&gt; select * from movie limit 10;
+  id  |           title            | year | content_rating | duration |    lang    |       country        |  gross   |  budget  | director_id 
+------+----------------------------+------+----------------+----------+------------+----------------------+----------+----------+-------------
+  407 | 102 Dalmatians             | 2000 | G              |      100 | English    | USA                  | 66941559 | 85000000 |        2174
+ 3699 | 10 Cloverfield Lane        | 2016 | PG-13          |      104 | English    | USA                  | 71897215 | 15000000 |        1327
+ 3016 | 10 Days in a Madhouse      | 2015 | R              |      111 | English    | USA                  |    14616 | 12000000 |        1881
+ 2846 | 10 Things I Hate About You | 1999 | PG-13          |       97 | English    | USA                  | 38176108 | 16000000 |        1458
+ 3421 | 10th &amp; Wolf                | 2006 | R              |      107 | English    | USA                  |    53481 |  8000000 |        2252
+ 3645 | 11:14                      | 2003 | R              |       85 | English    | USA                  |          |  6000000 |         665
+ 2430 | 127 Hours                  | 2010 | R              |       94 | English    | USA                  | 18329466 | 18000000 |          57
+ 4823 | 12 Angry Men               | 1957 | Not Rated      |       96 | English    | USA                  |          |   350000 |        1172
+ 1737 | 12 Monkeys                 |      | TV-14          |       42 | English    | USA                  |          |          |            
+ 2282 | 12 Rounds                  | 2009 | PG-13          |      108 | English    | USA                  | 12232937 | 22000000 |        1479
+(10 rows)
+
+a2=&gt; select * from rating limit 10;
+ movie_id | num_critic_for_reviews | num_user_for_reviews | num_voted_users | movie_facebook_likes | cast_total_facebook_likes | imdb_score 
+----------+------------------------+----------------------+-----------------+----------------------+---------------------------+------------
+      407 |                     84 |                   77 |           26413 |                  372 |                      4182 |        4.8
+     3699 |                    411 |                  440 |          126893 |                33000 |                     14504 |        7.3
+     3016 |                      1 |                   10 |             314 |                26000 |                      2059 |        7.5
+     2846 |                    133 |                  549 |          222099 |                10000 |                     37907 |        7.2
+     3421 |                     26 |                   34 |            5557 |                  294 |                      2512 |        6.4
+     3645 |                     68 |                  133 |           38273 |                    0 |                      2200 |        7.2
+     2430 |                    450 |                  440 |          279179 |                63000 |                     11984 |        7.6
+     4823 |                    177 |                  888 |          447785 |                40000 |                      1433 |        8.9
+     1737 |                     13 |                   56 |           20839 |                12000 |                      3309 |        7.6
+     2282 |                    113 |                  113 |           22823 |                    0 |                      2799 |        5.6
+(10 rows)
+
+a2=&gt; select * from director limit 10;
+  id  |       name       | facebook_likes 
+------+------------------+----------------
+ 1139 | Brad Bird        |            663
+  741 | Don Hall         |             38
+ 1295 | Rich Moore       |             66
+ 2132 | Dean DeBlois     |            255
+ 1228 | Jonathan Mostow  |             84
+  516 | James Gunn       |            571
+  203 | Hideaki Anno     |             28
+ 2312 | David Fincher    |          21000
+ 1753 | Matthew Vaughn   |            905
+ 1317 | Francis Lawrence |            508
+(10 rows)
+
+a2=&gt; select * from actor limit 10;
+  id  |         name         | facebook_likes 
+------+----------------------+----------------
+  408 | Christian Bale       |          23000
+ 1430 | Donna Murphy         |            553
+   66 | Robert Downey Jr.    |          21000
+  502 | Daniel Radcliffe     |          11000
+ 2011 | Lauren Cohan         |           4000
+  945 | Marlon Brando        |          10000
+ 1245 | Ruth Wilson          |           2000
+ 1590 | Christopher Meloni   |           3000
+ 3674 | Pierfrancesco Favino |            216
+ 2270 | Adam Brown           |            972
+(10 rows)
+
+a2=&gt; select * from acting limit 10;
+ movie_id | actor_id 
+----------+----------
+      407 |     2024
+     3699 |     1841
+     3016 |       11
+     2846 |      195
+     3421 |      738
+     3645 |     1186
+     2430 |      211
+     4823 |     1299
+     1737 |      786
+     2282 |      866
+(10 rows)
+
+a2=&gt; select * from genre limit 10;
+ movie_id |   genre   
+----------+-----------
+      407 | Adventure
+      407 | Comedy
+      407 | Family
+     3699 | Drama
+     3699 | Horror
+     3699 | Mystery
+     3699 | Sci-Fi
+     3699 | Thriller
+     3016 | Drama
+     2846 | Comedy
+(10 rows)
+
+a2=&gt; select * from keyword limit 10;
+ movie_id |    keyword     
+----------+----------------
+      407 | dog
+      407 | parole
+      407 | parole officer
+      407 | prison
+      407 | puppy
+     3699 | alien
+     3699 | bunker
+     3699 | car crash
+     3699 | kidnapping
+     3699 | minimal cast
+(10 rows)
+</pre>
+
+
+
+
+
+<h3>The sample PHP program</h3>
+<p>
+By following the steps above, you can prepare the setup of your assignment 2 and experience the provided sample program as follows:
+</p>
+<pre>-bash-4.1$ dropdb a2
+-bash-4.1$ createdb a2
+-bash-4.1$ psql -f a2.db a2
+SET
+SET
+...
+ALTER TABLE
+ALTER TABLE
+
+-bash-4.1$ psql -f updates.sql a2
+-bash-4.1$ ./pg
+Usage: ./pg Year
+
+-bash-4.1$ ./pg 1988
+1. Beetlejuice (PG, English, 92)
+2. Big (PG, English, 130)
+3. Crocodile Dundee II (PG, English, 108)
+4. My Stepmother Is an Alien (PG-13, English, 105)
+5. Poltergeist III (PG-13, English, 98)
+6. Scrooged (PG-13, English, 101)
+7. Twins (PG, English, 107)
+
+-bash-4.1$ 
+-bash-4.1$ ./pg 1989
+1. Back to the Future Part II (PG, English, 108)
+2. Batman (PG-13, English, 126)
+3. Bill &amp; Ted's Excellent Adventure (PG, English, 90)
+4. Dead Poets Society (PG, English, 128)
+5. Driving Miss Daisy (PG, English, 99)
+6. Henry V (PG-13, English, 137)
+7. Indiana Jones and the Last Crusade (PG-13, English, 127)
+8. Licence to Kill (PG-13, English, 133)
+9. New York Stories (PG, English, 124)
+10. Star Trek V: The Final Frontier (PG, English, 107)
+11. The Abyss (PG-13, English, 171)
+12. Troop Beverly Hills (PG, English, 105)
+13. UHF (PG-13, English, 150)
+14. We're No Angels (PG-13, English, 106)
+</pre>
+
+
+
+
+<h2>Submission and Testing</h2>
+<p>
+We will test your submission on <tt>Grieg</tt> as follows:
+</p>
+<ul>
+<p></p><li>
+create a testing subdirectory
+<p></p></li><li>
+untar the <tt>a2.tgz</tt> file into that directory
+<p></p></li><li>
+load your submitted <tt>a2.php</tt> and <tt>updates.sql</tt> files over the top of the standard ones
+<p></p></li><li>
+create a new database <tt><i>a2</i></tt> and initialise it with <code>a2.db</code> (For testing purposes, the dataset may be modified and slightly different from the dataset in your a2.db)
+<p></p></li><li>
+run the command: &nbsp; <code>psql <i>a2</i> -f updates.sql</code> &nbsp; (using your <tt>updates.sql</tt>)
+<p></p></li><li>
+run a series of tests using your submitted <tt>acting</tt>, <tt>title</tt>,
+                                                                              <tt>toprank</tt>, <tt>similar</tt>, <tt>shortest</tt> and <tt>degrees</tt> scripts
+<p></p></li><li>
+manually inspect your submitted PHP code and SQL code
+</li></ul>
+<p></p>
+<p>
+Your submitted code must be <em>complete</em> so that when we do the
+above, your PHP will work just as it did in your assignment directory
+and with a database with the identical schema (with either the same or slightly modified dataset) to yours (<code>a2.db</code>).
+If your code does not work when installed for testing on <tt>Grieg</tt>, as described
+above (for example, your <tt>updates.sql</tt>
+did not contain all of the required definitions, or you did not submit
+all of the required PHP files, etc),
+you will be penalised by a 50% administrative penalty.
+</p>
+<p>
+Some things that you can do wrong:
+</p><ul>
+<p></p><li>
+                                                                              make changes to files <i>other than</i> <tt>a2.php</tt>, <tt>updates.sql</tt> and the corresponding PHP commandline files (such as <tt>toprank</tt>)
+<p></p></li><li>
+forget to include all of your PHP functions in <tt>a2.php</tt> or other PHP files
+<p></p></li><li>
+forget to include all of your SQL and PLpgSQL definitions in <tt>updates.sql</tt>
+</li></ul>
+<p></p>
+<p>
+Before you submit, you should test out whether
+the files you submit will work by following a similar
+sequence of steps to those noted above on <tt>Grieg</tt>.
+
+</p><h2>Tasks</h2>
+<p>
+For each task,
+you are required to implement an executable PHP program command that takes in commandline arguments and displays the result in a specified format (which we will use for auto-marking).
+We assume the sample output format for each task below to
+to test your programs.
+                                                                              In particular, as shown in the code of <tt>pg</tt>, if any field of your output is empty, you should hide that field and its related formatting text (for example, in <tt>pg</tt>, a comma and a space will not be printed for <tt> duration </tt> if it is empty).
+                                                                              
+Of course, you are free to print debugging information temporarily (e.g. to add
+debugging <tt>print_r()</tt> calls), but please remember to eventually disable or remove them when your solution is submitted for marking. For all the tasks below, unless it is specified explicitly, we assume movies including any titles stored in the movie table (i.e., including movies and TV shows etc).
+</p><p>
+In implementing your functions,
+you are free to partition the functionality however you like
+between the database and the PHP scripts. In the past, some
+students have solved similar assignments to this by writing
+just about everything in SQL views and PLpgSQL functions
+and using PHP simply as a
+vehicle for collecting the results. Others have done most of
+the computational work in PHP. Do whatever you feel most
+comfortable with, but make sure that you limit your changes
+just to the files that you are required to submit, and do not create additional tables.
+</p>
+<p>
+For each task below, output nothing if there is no result returned from the database.
+If the task does not specify particular output order, your program can output in any row order.
+                                                                              If multiple columns are involved in your output, your output should follow the same column order as the sample output presented in each task below (for example, the order of the fields inside the brackets of the <tt> pg </tt> output matters).
+</p>
+
+<br>
+<h3>Task A: The list of movies acted by a given actor <span class="marks">(<span class="green">1</span> marks)</span></h3>
+<p>
+The <tt>acting</tt> script lists the movie title, its director, its year, its content rating and IMDB score, one per line, of all the movies acted by the given actor. The output is
+sorted by year and then by movie title, both in ascending order. If any movies have empty year, output them at the end and sort them by movie title in ascending order.
+It accepts one command-line argument: an actor name (has to exactly match a name stored in the database and the matching is case insensitive).
+It has the following output format:
+</p>
+<pre>grieg$ ./acting "james franco"
+1. Whatever It Takes -- David Raynr (2000, PG-13, 5.5)
+2. City by the Sea -- Michael Caton-Jones (2002, R, 6.2)
+3. Deuces Wild -- Scott Kalvert (2002, R, 5.6)
+4. Spider-Man -- Sam Raimi (2002, PG-13, 7.3)
+5. Spider-Man 2 -- Sam Raimi (2004, PG-13, 7.3)
+6. The Great Raid -- John Dahl (2005, R, 6.7)
+7. Flyboys -- Tony Bill (2006, PG-13, 6.6)
+8. The Dead Girl -- Karen Moncrieff (2006, R, 6.7)
+9. In the Valley of Elah -- Paul Haggis (2007, R, 7.2)
+10. Spider-Man 3 -- Sam Raimi (2007, PG-13, 6.2)
+11. Milk -- Gus Van Sant (2008, R, 7.6)
+12. Pineapple Express -- David Gordon Green (2008, R, 7.0)
+13. 127 Hours -- Danny Boyle (2010, R, 7.6)
+14. Date Night -- Shawn Levy (2010, PG-13, 6.3)
+15. Eat Pray Love -- Ryan Murphy (2010, PG-13, 5.7)
+16. Rise of the Planet of the Apes -- Rupert Wyatt (2011, PG-13, 7.6)
+17. Your Highness -- David Gordon Green (2011, R, 5.6)
+18. Spring Breakers -- Harmony Korine (2012, R, 5.3)
+19. The Iceman -- Ariel Vromen (2012, R, 6.9)
+20. Homefront -- Gary Fleder (2013, R, 6.5)
+21. Oz the Great and Powerful -- Sam Raimi (2013, PG, 6.4)
+22. Palo Alto -- Gia Coppola (2013, R, 6.3)
+23. This Is the End -- Evan Goldberg (2013, R, 6.7)
+24. The Interview -- Evan Goldberg (2014, R, 6.6)
+25. The Little Prince -- Mark Osborne (2015, PG, 7.8)
+26. Sausage Party -- Greg Tiernan (2016, R, 7.5)
+</pre>
+
+                For all the tasks in this assignment, as mentioned previously, your program shall output nothing if there are no results. If there are N results, it shall output exactly N lines of output without any extra lines or messages.
+                    We can then use the line count to measure the size of an output. For example:
+                                                                                                                                           <pre>grieg$ ./acting "james franco"|wc -l
+26
+grieg$ ./acting "john smith" |wc -l
+0
+                </pre>
+
+
+<br>
+<h3>Task B: List movie information by its title substring <span class="marks">(<span class="green">1</span> marks)</span></h3>
+<p>
+The <tt>title</tt> script lists the movie title, year, content rating, IMDB score and genres of those movies with the title matching the given substring (case insensitive), one per line.
+The output of multiple genres of a movie should be concatenated in one line delimited by a comma and sorted alphabetically in ascending order, as shown by an example below.
+The rows are ordered by year (ascending), then by IMDB rating (descending) and finally by title (ascending).
+It has the following output format:
+</p>
+<pre>grieg$ ./title "star war"
+1. Star Wars: Episode IV - A New Hope (1977, PG, 8.7) [Action,Adventure,Fantasy,Sci-Fi]
+2. Star Wars: Episode V - The Empire Strikes Back (1980, PG, 8.8) [Action,Adventure,Fantasy,Sci-Fi]
+3. Star Wars: Episode VI - Return of the Jedi (1983, PG, 8.4) [Action,Adventure,Fantasy,Sci-Fi]
+4. Star Wars: Episode I - The Phantom Menace (1999, PG, 6.5) [Action,Adventure,Fantasy,Sci-Fi]
+5. Star Wars: Episode II - Attack of the Clones (2002, PG, 6.7) [Action,Adventure,Fantasy,Sci-Fi]
+6. Star Wars: Episode III - Revenge of the Sith (2005, PG-13, 7.6) [Action,Adventure,Fantasy,Sci-Fi]
+7. Star Wars: The Clone Wars (TV-PG, 7.9) [Action,Adventure,Animation,Drama,Fantasy,Sci-Fi]
+
+grieg$ ./title "happy"
+1. Happy Gilmore (1996, PG-13, 7.0) [Comedy,Sport]
+2. Happy, Texas (1999, PG-13, 6.3) [Comedy,Crime,Romance]
+3. The Pursuit of Happyness (2006, PG-13, 8.0) [Biography,Drama]
+4. Happy Feet (2006, PG, 6.5) [Animation,Comedy,Family,Music,Romance]
+5. Another Happy Day (2011, R, 6.0) [Comedy,Drama]
+6. Happy Feet 2 (2011, PG, 5.9) [Animation,Comedy,Family,Musical]
+7. Happy Christmas (2014, R, 5.6) [Comedy,Drama]
+8. Happy Valley (TV-MA, 8.5) [Crime,Drama]
+
+grieg$ ./title "mars"
+1. Invaders from Mars (1986, PG, 5.5) [Horror,Sci-Fi]
+2. Mars Attacks! (1996, PG-13, 6.3) [Action,Comedy,Sci-Fi]
+3. Mission to Mars (2000, PG, 5.6) [Adventure,Sci-Fi,Thriller]
+4. Ghosts of Mars (2001, R, 4.9) [Action,Horror,Sci-Fi]
+5. We Are Marshall (2006, PG, 7.1) [Drama,Sport]
+6. Forgetting Sarah Marshall (2008, R, 7.2) [Comedy,Drama,Romance]
+7. The 41-Year-Old Virgin Who Knocked Up Sarah Marshall and Felt Superbad About It (2010, R, 2.7) [Comedy]
+8. Mars Needs Moms (2011, PG, 5.4) [Action,Adventure,Animation,Comedy,Family,Sci-Fi]
+9. The Last Days on Mars (2013, R, 5.5) [Horror,Sci-Fi,Thriller]
+10. Veronica Mars (TV-14, 8.4) [Crime,Drama,Mystery]
+</pre>
+
+
+<br>
+<h3>Task C: Top ranked movies <span class="marks">(<span class="green">2</span> marks)</span></h3>
+<p>
+The <tt>toprank</tt> script takes in 3 or 4 commandline arguments:
+</p><pre>./toprank K StartYear EndYear
+</pre>
+or:
+<pre>./toprank Genres K StartYear EndYear
+</pre>
+    where Genres is a list of genres separated by '&amp;', K is the top K movies ranked by IMDB score and then by the number of votes (both in descending order) between (and including) StartYear and EndYear, with 1 &lt;= K &lt;= 1000, 
+1900 &lt; StartYear &lt;= EndYear &lt; 2020 and your program will not be tested  with a list of more than 8 genres. We interpret '&amp;' as conjunction, i.e., the selected movies shall contain all the specified genres.
+
+When Genres is not provided (when your program takes in 3 arguments), perform the same ranking but on movies with any genres. Do not include any movie titles with empty year.
+For example:
+<pre>./toprank "Action&amp;Sci-Fi&amp;Adventure" 10 2005 2005
+1. Serenity (2005, PG-13, English) [8.0, 242599]
+2. Star Wars: Episode III - Revenge of the Sith (2005, PG-13, English) [7.6, 520104]
+3. The Island (2005, PG-13, English) [6.9, 263329]
+4. Zathura: A Space Adventure (2005, PG, English) [6.1, 67707]
+5. Doom (2005, R, English) [5.2, 88146]
+6. Stealth (2005, PG-13, English) [5.0, 45455]
+7. A Sound of Thunder (2005, PG-13, English) [4.2, 16474]
+8. The Helix... Loaded (2005, R, English) [1.9, 534]
+
+./toprank "Sci-Fi&amp;Adventure&amp;Action" 20 1920 2019
+1. Inception (2010, PG-13, English) [8.8, 1468200]
+2. Star Wars: Episode V - The Empire Strikes Back (1980, PG, English) [8.8, 837759]
+3. Star Wars: Episode IV - A New Hope (1977, PG, English) [8.7, 911097]
+4. Star Wars: Episode VI - Return of the Jedi (1983, PG, English) [8.4, 681857]
+5. Aliens (1986, R, English) [8.4, 488537]
+6. Captain America: Civil War (2016, PG-13, English) [8.2, 272670]
+7. Godzilla Resurgence (2016, Japanese) [8.2, 374]
+8. The Avengers (2012, PG-13, English) [8.1, 995415]
+9. Guardians of the Galaxy (2014, PG-13, English) [8.1, 682155]
+10. Mad Max: Fury Road (2015, R, English) [8.1, 552503]
+11. Deadpool (2016, R, English) [8.1, 479047]
+12. Destiny (2014, English) [8.1, 3089]
+13. X-Men: Days of Future Past (2014, PG-13, English) [8.0, 514125]
+14. Star Trek (2009, PG-13, English) [8.0, 504419]
+15. Serenity (2005, PG-13, English) [8.0, 242599]
+16. The Iron Giant (1999, PG, English) [8.0, 128455]
+17. Avatar (2009, PG-13, English) [7.9, 886204]
+18. Iron Man (2008, PG-13, English) [7.9, 696338]
+19. Edge of Tomorrow (2014, PG-13, English) [7.9, 431620]
+20. Big Hero 6 (2014, PG, English) [7.9, 279093]
+
+./toprank 20 1920 2019
+1. The Shawshank Redemption (1994, R, English) [9.3, 1689764]
+2. The Godfather (1972, R, English) [9.2, 1155770]
+3. The Dark Knight (2008, PG-13, English) [9.0, 1676169]
+4. The Godfather: Part II (1974, R, English) [9.0, 790926]
+5. Pulp Fiction (1994, R, English) [8.9, 1324680]
+6. The Lord of the Rings: The Return of the King (2003, PG-13, English) [8.9, 1215718]
+7. Schindler's List (1993, R, English) [8.9, 865020]
+8. The Good, the Bad and the Ugly (1966, Approved, Italian) [8.9, 503509]
+9. 12 Angry Men (1957, Not Rated, English) [8.9, 447785]
+10. Inception (2010, PG-13, English) [8.8, 1468200]
+11. Fight Club (1999, R, English) [8.8, 1347461]
+12. Forrest Gump (1994, PG-13, English) [8.8, 1251222]
+13. The Lord of the Rings: The Fellowship of the Ring (2001, PG-13, English) [8.8, 1238746]
+14. Star Wars: Episode V - The Empire Strikes Back (1980, PG, English) [8.8, 837759]
+15. The Matrix (1999, R, English) [8.7, 1217752]
+16. The Lord of the Rings: The Two Towers (2002, PG-13, English) [8.7, 1100446]
+17. Star Wars: Episode IV - A New Hope (1977, PG, English) [8.7, 911097]
+18. Goodfellas (1990, R, English) [8.7, 728685]
+19. One Flew Over the Cuckoo's Nest (1975, R, English) [8.7, 680041]
+20. City of God (2002, R, Portuguese) [8.7, 533200]
+</pre>
+
+
+<br>
+<h3>Task D: Similar movies <span class="marks">(<span class="green">3</span> marks)</span></h3>
+<p>
+Suppose you are asked to implement a movie recommendation feature for IMDB. Based on the movie that a user is currently browsing, a list of <i>similar</i> movies will be presented. 
+In Task D, the <tt>similar</tt> script takes in 2 arguments: a case-insensitive movie full title (this shall produce a single match. If not, just use the one with the most recent year as if it is the only match); and a number N (1 &lt;= N &lt;= 1000). It will then find its similar N movies (excluding itself) that share the maximum number of common genres (output nothing if no other movies have any common genres with the given movie). For those with the same number of common genres, they will then be ranked by the maximum number (including zero number) of common plot keywords. If both are the same, then they will be ranked by their IMDB scores and then by the number of votes (the higher the better).
+</p><pre>./similar "Happy Feet" 30
+1. Hairspray (2007) [4, 2, 6.7, 98693]
+2. Confessions of a Teenage Drama Queen (2004) [4, 1, 4.6, 23408]
+3. Aladdin (1992) [4, 0, 8.0, 260939]
+4. Tangled (2010) [4, 0, 7.8, 294810]
+5. The Book of Life (2014) [4, 0, 7.3, 45580]
+6. Shrek 2 (2004) [4, 0, 7.2, 314630]
+7. Enchanted (2007) [4, 0, 7.1, 142496]
+8. The Road to El Dorado (2000) [4, 0, 6.9, 58300]
+9. A Monster in Paris (2011) [4, 0, 6.8, 15790]
+10. Sinbad: Legend of the Seven Seas (2003) [4, 0, 6.7, 36144]
+11. Bandslam (2009) [4, 0, 6.4, 11958]
+12. Freaky Friday (2003) [4, 0, 6.1, 96693]
+13. Rugrats in Paris: The Movie (2000) [4, 0, 6.1, 8146]
+14. Home on the Range (2004) [4, 0, 5.4, 13581]
+15. The Lizzie McGuire Movie (2003) [4, 0, 5.3, 27580]
+16. Alpha and Omega (2010) [4, 0, 5.3, 10986]
+17. Roadside Romeo (2008) [4, 0, 5.3, 922]
+18. High School Musical (2006) [4, 0, 5.2, 59254]
+19. Alvin and the Chipmunks (2007) [4, 0, 5.2, 57276]
+20. Alvin and the Chipmunks: The Road Chip (2015) [4, 0, 5.0, 9418]
+21. High School Musical 2 (2007) [4, 0, 4.8, 39786]
+22. High School Musical 3: Senior Year (2008) [4, 0, 4.5, 43795]
+23. Alvin and the Chipmunks: The Squeakquel (2009) [4, 0, 4.5, 31649]
+24. Alvin and the Chipmunks: Chipwrecked (2011) [4, 0, 4.4, 22838]
+25. Hannah Montana: The Movie (2009) [4, 0, 4.2, 31760]
+26. Doug's 1st Movie (1999) [3, 2, 5.0, 2448]
+27. Monsters, Inc. (2001) [3, 1, 8.1, 585659]
+28. The Iron Giant (1999) [3, 1, 8.0, 128455]
+29. Toy Story 2 (1999) [3, 1, 7.9, 385871]
+30. Arthur [3, 1, 7.4, 8495]
+
+./similar "The Shawshank Redemption" 30
+1. American History X (1998) [2, 1, 8.6, 782437]
+2. The Grand Budapest Hotel (2014) [2, 1, 8.1, 475518]
+3. The Town (2010) [2, 1, 7.6, 280228]
+4. Escape from Alcatraz (1979) [2, 1, 7.6, 87090]
+5. Bronson (2008) [2, 1, 7.1, 84817]
+6. Bandits (2001) [2, 1, 6.6, 57038]
+7. Contraband (2012) [2, 1, 6.5, 101977]
+8. Faster (2010) [2, 1, 6.5, 80574]
+9. Hurricane Streets (1997) [2, 1, 6.5, 1038]
+10. Undisputed (2002) [2, 1, 6.1, 21542]
+11. Prison (1987) [2, 1, 5.9, 2705]
+12. Fled (1996) [2, 1, 5.3, 7073]
+13. Civil Brand (2002) [2, 1, 5.3, 553]
+14. American Heist (2014) [2, 1, 5.2, 12372]
+15. Get Rich or Die Tryin' (2005) [2, 1, 5.0, 35834]
+16. The Godfather (1972) [2, 0, 9.2, 1155770]
+17. The Dark Knight (2008) [2, 0, 9.0, 1676169]
+18. The Godfather: Part II (1974) [2, 0, 9.0, 790926]
+19. Fargo [2, 0, 9.0, 170055]
+20. Pulp Fiction (1994) [2, 0, 8.9, 1324680]
+21. 12 Angry Men (1957) [2, 0, 8.9, 447785]
+22. Daredevil [2, 0, 8.8, 213483]
+23. Goodfellas (1990) [2, 0, 8.7, 728685]
+24. City of God (2002) [2, 0, 8.7, 533200]
+25. Gomorrah [2, 0, 8.7, 9638]
+26. Se7en (1995) [2, 0, 8.6, 1023511]
+27. The Silence of the Lambs (1991) [2, 0, 8.6, 887467]
+28. The Usual Suspects (1995) [2, 0, 8.6, 740918]
+29. Hannibal [2, 0, 8.6, 159910]
+30. Luther [2, 0, 8.6, 70568]
+</pre>
+
+
+<br>
+<h3>Task E: Six degrees of Kevin Bacon <span class="marks">(<span class="green">4</span> marks)</span></h3>
+<p>
+Tasks E &amp; F are inspired by Six degrees of Kevin Bacon.
+The <tt>shortest</tt> script takes in two actor names (with case insensitive matching), and lists the shortest path (up to Six Degrees of Separation) between two given actors. In other words, if two actors are not connected within six degrees, you can assume that they are not connected at all. The output will be a list of actors, the movies and the years.
+If there are more than one the same shortest paths, output all of them (all output lines are sorted alphabetically in ascending order).
+Reference(Wikipedia): <a href="https://en.wikipedia.org/wiki/Six_Degrees_of_Kevin_Bacon">Six Degrees of Kevin Bacon</a> 
+</p><pre>./shortest "tom cruise" "Jeremy Renner"
+1. Tom Cruise was in Mission: Impossible - Ghost Protocol (2011) with Jeremy Renner
+2. Tom Cruise was in Mission: Impossible - Rogue Nation (2015) with Jeremy Renner
+
+./shortest "chris evans" "Scarlett Johansson"
+1. Chris Evans was in Captain America: Civil War (2016) with Scarlett Johansson
+2. Chris Evans was in Captain America: The Winter Soldier (2014) with Scarlett Johansson
+
+./shortest "tom cruise" "Robert Downey Jr."
+1. Tom Cruise was in Days of Thunder (1990) with Robert Duvall; Robert Duvall was in Lucky You (2007) with Robert Downey Jr.
+2. Tom Cruise was in Days of Thunder (1990) with Robert Duvall; Robert Duvall was in The Judge (2014) with Robert Downey Jr.
+3. Tom Cruise was in Jack Reacher (2012) with Robert Duvall; Robert Duvall was in Lucky You (2007) with Robert Downey Jr.
+4. Tom Cruise was in Jack Reacher (2012) with Robert Duvall; Robert Duvall was in The Judge (2014) with Robert Downey Jr.
+5. Tom Cruise was in Mission: Impossible (1996) with Kristin Scott Thomas; Kristin Scott Thomas was in Richard III (1995) with Robert Downey Jr.
+6. Tom Cruise was in Mission: Impossible III (2006) with Eddie Marsan; Eddie Marsan was in Sherlock Holmes (2009) with Robert Downey Jr.
+7. Tom Cruise was in Mission: Impossible III (2006) with Eddie Marsan; Eddie Marsan was in Sherlock Holmes: A Game of Shadows (2011) with Robert Downey Jr.
+8. Tom Cruise was in The Firm (1993) with Holly Hunter; Holly Hunter was in Home for the Holidays (1995) with Robert Downey Jr.
+
+./shortest "brad pitt" "will smith"
+1. Brad Pitt was in Burn After Reading (2008) with Kevin Sussman; Kevin Sussman was in Hitch (2005) with Will Smith
+2. Brad Pitt was in Ocean's Thirteen (2007) with Matt Damon; Matt Damon was in The Legend of Bagger Vance (2000) with Will Smith
+3. Brad Pitt was in True Romance (1993) with Michael Rapaport; Michael Rapaport was in Hitch (2005) with Will Smith
+
+./shortest "chris evans" "bill clinton"
+1. Chris Evans was in Captain America: Civil War (2016) with Robert Downey Jr.; Robert Downey Jr. was in Kiss Kiss Bang Bang (2005) with Larry Miller; Larry Miller was in What's the Worst That Could Happen? (2001) with Richard Schiff; Richard Schiff was in Lucky Numbers (2000) with Michael Moore; Michael Moore was in Bowling for Columbine (2002) with Bill Clinton
+2. Chris Evans was in Captain America: Civil War (2016) with Robert Downey Jr.; Robert Downey Jr. was in Kiss Kiss Bang Bang (2005) with Larry Miller; Larry Miller was in What's the Worst That Could Happen? (2001) with Richard Schiff; Richard Schiff was in Lucky Numbers (2000) with Michael Moore; Michael Moore was in Sicko (2007) with Bill Clinton
+3. Chris Evans was in Captain America: Civil War (2016) with Robert Downey Jr.; Robert Downey Jr. was in Lucky You (2007) with Robert Duvall; Robert Duvall was in The 6th Day (2000) with Michael Rapaport; Michael Rapaport was in Lucky Numbers (2000) with Michael Moore; Michael Moore was in Bowling for Columbine (2002) with Bill Clinton
+4. Chris Evans was in Captain America: Civil War (2016) with Robert Downey Jr.; Robert Downey Jr. was in Lucky You (2007) with Robert Duvall; Robert Duvall was in The 6th Day (2000) with Michael Rapaport; Michael Rapaport was in Lucky Numbers (2000) with Michael Moore; Michael Moore was in Sicko (2007) with Bill Clinton
+5. Chris Evans was in Captain America: Civil War (2016) with Robert Downey Jr.; Robert Downey Jr. was in The Judge (2014) with Robert Duvall; Robert Duvall was in The 6th Day (2000) with Michael Rapaport; Michael Rapaport was in Lucky Numbers (2000) with Michael Moore; Michael Moore was in Bowling for Columbine (2002) with Bill Clinton
+6. Chris Evans was in Captain America: Civil War (2016) with Robert Downey Jr.; Robert Downey Jr. was in The Judge (2014) with Robert Duvall; Robert Duvall was in The 6th Day (2000) with Michael Rapaport; Michael Rapaport was in Lucky Numbers (2000) with Michael Moore; Michael Moore was in Sicko (2007) with Bill Clinton
+7. Chris Evans was in Captain America: Civil War (2016) with Robert Downey Jr.; Robert Downey Jr. was in The Soloist (2009) with Stephen Root; Stephen Root was in Imagine That (2009) with Richard Schiff; Richard Schiff was in Lucky Numbers (2000) with Michael Moore; Michael Moore was in Bowling for Columbine (2002) with Bill Clinton
+8. Chris Evans was in Captain America: Civil War (2016) with Robert Downey Jr.; Robert Downey Jr. was in The Soloist (2009) with Stephen Root; Stephen Root was in Imagine That (2009) with Richard Schiff; Richard Schiff was in Lucky Numbers (2000) with Michael Moore; Michael Moore was in Sicko (2007) with Bill Clinton
+...
+45. Chris Evans was in The Iceman (2012) with James Franco; James Franco was in City by the Sea (2002) with Robert De Niro; Robert De Niro was in Men of Honor (2000) with Michael Rapaport; Michael Rapaport was in Lucky Numbers (2000) with Michael Moore; Michael Moore was in Bowling for Columbine (2002) with Bill Clinton
+46. Chris Evans was in The Iceman (2012) with James Franco; James Franco was in City by the Sea (2002) with Robert De Niro; Robert De Niro was in Men of Honor (2000) with Michael Rapaport; Michael Rapaport was in Lucky Numbers (2000) with Michael Moore; Michael Moore was in Sicko (2007) with Bill Clinton
+47. Chris Evans was in The Iceman (2012) with James Franco; James Franco was in In the Valley of Elah (2007) with Charlize Theron; Charlize Theron was in Men of Honor (2000) with Michael Rapaport; Michael Rapaport was in Lucky Numbers (2000) with Michael Moore; Michael Moore was in Bowling for Columbine (2002) with Bill Clinton
+48. Chris Evans was in The Iceman (2012) with James Franco; James Franco was in In the Valley of Elah (2007) with Charlize Theron; Charlize Theron was in Men of Honor (2000) with Michael Rapaport; Michael Rapaport was in Lucky Numbers (2000) with Michael Moore; Michael Moore was in Sicko (2007) with Bill Clinton
+49. Chris Evans was in The Losers (2010) with Jason Patric; Jason Patric was in The Lost Boys (1987) with Dianne Wiest; Dianne Wiest was in I Am Sam (2001) with Richard Schiff; Richard Schiff was in Lucky Numbers (2000) with Michael Moore; Michael Moore was in Bowling for Columbine (2002) with Bill Clinton
+50. Chris Evans was in The Losers (2010) with Jason Patric; Jason Patric was in The Lost Boys (1987) with Dianne Wiest; Dianne Wiest was in I Am Sam (2001) with Richard Schiff; Richard Schiff was in Lucky Numbers (2000) with Michael Moore; Michael Moore was in Sicko (2007) with Bill Clinton
+</pre>
+Both case sensitive or case insensitve sorting are accepted as correct answers. For example, your output of the last example above may instead look like below:
+<pre>...
+45. Chris Evans was in The Iceman (2012) with James Franco; James Franco was in In the Valley of Elah (2007) with Charlize Theron; Charlize Theron was in Men of Honor (2000) with Michael Rapaport; Michael Rapaport was in Lucky Numbers (2000) with Michael Moore; Michael Moore was in Bowling for Columbine (2002) with Bill Clinton
+46. Chris Evans was in The Iceman (2012) with James Franco; James Franco was in In the Valley of Elah (2007) with Charlize Theron; Charlize Theron was in Men of Honor (2000) with Michael Rapaport; Michael Rapaport was in Lucky Numbers (2000) with Michael Moore; Michael Moore was in Sicko (2007) with Bill Clinton
+47. Chris Evans was in The Losers (2010) with Jason Patric; Jason Patric was in The Lost Boys (1987) with Dianne Wiest; Dianne Wiest was in I Am Sam (2001) with Richard Schiff; Richard Schiff was in Lucky Numbers (2000) with Michael Moore; Michael Moore was in Bowling for Columbine (2002) with Bill Clinton
+48. Chris Evans was in The Losers (2010) with Jason Patric; Jason Patric was in The Lost Boys (1987) with Dianne Wiest; Dianne Wiest was in I Am Sam (2001) with Richard Schiff; Richard Schiff was in Lucky Numbers (2000) with Michael Moore; Michael Moore was in Sicko (2007) with Bill Clinton
+49. Chris Evans was in TMNT (2007) with Mako; Mako was in Seven Years in Tibet (1997) with Brad Pitt; Brad Pitt was in True Romance (1993) with Michael Rapaport; Michael Rapaport was in Lucky Numbers (2000) with Michael Moore; Michael Moore was in Bowling for Columbine (2002) with Bill Clinton
+50. Chris Evans was in TMNT (2007) with Mako; Mako was in Seven Years in Tibet (1997) with Brad Pitt; Brad Pitt was in True Romance (1993) with Michael Rapaport; Michael Rapaport was in Lucky Numbers (2000) with Michael Moore; Michael Moore was in Sicko (2007) with Bill Clinton
+</pre>
+Some more examples:
+<pre>./shortest "emma stone" "al pacino"
+...
+32. Emma Stone was in Zombieland (2009) with Bill Murray; Bill Murray was in Get Low (2009) with Robert Duvall; Robert Duvall was in The Godfather (1972) with Al Pacino
+33. Emma Stone was in Zombieland (2009) with Bill Murray; Bill Murray was in Get Low (2009) with Robert Duvall; Robert Duvall was in The Godfather: Part II (1974) with Al Pacino
+34. Emma Stone was in Zombieland (2009) with Bill Murray; Bill Murray was in The Grand Budapest Hotel (2014) with F. Murray Abraham; F. Murray Abraham was in Scarface (1983) with Al Pacino
+35. Emma Stone was in Zombieland (2009) with Bill Murray; Bill Murray was in The Monuments Men (2014) with Matt Damon; Matt Damon was in Ocean's Thirteen (2007) with Al Pacino
+
+./shortest "emma stone" "adam garcia"
+...
+5. Emma Stone was in Marmaduke (2010) with Judy Greer; Judy Greer was in The Hebrew Hammer (2003) with Adam Goldberg; Adam Goldberg was in Babe: Pig in the City (1998) with Glenne Headly; Glenne Headly was in Confessions of a Teenage Drama Queen (2004) with Adam Garcia
+6. Emma Stone was in The Croods (2013) with Nicolas Cage; Nicolas Cage was in Kiss of Death (1995) with Michael Rapaport; Michael Rapaport was in The Pallbearer (1996) with Carol Kane; Carol Kane was in Confessions of a Teenage Drama Queen (2004) with Adam Garcia
+7. Emma Stone was in The Help (2011) with Bryce Dallas Howard; Bryce Dallas Howard was in 50/50 (2011) with Joseph Gordon-Levitt; Joseph Gordon-Levitt was in Latter Days (2003) with Jacqueline Bisset; Jacqueline Bisset was in Fascination (2004) with Adam Garcia
+8. Emma Stone was in The House Bunny (2008) with Beverly D'Angelo; Beverly D'Angelo was in Illuminata (1998) with Ben Gazzara; Ben Gazzara was in Inchon (1981) with Jacqueline Bisset; Jacqueline Bisset was in Fascination (2004) with Adam Garcia
+
+./shortest "emma stone" "chelsea field"
+...
+22. Emma Stone was in The Rocker (2008) with Bradley Cooper; Bradley Cooper was in Silver Linings Playbook (2012) with Robert De Niro; Robert De Niro was in Meet the Fockers (2004) with Teri Polo; Teri Polo was in 2:13 (2009) with Jere Burns; Jere Burns was in Crocodile Dundee in Los Angeles (2001) with Paul Hogan; Paul Hogan was in Flipper (1996) with Chelsea Field
+23. Emma Stone was in The Rocker (2008) with Bradley Cooper; Bradley Cooper was in Silver Linings Playbook (2012) with Robert De Niro; Robert De Niro was in Meet the Parents (2000) with Teri Polo; Teri Polo was in 2:13 (2009) with Jere Burns; Jere Burns was in Crocodile Dundee in Los Angeles (2001) with Paul Hogan; Paul Hogan was in Flipper (1996) with Chelsea Field
+24. Emma Stone was in The Rocker (2008) with Josh Gad; Josh Gad was in 21 (2008) with Kevin Spacey; Kevin Spacey was in The Usual Suspects (1995) with Kevin Pollak; Kevin Pollak was in 2:13 (2009) with Jere Burns; Jere Burns was in Crocodile Dundee in Los Angeles (2001) with Paul Hogan; Paul Hogan was in Flipper (1996) with Chelsea Field
+25. Emma Stone was in Zombieland (2009) with Bill Murray; Bill Murray was in Moonrise Kingdom (2012) with Bruce Willis; Bruce Willis was in Cop Out (2010) with Kevin Pollak; Kevin Pollak was in 2:13 (2009) with Jere Burns; Jere Burns was in Crocodile Dundee in Los Angeles (2001) with Paul Hogan; Paul Hogan was in Flipper (1996) with Chelsea Field
+</pre>
+
+<br>
+<h3>Task F: Actors with N degrees of separation <span class="marks">(<span class="green">4</span> marks)</span></h3>
+<p>
+The <tt>degrees</tt> takes in an actor name (case insensitive) and M &amp; N degrees of separation (where 1 &lt;= M &lt;= N &lt;= 6). It outputs all actors (no directors) that are exactly M to N degrees of separation (which represents the shortest path) from the given actor. 
+Output the list of actors with the degree of separation indicated in brackets, sorted by the degree of separation and then by name, both in ascending order. For example:
+</p><pre>./degrees "chris evans" 1 2
+1. Andre Braugher (1)
+2. Ari Graynor (1)
+3. Benedict Wong (1)
+4. Dane Cook (1)
+5. Dominic Cooper (1)
+6. Ed Begley Jr. (1)
+7. Ewen Bremner (1)
+8. Hayley Atwell (1)
+9. Ioan Gruffudd (1)
+10. James Franco (1)
+11. Jason Patric (1)
+12. Jason Statham (1)
+13. JoAnna Garcia Swisher (1)
+14. Kang-ho Song (1)
+15. Keanu Reeves (1)
+16. Mako (1)
+17. Mia Kirshner (1)
+18. Noel Gugliemi (1)
+19. Robert Davi (1)
+20. Robert Downey Jr. (1)
+21. Sarah Michelle Gellar (1)
+22. scar Jaenada (1)
+23. Scarlett Johansson (1)
+24. Troy Garity (1)
+25. Aaron Yoo (2)
+26. Adam Alexi-Malle (2)
+27. Adam Arkin (2)
+28. Adam Baldwin (2)
+...
+368. Wendell Pierce (2)
+369. William Atherton (2)
+370. William Smith (2)
+371. Woo-sung Jung (2)
+372. Zach Gilford (2)
+373. Zach McGowan (2)
+374. Zach Woods (2)
+375. Zooey Deschanel (2)
+
+./degrees "chris evans" 2 2
+1. Aaron Yoo (2)
+2. Adam Alexi-Malle (2)
+3. Adam Arkin (2)
+4. Adam Baldwin (2)
+5. Ah-sung Ko (2)
+6. Aidan Quinn (2)
+...
+345. William Atherton (2)
+346. William Smith (2)
+347. Woo-sung Jung (2)
+348. Zach Gilford (2)
+349. Zach McGowan (2)
+350. Zach Woods (2)
+351. Zooey Deschanel (2)
+
+./degrees "tom cruise" 1 1 
+1. Adrian Pasdar (1)
+2. Andrew Garfield (1)
+3. Beth Grant (1)
+4. Bill Cobbs (1)
+5. Bonnie Hunt (1)
+6. Brad Pitt (1)
+7. Chad Lindberg (1)
+8. David Oyelowo (1)
+9. Debi Mazar (1)
+10. Demi Moore (1)
+...
+45. Tom Waits (1)
+46. Tom Wilkinson (1)
+47. Tony Goldwyn (1)
+48. Valeria Golino (1)
+49. Vanessa Redgrave (1)
+50. Vinessa Shaw (1)
+51. Wilford Brimley (1)
+52. William Smith (1)
+53. Zo Bell (1)
+
+./degrees "tom cruise" 1 2 | wc -l
+674
+./degrees "chris evans" 4 4 |wc -l
+1714
+./degrees "chris evans" 1 6 |wc -l
+4569
+./degrees "tom hanks" 1 5 |wc -l
+4485
+./degrees "emma stone" 3 6 |wc -l
+4161
+</pre>
+
+
+
+
+
+
+
+
+
+
+</body></html>

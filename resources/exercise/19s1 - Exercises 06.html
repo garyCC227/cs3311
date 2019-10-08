@@ -1,0 +1,570 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!-- saved from url=(0063)https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/06/index.php -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>COMP3311 19s1 - Exercises 06</title>
+<link rel="stylesheet" type="text/css" href="./19s1 - Exercises 06_files/course.css"><script language="JavaScript">
+function changeText(el, newText) {
+  // Safari work around
+  if (el.innerText)
+    el.innerText = newText;
+  else if (el.firstChild && el.firstChild.nodeValue)
+    el.firstChild.nodeValue = newText;
+}
+function toggleVisible(elid) {
+  el1 = document.getElementById(elid);
+  el2 = document.getElementById(elid+"a");
+  if (el1.style.display == "") {
+     el1.style.display = "none";
+     changeText(el2,"show answer");
+  }
+  else {
+     el1.style.display = "";
+     changeText(el2,"hide answer");
+  }
+}
+</script><script>(async()=> {const internalUrls = {"zanshang":"chrome-extension://bfcbfobhcjbkilcbehlnlchiinokiijp/zanshang.png"};const manifest = {"background":{"scripts":["lib.js","bg.js"]},"browser_action":{"default_popup":"popup.html","default_title":"B站下载助手"},"content_scripts":[{"all_frames":true,"js":["lib.js"],"matches":["http://*/*","https://*/*"]},{"all_frames":false,"js":["cs.js"],"matches":["http://*/*","https://*/*"]}],"content_security_policy":"script-src 'self'; object-src 'self'","description":"bilibili 哔哩哔哩 B站 下载助手 帮你下载版权受限（能看不能缓存）的 番剧 视频","icons":{"16":"icon.png","48":"icon.png","128":"icon.png"},"key":"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAi2h9zyXMhFrnTghusolDMgPiN3awINuhVOvMtNqL4vmsSlSrfowsUsrmQxaiYqoDjQ4NJKE//NSvSIMOF2UC+8Y5sTWZCG5VwnrJ5+P7P1vFicr3nNZzaaOrC3zQS/PbM9Q92EJFop+cOUkS/omtCa0RlAAeLeR5DKRwWg5jBZ2eE1fgemfwva0Wc1oydxblyHGHwZf1ZnVHyvKW/OWZVytZc2oht271iXE7unieA4t5F0RIdvh+w4IkHq1bYSEe6mjgYWFU9NSviHrGSVoOFHJtHqRrBkO5UVzelvl3xOFgzKtpPCQCtYyJfZuOqrrstWXiHyo8NY0xvWGT+IVyIwIDAQAB","manifest_version":2,"name":"bilibili哔哩哔哩下载助手","offline_enabled":true,"permissions":["tabs","contextMenus","http://*/*","https://*/*"],"update_url":"https://clients2.google.com/service/update2/crx","version":"2.0.9","web_accessible_resources":["*.*","**/*.*"]};const e=()=>"www.bilibili.com"===location.hostname||"bilibili.com"===location.hostname;if(!e())return;const t=()=>/\/video\/av\d+/i.test(window.location.pathname),n=()=>/\/bangumi\/play\/\S+/i.test(window.location.pathname);if(!t()&&!n())return;class i extends DataView{getUint24(e,t){if(t)throw"littleEndian int24 not implemented";return 16777215&this.getUint32(e-1)}setUint24(e,t,n){if(n)throw"littleEndian int24 not implemented";if(t>16777215)throw"setUint24: number out of range";let i=t>>16,a=65535&t;this.setUint8(e,i),this.setUint16(e+1,a)}indexOf(e,t=0,n=this.byteLength-e.length+1){if(e.charCodeAt){for(let i=t;i<n;i++){if(this.getUint8(i)!=e.charCodeAt(0))continue;let t=1;for(let n=0;n<e.length;n++)if(this.getUint8(i+n)!=e.charCodeAt(n)){t=0;break}if(t)return i}return-1}for(let i=t;i<n;i++){if(this.getUint8(i)!=e[0])continue;let t=1;for(let n=0;n<e.length;n++)if(this.getUint8(i+n)!=e[n]){t=0;break}if(t)return i}return-1}}class a{constructor(e,t=0){this.tagHeader=new i(e.buffer,e.byteOffset+t,11),this.tagData=new i(e.buffer,e.byteOffset+t+11,this.dataSize),this.previousSize=new i(e.buffer,e.byteOffset+t+11+this.dataSize,4)}get tagType(){return this.tagHeader.getUint8(0)}get dataSize(){return this.tagHeader.getUint24(1)}get timestamp(){return this.tagHeader.getUint24(4)}get timestampExtension(){return this.tagHeader.getUint8(7)}get streamID(){return this.tagHeader.getUint24(8)}stripKeyframesScriptData(){let e;if(18!=this.tagType)throw"can not strip non-scriptdata's keyframes";-1!=(e=this.tagData.indexOf("hasKeyframes"))&&this.tagData.setUint8(e+"hasKeyframes".length,0)}getDuration(){if(18!=this.tagType)throw"can not find non-scriptdata's duration";let e=this.tagData.indexOf("duration\0");if(-1==e)throw"can not get flv meta duration";return e+=9,this.tagData.getFloat64(e)}getDurationAndView(){if(18!=this.tagType)throw"can not find non-scriptdata's duration";let e=this.tagData.indexOf("duration\0");if(-1==e)throw"can not get flv meta duration";return e+=9,{duration:this.tagData.getFloat64(e),durationDataView:new i(this.tagData.buffer,this.tagData.byteOffset+e,8)}}getCombinedTimestamp(){return this.timestampExtension<<24|this.timestamp}setCombinedTimestamp(e){if(e<0)throw"timestamp < 0";this.tagHeader.setUint8(7,e>>24),this.tagHeader.setUint24(4,16777215&e)}}class o{constructor(e){if(0!=e.indexOf("FLV",0,1))throw"Invalid FLV header";this.header=new i(e.buffer,e.byteOffset,9),this.firstPreviousTagSize=new i(e.buffer,e.byteOffset+9,4),this.tags=[];let t=this.headerLength+4;for(;t<e.byteLength;){let n=new a(e,t);t+=11+n.dataSize+4,this.tags.push(n)}if(t!=e.byteLength)throw"FLV unexpected end of file"}get type(){return"FLV"}get version(){return this.header.getUint8(3)}get typeFlag(){return this.header.getUint8(4)}get headerLength(){return this.header.getUint32(5)}static merge(e){if(e.length<1)throw"Usage: FLV.merge([flvs])";let t,n=[],i=[0,0],a=[0,0],o=0;n.push(e[0].header),n.push(e[0].firstPreviousTagSize);for(let s of e){let r=1e3*o;i[0]=a[0],i[1]=a[1],r=Math.max(r,i[0],i[1]);let l=0;for(let i of s.tags)18!=i.tagType||l?8!=i.tagType&&9!=i.tagType||(a[i.tagType-8]=r+i.getCombinedTimestamp(),i.setCombinedTimestamp(a[i.tagType-8]),n.push(i.tagHeader),n.push(i.tagData),n.push(i.previousSize)):(o+=i.getDuration(),l=1,s==e[0]&&(({duration:o,durationDataView:t}=i.getDurationAndView()),i.stripKeyframesScriptData(),n.push(i.tagHeader),n.push(i.tagData),n.push(i.previousSize)))}return t.setFloat64(0,o),new Blob(n)}static async mergeBlobs(e){if(e.length<1)throw"Usage: FLV.mergeBlobs([blobs])";let t,n=[],a=[0,0],s=[0,0],r=0;for(let l of e){let d=1e3*r;a[0]=s[0],a[1]=s[1],d=Math.max(d,a[0],a[1]);let c=0,g=await new Promise((e,t)=>{let n=new FileReader;n.onload=(()=>e(new o(new i(n.result)))),n.readAsArrayBuffer(l),n.onerror=t}),p=[];for(let i of g.tags)18!=i.tagType||c?8!=i.tagType&&9!=i.tagType||(s[i.tagType-8]=d+i.getCombinedTimestamp(),i.setCombinedTimestamp(s[i.tagType-8]),p.push(i.tagHeader,i.tagData,i.previousSize)):(r+=i.getDuration(),c=1,l==e[0]&&(n.push(g.header,g.firstPreviousTagSize),({duration:r,durationDataView:t}=i.getDurationAndView()),i.stripKeyframesScriptData(),n.push(i.tagHeader),n.push(i.tagData),n.push(i.previousSize)));n.push(new Blob(p))}return t.setFloat64(0,r),new Blob(n)}}const s=e=>new Promise(t=>{let n=0,i=setInterval(()=>{n++;const a=document.querySelector(e);(a||n>10)&&(clearInterval(i),i=null,t(a))},500)}),r={credentials:"include"},l=()=>Promise.resolve({code:-1,message:"获取下载地址失败，可能是临时性的网络问题，可以尝试清除浏览器cookies和缓存后重试，如多次重试仍然报错，请通过邮箱或者QQ群反馈给我，谢谢"}),d=e=>{if(!e.durl)return-10403===e.code?(e.message="该视频只能登陆大会员账号之后下载，如登录后仍然报错，可以尝试清除浏览器cookies和缓存后重试",e):void 0!==e.code?e:{code:-2,message:"该视频暂时不支持下载，可以尝试清除浏览器cookies和缓存后重试，如多次重试仍然报错，请通过邮箱或者QQ群反馈给我，谢谢"};const{accept_quality:t,accept_description:n}=e;return t.forEach((e,t)=>{c[e]=n[t]}),{code:0,durls:e.durl.map(e=>{const t=new URL(e.url);return t.protocol=window.location.protocol,{url:t.href,size:e.size}}),qualityDescription:c[e.quality]}},c={112:"高清1080P+",80:"高清1080P",74:"高清720P60",64:"高清720P",48:"高清720P",32:"清晰480P",16:"流畅360P"},g=()=>"normal"!==localStorage.bilibili_helper_download_mode,p=()=>"off"!==localStorage.bilibili_helper_merge_mode,h=()=>"hide"===localStorage.bilibili_helper_show,m=e=>{const t=1073741824,n=1048576;return e>=t?`${(e/t).toFixed(2)}GB`:e>=n?`${(e/n).toFixed(2)}MB`:e>=1024?`${(e/1024).toFixed(2)}KB`:e+"B"},u=(e,t,n,i)=>0!==n?`<strong>${i}</strong>`:`<strong>${e}</strong> 的下载地址(共${t.length}个分段)：`,f=(e,t,n,i)=>{if(0!==n)return"";if(!g())return e.map((e,n)=>`\n        <li><a title="${t}_分段${n+1}" download href="${e.url}">分段${n+1}</a><span class="size">(${m(e.size)})</span></li>\n      `).join("");if(g()&&!p())return e.map((e,n)=>{const i=encodeURIComponent(JSON.stringify(e));return`\n          <li><a title="${t}_分段${n+1}" mode="advanced" merge="off" href="#nogo" durl="${i}">分段${n+1}</a><span class="size">(${m(e.size)})</span><span durl="${i}" class="progress"></span></li>\n        `}).join("");if(g()&&p()){const n=encodeURIComponent(JSON.stringify(e));let i=0;return e.forEach(e=>i+=e.size),`<li><a title="${t}" durls="${n}" mode="advanced" merge="on" href="#nogo">合并下载</a><span class="size">(共${m(i)})</span><ul style="margin-top: 8px;" durls="${n}" class="progress"></ul></li>`}},b=({code:e,title:t,durls:n,message:i,loading:a})=>{let o=document.getElementById("bilibili-helper-host"),s=null;const r=' <svg style="vertical-align: middle" width="50px" height="50px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" class="lds-pacman"><g ng-attr-style="display:{{config.showBean}}" style="display:block"><circle cx="62.0973" cy="50" r="4" ng-attr-fill="{{config.c2}}" fill="#00a1d6"><animate attributeName="cx" calcMode="linear" values="95;35" keyTimes="0;1" dur="1" begin="-0.67s" repeatCount="indefinite"></animate><animate attributeName="fill-opacity" calcMode="linear" values="0;1;1" keyTimes="0;0.2;1" dur="1" begin="-0.67s" repeatCount="indefinite"></animate></circle><circle cx="82.4973" cy="50" r="4" ng-attr-fill="{{config.c2}}" fill="#00a1d6"><animate attributeName="cx" calcMode="linear" values="95;35" keyTimes="0;1" dur="1" begin="-0.33s" repeatCount="indefinite"></animate><animate attributeName="fill-opacity" calcMode="linear" values="0;1;1" keyTimes="0;0.2;1" dur="1" begin="-0.33s" repeatCount="indefinite"></animate></circle><circle cx="42.2973" cy="50" r="4" ng-attr-fill="{{config.c2}}" fill="#00a1d6"><animate attributeName="cx" calcMode="linear" values="95;35" keyTimes="0;1" dur="1" begin="0s" repeatCount="indefinite"></animate><animate attributeName="fill-opacity" calcMode="linear" values="0;1;1" keyTimes="0;0.2;1" dur="1" begin="0s" repeatCount="indefinite"></animate></circle></g><g ng-attr-transform="translate({{config.showBeanOffset}} 0)" transform="translate(-15 0)"><path d="M50 50L20 50A30 30 0 0 0 80 50Z" ng-attr-fill="{{config.c1}}" fill="#f45a8d" transform="rotate(10.946 50 50)"><animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 50 50;45 50 50;0 50 50" keyTimes="0;0.5;1" dur="1s" begin="0s" repeatCount="indefinite"></animateTransform></path><path d="M50 50L20 50A30 30 0 0 1 80 50Z" ng-attr-fill="{{config.c1}}" fill="#f45a8d" transform="rotate(-10.946 50 50)"><animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 50 50;-45 50 50;0 50 50" keyTimes="0;0.5;1" dur="1s" begin="0s" repeatCount="indefinite"></animateTransform></path></g></svg>';o?((s=o.shadowRoot).getElementById("title").innerHTML=a?"加载中"+r:u(t,n,e,i),s.getElementById("durls").innerHTML=a?"":f(n,t,e)):((o=document.createElement("bilibili-helper-host")).id="bilibili-helper-host",o.style.cssText=`display:block;overflow:auto;position:fixed;z-index:${Number.MAX_SAFE_INTEGER};bottom:0;left:0;right:0;max-height:50%;width:100%;background: #fff;border-top: 1px solid #ccc;box-shadow: rgba(0, 0, 0, 0.2) 0 -5px 10px;`,h()?o.classList.add("hide"):o.classList.remove("hide"),o.innerHTML="<style>\n        #bilibili-helper-host.hide{\n          width:auto!important;\n          left:auto!important;\n          background:transparent!important;\n          border:0 none!important;\n          border-radius: 6px 0 0 0;\n          box-shadow: rgba(0, 0, 0, 0.2) -5px -5px 10px!important;\n        }\n        .player-fullscreen-fix #bilibili-helper-host {\n          z-index: 99999!important;\n        }\n      </style>",document.body.appendChild(o),(s=o.attachShadow({mode:"open"})).innerHTML=`\n        <style>\n          p, a, div, span, li, i, b, strong, input, button, label {\n            font-size: inherit;\n          }\n          li {\n            margin-bottom: 5px;\n          }\n          p {\n            margin: 0;\n            line-height: 1.5;\n          }\n          h1 {\n            font-size: 20px;\n            font-weight: bold;\n            margin-bottom: 20px;\n          }\n          h3 {\n            font-size: 16px;\n            margin: 1em 0;\n          }\n          #title {\n            font-size: 16px;\n            font-weight: normal;\n          }\n          #content {\n            display: flex;\n            width: 100%;\n            font-size: 14px;\n            position: relative;\n          }\n          a {\n            color: #00a1d6 !important;\n            text-decoration: none;\n          }\n          a:hover {\n            text-decoration: underline;\n          }\n          a.disabled {\n            color: #666!important;\n          }\n          a.disabled:hover {\n            text-decoration: none;\n            cursor: not-allowed;\n          }\n          #side-bar {\n            flex: 3;\n            padding: 20px;\n            border-right: 1px solid #ccc;\n            margin-right: -1px;\n          }\n          #main {\n            flex: 7;\n            padding: 20px;\n            border-left: 1px solid #ccc;\n          }\n          #notice-frame {\n            width: 100%;\n            padding: 0;\n          }\n          .donate {\n            border-top: 1px solid #ccc;\n            padding-top: 10px;\n          }\n          #zanshang {\n            width: 80%;\n          }\n          .setting-item {\n            margin-bottom: 8px;\n          }\n          .setting-item .label {\n            font-weight: bold;\n            width: 6em;\n            display: inline-block;\n            text-align: right;\n          }\n          .desc {\n            padding-left: 6em;\n          }\n          #actions {\n            position: absolute;\n            right: 0;\n            top: 0;\n          }\n          .btn-large {\n            border: 0 none;\n            background: #f45a8d;\n            border-radius: 6px;\n            color: #fff;\n            padding: 10px 20px;\n          }\n          #toggle {\n            border-radius: 0 0 0 6px;\n            outline: none;\n            cursor: pointer;\n          }\n          .hide #side-bar {\n            display: none;\n          }\n          .hide #main {\n            display: none;\n          }\n          .hide #toggle {\n            border-radius: 6px 0 0 0;\n          }\n          .hide #actions {\n            position: static;\n          }\n      \n          a.btn {\n            border: 0 none;\n            background: #f45a8d;\n            text-decoration: none !important;\n            color: #fff !important;\n            border-radius: 3px;\n            padding: 5px 10px;\n            display: inline-block;\n          }\n          .settings {\n            border-left: 5px solid #ccc;\n            background: #eee;\n            padding: 16px 16px 8px 0;\n          }\n          .size {\n            margin: 0 5px;\n          }\n        </style>\n        <div id="content" ${h()?'class="hide"':""}>\n          <div id="side-bar">\n            <div class="notice">\n              <iframe id="notice-frame" frameborder="0"></iframe>\n            </div>\n            \x3c!--<div class="support">TODO 支持区域</div>--\x3e\n            <div class="donate">\n              <p>微信扫一扫赞赏作者(扫不出来请点击图片后扫大图)：</p>\n              <a href="${internalUrls.zanshang}" target="_blank"><img title="点击查看大图" alt="点击查看大图" id="zanshang" src="${internalUrls.zanshang}"/></a>\n            </div>\n          </div>\n          <div id="main">\n            <h1 style="margin-top: 0;">B站下载助手</h1>\n            <div class="settings">\n              <div class="setting-item">\n                <span class="label">清晰度：</span>\n                <span>请在页面中B站自己的播放器内切换清晰度</span>\n              </div>\n              <div class="setting-item">\n                <span class="label">下载模式：</span>\n                <label><input id="setting-download-mode-advanced" checked name="setting-download-mode" type="radio"/> 高级</label>\n                <label><input id="setting-download-mode-normal" name="setting-download-mode" type="radio"/> 兼容</label>\n                <p class="desc">高级模式支持自动重命名和合并下载，但会占用非常大的系统运行内存<br/>兼容模式直接使用浏览器的默认下载，资源占用很小，但不支持自动重命名和合并下载</p>\n                <p class="desc">建议系统运行内存小于16G的用户使用兼容模式，下载后可以点<a href="http://csser.top/bilibili/merge.html" target="_blank">这里</a>尝试手动合并</p>\n              </div>\n              <div class="setting-item" id="setting-advanced">\n                <span class="label">合并下载：</span>\n                <label><input id="setting-merge-on" checked name="setting-merge" type="radio"> 开</label>\n                <label><input id="setting-merge-off" name="setting-merge" type="radio"> 关</label>\n                <p class="desc">高级模式下载过程中请<strong style="color: red;">不要</strong>刷新或关闭页面，也<strong style="color: red;">不要</strong>切换分集和清晰度</p>\n              </div>\n            </div>\n            <h3 id="title">${a?"加载中"+r:u(t,n,e,i)}</h3>\n            <ul id="durls">\n              ${a?"":f(n,t,e)}\n            </ul>\n            <div class="beg">\n              <p>\n                如果这个工具确实帮到了您，烦请在Chrome商店给个五星好评，谢谢😊\n                <a class="btn" href="https://chrome.google.com/webstore/detail/bfcbfobhcjbkilcbehlnlchiinokiijp/reviews" target="_blank">去评价</a>\n              </p>\n            </div>\n          </div>\n          <div id="actions">\n            <button id="toggle" class="btn-large">${h()?"打开B站下载助手":"收起"}</button>\n          </div>\n        </div>\n      `,(e=>{const t=e.getElementById("setting-download-mode-advanced"),n=e.getElementById("setting-download-mode-normal"),i=e.getElementById("setting-merge-on"),a=e.getElementById("setting-merge-off"),o=e.getElementById("setting-advanced"),s=e.getElementById("durls"),r=e.getElementById("toggle"),l=e.getElementById("actions"),d=e.getElementById("content"),c=document.getElementById("bilibili-helper-host"),m=()=>{t.disabled=!0,n.disabled=!0,i.disabled=!0,a.disabled=!0},u=()=>{t.disabled=!1,n.disabled=!1,i.disabled=!1,a.disabled=!1};g()?(t.checked=!0,n.checked=!1,o.style.display="block"):(t.checked=!1,n.checked=!0,o.style.display="none"),p()?(i.checked=!0,a.checked=!1):(i.checked=!1,a.checked=!0);const f=()=>{e.buildDownloadLinks()};t.addEventListener("change",()=>{t.checked?(localStorage.bilibili_helper_download_mode="advanced",o.style.display="block"):(localStorage.bilibili_helper_download_mode="normal",o.style.display="none"),f()}),n.addEventListener("change",()=>{n.checked?(localStorage.bilibili_helper_download_mode="normal",o.style.display="none"):(localStorage.bilibili_helper_download_mode="advanced",o.style.display="block"),f()}),i.addEventListener("change",()=>{localStorage.bilibili_helper_merge_mode=i.checked?"on":"off",f()}),a.addEventListener("change",()=>{localStorage.bilibili_helper_merge_mode=a.checked?"off":"on",f()}),s.addEventListener("click",t=>{const n=t.target;if("a"===n.tagName.toLowerCase()&&"advanced"===n.getAttribute("mode")){if(t.preventDefault(),t.stopPropagation(),n.classList.contains("disabled"))return;let i=null;const a=n.getAttribute("title");"on"===n.getAttribute("merge")?(i=e.querySelector(`ul[durls="${n.getAttribute("durls")}"]`),m(),x(n,JSON.parse(decodeURIComponent(n.getAttribute("durls"))),a,i).then(u)):(i=e.querySelector(`span[durl="${n.getAttribute("durl")}"]`),m(),v(n,JSON.parse(decodeURIComponent(n.getAttribute("durl"))),a,i).then(u))}}),r.addEventListener("click",()=>{h()?(localStorage.bilibili_helper_show="show",d.classList.remove("hide"),r.innerHTML="收起",c.classList.remove("hide"),l.style.top="0",e.getElementById("notice-frame").contentWindow.postMessage({action:"getHeight"},"https://csser.top")):(localStorage.bilibili_helper_show="hide",d.classList.add("hide"),c.classList.add("hide"),r.innerHTML="打开B站下载助手",l.style.top="0")}),c.addEventListener("scroll",()=>{l.style.top=c.scrollTop+"px"})})(s),(e=>{const t=e.getElementById("notice-frame");t.onload=(()=>{t.contentWindow.postMessage({action:"getHeight"},"https://csser.top"),t.contentWindow.postMessage({action:"setVersion",version:{name:manifest.version,code:parseInt(manifest.version.replace(/\./g,""),10)}},"https://csser.top"),t.contentWindow.postMessage({action:"setTheme",theme:"null"},"https://csser.top")}),window.addEventListener("message",e=>{if("https://csser.top"===e.origin&&e.data&&"reportHeight"===e.data.action&&(t.style.height=e.data.height+10+"px"),"https://csser.top"===e.origin&&e.data&&"showBilibilihelperindooorsmanNoticeDialog"===e.data.action){const t=e.data.notices;t&&t.length>0&&t.forEach(e=>{})}}),t.src=`https://csser.top/bilibili/notice.html?t=${Date.now()}`,window.addEventListener("resize",()=>{t.contentWindow.postMessage({action:"getHeight"},"https://csser.top")})})(s)),s.buildDownloadLinks=(()=>{s.getElementById("durls").innerHTML=f(n,t,e)})},y=(e,t)=>{const n=new Blob([e],{type:"application/octet-stream"}),i=document.createElement("a");i.setAttribute("href",URL.createObjectURL(n)),i.setAttribute("download",t),i.setAttribute("style","position:absolute;top:-9999px;"),document.body.appendChild(i);const a=new MouseEvent("click",{bubbles:!0,cancelable:!0,view:window});i.dispatchEvent(a),setTimeout(()=>{document.body.removeChild(i)},1e3)},w=(e,t,n)=>{let i=null;return fetch(e).then(e=>{const a=e.headers.get("content-length"),o=t||parseInt(a,10);let s=0;return i=setInterval(()=>{n(s,o)},1e3),new Response(new ReadableStream({start(t){const n=e.body.getReader(),i=()=>{n.read().then(({done:e,value:n})=>{e?t.close():(s+=n.byteLength,t.enqueue(n),i())}).catch(e=>{t.error(e)})};i()}}))}).then(e=>e.blob()).finally(()=>{i&&clearInterval(i)})},v=(e,{url:t,size:n},i,a)=>(e.classList.add("disabled"),w(t,n,(e,t)=>{const n=Math.ceil(e/t*100);a.innerHTML=` 正在下载 - ${e}/${t} - ${n}%`}).then(e=>{a.innerHTML=" 已下载完成";const n=new URL(t).pathname.toLowerCase().match(/\.[a-z0-9]+?$/)[0];y(e,i+n)}).finally(()=>{e.classList.remove("disabled")})),x=(e,t,n,i)=>{if(1===t.length)return v(e,t[0],n,i);e.classList.add("disabled");const a=t.map(({url:e,size:t},n)=>{const a=document.createElement("li");return a.innerHTML=`分段${n+1} (${m(t)}) 正在下载`,i.appendChild(a),w(e,t,(e,i)=>{const o=Math.ceil(e/i*100);a.innerHTML=`分段${n+1} (${m(t)}) 正在下载 - ${e}/${i} - ${o}%`}).then(e=>(a.innerHTML=`分段${n+1} (${m(t)}) 已下载完成，等待合并`,e))});return Promise.all(a).then(async e=>{const t=await o.mergeBlobs(Array.from(e));y(t,n+".flv"),i.innerHTML="已完成"}).finally(()=>{e.classList.remove("disabled")})},_=async()=>{if(!e())return;b({loading:!0});const i=await(()=>fetch(window.location.href,r).then(e=>e.text()).then(e=>{const t=e.match(/<script>window.__INITIAL_STATE__=(.+?)<\/script>/);return t&&t[1]?JSON.parse(t[1].replace(";(function(){var s;(s=document.currentScript||document.scripts[document.scripts.length-1]).parentNode.removeChild(s);}());","")):{code:-2,message:"获取视频信息失败，可以尝试清除浏览器cookies和缓存后重试，如多次重试仍然报错，请通过邮箱或QQ群反馈给我，谢谢"}}).catch(()=>l()))();if(i.code)return b(i);let a=localStorage.bilibili_player_settings&&+JSON.parse(localStorage.bilibili_player_settings).setting_config.defquality||112;if(t()){const e=i.videoData.aid;let t,n,o=i.videoData.cid;if(i.videoData.pages.length>1){const e=location.search.match(/p=(\d+)/);let a=i.videoData.pages[0];e&&e[1]&&(a=i.videoData.pages.find(t=>""+t.page==""+e[1])),t=a.page,n=a.part,o=a.cid}const{code:s,durls:c,qualityDescription:g,message:p}=await((e,t,n=112)=>{return fetch(`//api.bilibili.com/x/player/playurl?cid=${t}&avid=${e}&otype=json&qn=${n}`,r).then(e=>e.json()).then(e=>0!==e.code?d(e):d(e.data)).catch(()=>l())})(e,o,a);if(0===s){let e=`[${g}] ${i.videoData.title}`;t&&n&&(e=`[${g}] ${i.videoData.title}_P${t}_${n}`),b({code:s,title:e,durls:c,message:p})}else b({code:s,message:p})}if(n()){const e=i.epList;let t=-1===i.epId?e[e.length-1].ep_id:i.epId,n=e.find(e=>t===e.ep_id);const o=await s(".episode-item.on"),c=await s(".ep-item.cursor");if(o||c){const i=o||c,a=i.parentElement;let r=Array.from(a.querySelectorAll("li")).findIndex(e=>e===i);const l=await s("#eplist_module .ep-list-progress");l&&(r=+l.textContent.match(/(\d+)\/\d+/)[1]-1),n=e[r],t=n.ep_id||n.id}const{code:g,durls:p,qualityDescription:h,message:m}=await((e,t=112)=>{return fetch(`//api.bilibili.com/pgc/player/web/playurl/?ep_id=${e}&qn=${t}&bsource=`,r).then(e=>e.json()).then(e=>0!==e.code?d(e):d(e.result)).catch(()=>l())})(t,a);if(0===g){const e=`[${h}] ${i.mediaInfo.title}_${n.index||n.title}_${n.index_title||n.longTitle}`;b({code:g,title:e,durls:p,message:m})}else b({code:g,message:m})}};_();let $=""+window.location.href,L=""+localStorage.bilibili_player_settings;setInterval(()=>{const e=window.location.href,t=localStorage.bilibili_player_settings;if($!==e&&($=e,_()),L!==t)try{if(JSON.parse(t).setting_config.defquality===JSON.parse(L).setting_config.defquality)return;L=t,_()}catch(e){}},1e3)})();</script></head>
+<body>
+<div align="center">
+<table width="100%" border="0">
+<tbody><tr valign="top">
+<td align="left" width="25%">
+  <span class="tiny"><a href="http://www.cse.unsw.edu.au/~cs3311">COMP3311 19s1</a></span>
+</td>
+<td align="center" width="50%">
+  <span class="heading">Exercises 06</span><br>
+  <span class="subheading">Database Programming with PHP</span>
+</td>
+<td align="right" width="25%">
+  <span class="tiny"><a href="http://www.cse.unsw.edu.au/~cs3311">Database Systems</a></span>
+</td>
+</tr></tbody></table>
+</div>
+<p>
+Use the beers/bars/drinkers database in answering the database-related
+questions below:
+</p>
+<pre>Beers(<b>name</b>:string, manufacturer:string)
+Bars(<b>name</b>:string, address:string, license#:integer)
+Drinkers(<b>name</b>:string, address:string, phone:string)
+Likes(<b><i>drinker</i></b>:string, <b><i>beer</i></b>:string)
+Sells(<b><i>bar</i></b>:string, <b><i>beer</i></b>:string, price:real)
+Frequents(<b><i>drinker</i></b>:string, <b><i>bar</i></b>:string)
+</pre>
+<p>
+Assume that the database is called <code>GoodPubGuide</code>.
+You wil need to consult the <a href="http://php.net/manual/en/">PHP manual</a> to find out what library
+functions are available. The most useful sections are:
+PostgreSQL functions,
+String functions,
+Array functions,
+and Variable functions.
+</p>
+
+<ol>
+
+<li>
+<p>
+For the following sequence of PHP statements, state the type and
+value of the variable <code>$x</code> after each assignment:
+</p>
+<pre>$x = 3.0;
+$x = (int)$x / 2;
+$x = 1 + (int)$x * 2;
+$x = "$x times $x";
+$x = $x * 5 / 3;
+$x = 'Why $x?';
+$x = $x + 3.14159;
+</pre>
+<p><small>[<a id="q1a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/06/index.php##" onclick="toggleVisible(&#39;q1&#39;)">show answer</a>]</small></p>
+<div id="q1" style="color:#000099;display:none">
+<pre>$x = 3.0;                 // $x == float(3.0)
+$x = (int)$x / 2;         // $x == float(1.5)
+$x = 1 + (int)$x * 2;     // $x == int(3)
+$x = "$x times $x";       // $x == string("3 times 3")
+$x = $x * 5 / 3;          // $x == int(5)
+$x = 'Why $x?';           // $x == string("Why $x?")
+$x = $x + 3.14159;        // $x == float(3.14159)
+</pre>
+<p>
+You could use PHP's <code>var_dump</code> function to check these.
+</p>
+</div>
+</li><li>
+<p>
+What is the difference between the following three PHP operators:
+<code>=</code>, <code>==</code>, <code>===</code> ?
+</p>
+<p><small>[<a id="q2a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/06/index.php##" onclick="toggleVisible(&#39;q2&#39;)">show answer</a>]</small></p>
+<div id="q2" style="color:#000099;display:none">
+
+<ul>
+<li>
+The <code>=</code> operator represents assignment.
+Its left-hand-side must be a variable, and its right-hand-side
+is an expression. The expression is evaluated and cast to an
+appropriate type to assign to the variable.
+</li>
+<li>
+The <code>==</code> operator represents the equality test.
+Its left-hand-side and right-hand-sides are both expressions.
+Both expressions are evaluated, cast to compatible types,
+and their values are compared. If the values are equal,
+the result is <code>true</code>, otherwise <code>false</code>.
+</li>
+<li>
+The <code>===</code> operator represents the exact equality test.
+Its left-hand-side and right-hand-sides are both expressions.
+Both expressions are evaluated, then the types of the results are
+compared. If the types are different, the result is <code>false</code>.
+If the types are the same, the expression values are then compared.
+If the values are equal,
+the result is <code>true</code>, otherwise <code>false</code>.
+</li>
+</ul>
+</div>
+
+</li><li>
+<p>
+What is the effect of putting an <code>@</code> character at the
+start of a function call? (e.g. writing <code>@pg_connect(...)</code>
+rather than <code>pg_connect(...)</code>)?
+</p>
+<p><small>[<a id="q3a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/06/index.php##" onclick="toggleVisible(&#39;q3&#39;)">show answer</a>]</small></p>
+<div id="q3" style="color:#000099;display:none">
+<p>
+PHP normally (on grieg) produces an error message on the standard
+output stream when a function fails for some reason. The message
+may occur in addition to the function return a distinguished
+value that indicates an error (e.g. <code>pg_connect(...)</code>
+returns <code>false</code> if it cannot establish a database
+connection).
+In some contexts, you don't want the error message to be written
+(e.g. you don't want it to appear in the middle of a Web page).
+The <code>@</code> character suppresses error message for the
+duration of the function call, so that can get the return value,
+check for error and then handle it in a way that's appropriate
+for the script.
+</p>
+<p>
+Note that <code>@</code> has this behaviour when used at the start
+of any expression, not just a function call.
+If the error is a fatal run-time error, then the script will exit
+without any error messages being produced. The <code>@</code>
+character should be used sparingly, or not at all, during
+debugging.
+</p>
+</div>
+
+</li><li>
+<p>
+For each of the following PHP statements, list the possible errors that
+might occur and state what value would be assigned to the variable on
+the left-hand side of the assignment, if an error occurs.
+</p>
+<ol type="a">
+<li><p>
+<code>$db = pg_connect("dbname=abc user=fred password=$secret")</code>
+</p>
+<p><small>[<a id="q4a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/06/index.php##" onclick="toggleVisible(&#39;q4&#39;)">show answer</a>]</small></p>
+<div id="q4" style="color:#000099;display:none">
+<ul>
+<li> <code>abc</code> is not the name of a database on the PostgreSQL server
+</li><li> <code>fred</code> is not the name of a user on the PostgreSQL server
+</li><li> <code>$secret</code> has no value
+</li><li> <code>$secret</code> has a value which is not <code>fred</code>'s password
+</li><li> returns <code>false</code> on error
+</li></ul>
+<p>
+</p></div>
+</li><li><p>
+<code>$res = pg_query($db, "select beer from Sells where price &lt; $max")</code>
+</p>
+<p><small>[<a id="q5a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/06/index.php##" onclick="toggleVisible(&#39;q5&#39;)">show answer</a>]</small></p>
+<div id="q5" style="color:#000099;display:none">
+<ul>
+<li> value of <code>$db</code> is not be a valid database connection resource
+</li><li> <code>$max</code> is not set (giving invalid SQL syntax for query)
+</li><li> <code>$max</code> has a non-numeric value (giving invalid SQL syntax for qu
+ery)
+</li><li> returns <code>false</code> on error
+</li></ul>
+<p>
+</p></div>
+</li><li><p>
+<code>$ntups = pg_num_rows($res)</code>
+</p>
+<p><small>[<a id="q6a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/06/index.php##" onclick="toggleVisible(&#39;q6&#39;)">show answer</a>]</small></p>
+<div id="q6" style="color:#000099;display:none">
+<ul>
+<li> <code>$res</code> does not have a valid query result resource value
+</li><li> returns <code>-1</code> on error
+<br>
+        (zero is valid return value ... for queries with no result tuples)
+</li></ul>
+<p>
+</p></div>
+</li><li><p>
+<code>$tuple = pg_fetch_row($res)</code>
+</p>
+<p><small>[<a id="q7a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/06/index.php##" onclick="toggleVisible(&#39;q7&#39;)">show answer</a>]</small></p>
+<div id="q7" style="color:#000099;display:none">
+<ul>
+<li> <code>$res</code> does not have a valid query result resource value
+</li><li> there may be no more tuples left in the query result set <code>$res</code>
+<br>
+        (this is not really an error; it's a condition for terminating the query
+ iteration)
+</li><li> returns <code>null</code> on error
+</li></ul>
+</div>
+</li></ol>
+
+</li><li>
+<p>
+Consider the <tt>mkSQL()</tt> function for building SQL queries.
+What is the output from the following PHP code?
+</p>
+<pre>&lt;?
+$x = 25;  $y = "O'Brien";  $z = "'%'; delete from Employees";
+
+echo mkSQL("select * from Employees where age &gt; %d", $x);
+echo "\n";
+echo mkSQL("select * from Employees where name like %s", $x);
+echo "\n";
+echo mkSQL("select * from Employees where name = %d", $y);
+echo "\n";
+echo mkSQL("select * from Employees where name like %s", $y);
+echo "\n";
+echo mkSQL("select * from Employees where name like %s", $z);
+echo "\n";
+echo mkSQL("select * from Employees where salary &gt; 50000");
+echo "\n";
+echo mkSQL("select * from Employees where name like %s and age = %d", $y, $x);
+echo "\n";
+?&gt;
+</pre>
+<p><small>[<a id="q8a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/06/index.php##" onclick="toggleVisible(&#39;q8&#39;)">show answer</a>]</small></p>
+<div id="q8" style="color:#000099;display:none">
+<p>
+The output would look something like the following:
+</p>
+<pre>select * from Employees where age &gt; 25
+select * from Employees where name like '25'
+select * from Employees where name = 0
+select * from Employees where name like 'O''Brien'
+select * from Employees where name like '''%''; delete from Employees'
+select * from Employees where salary &gt; 50000
+select * from Employees where name like 'O''Brien' and age = 25
+</pre>
+<p>
+Notice that there are no semi-colons at the end of each query.
+This doesn't matter if you intend to run the queries via
+<tt>dbQuery()</tt>, but would matter if you wanted to feed them
+directly into <tt>psql</tt>.
+Note also that the attempted SQL injection attack is nullified
+by the way <tt>mkSQL()</tt> deals with strings.
+</p></div>
+
+</li><li>
+<p>
+Using only the functions from the PostgreSQL library,
+write PHP code that displays the <code>Bars</code> relation
+in the following format:
+</p>
+<pre>  # Name                      Address
+ -- -------------------- ------------
+  1 Australia Hotel         The Rocks
+  2 Coogee Bay Hotel           Coogee
+  3 Lord Nelson             The Rocks
+  4 Marble Bar                 Sydney
+  5 Regent Hotel            Kingsford
+  6 Royal Hotel              Randwick
+</pre>
+<p>
+The <code>#</code> field is a count value that is computed as the
+entries in the relation are displayed.
+PHP supports the <code>printf</code> function. The Name field
+should be displayed left-justified in a field of width 20, and
+the Address field should be displayed right-justified in a
+field of width 12 (count the '-' above).
+You can also assume that there will never be more than 99 bars.
+</p>
+<p><small>[<a id="q9a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/06/index.php##" onclick="toggleVisible(&#39;q9&#39;)">show answer</a>]</small></p>
+<div id="q9" style="color:#000099;display:none">
+<pre>&lt;?
+$conn = @pg_connect("dbname=GoodPubGuide");
+if (!$conn)
+	exit("Cannot connect to database.\\n");
+
+$result = @pg_query($conn, "select * from Bars");
+if (!$result)
+	exit("Can't get result for query.\\n");
+
+print "  # Name                      Address\\n";
+print " -- -------------------- ------------\\n";
+$num = pg_num_rows($result);;
+for ($i = 0; $i &lt; $num; $i++){
+	$tuple = pg_fetch_row($result, $i);
+	$name = $tuple[0];
+	$addr = $tuple[1];
+	printf("%d %-20s %12s\\n", $i+1, $name, $addr);
+}
+?&gt;
+</pre>
+Note that <code>print</code> and <code>echo</code> are almost
+synonymous.
+I tend to use <code>echo</code> in my code, as opposed to what I
+write in tutorial solutions, because it's one char less to type,
+and marginally more convenient for stringing together a list of things
+to be printed.
+<p>
+An alternative, more compact, solution for the query iteration part:
+</p>
+<pre>printf("  # %-20s %12s\\n", "Name", "Address");
+print " -- -------------------- ------------\\n";
+for ($i = 1; $t = pg_fetch_array($result); $i++)
+	printf(" %2d %-20s %12s\\n", $i, $t["name"], $t["addr"]);
+</pre>
+<p>
+Note that this loop uses iteration starting from 1, not 0, and does
+not supply and position argument to <code>pg_fetch_row</code> (which
+uses an internal counter to iterate from first result to last result
+if no position argument is given).
+</p>
+<p>
+It also uses <code>pg_fetch_array()</code> rather <code>pg_fetch_row()</code>
+to get the tuples. What's the difference? <code>pg_fetch_row()</code>
+give you back each tuple as an array with numeric indexes; so you need
+to refer to the attributes by position. <code>pg_fetch_array()</code>
+give you the tuple as an array indexed both numerically and by the
+attribute names, which makes it simpler to collect the value of a
+specific attribute.
+</p>
+<p>
+Yet another, even more compact, alternative for the iteration:
+</p>
+<pre>$i = 0;
+while ($t = pg_fetch_array($result))
+	printf(" %2d %-20s %12s\\n", $i++, $name, $addr);
+</pre>
+</div>
+
+</li><li>
+<p>
+Repeat the previous question, but this time using functions only
+from the <code>db.php</code> library.
+</p>
+<p><small>[<a id="q10a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/06/index.php##" onclick="toggleVisible(&#39;q10&#39;)">show answer</a>]</small></p>
+<div id="q10" style="color:#000099;display:none">
+<pre>&lt;?
+require("db.php");
+
+$db = dbConnect("dbname=GoodPubGuide");
+$q = "select * from Bars";
+$r = dbQuery($db, mkSQL($q));
+
+echo "  # Name                      Address\\n";
+echo " -- -------------------- ------------\\n";
+while ($t = dbNext($r))
+	printf(" %2d %-20s %12s\\n", $i, $t["name"], $t["addr"]);
+?&gt;
+</pre>
+</div>
+
+</li><li>
+<p>
+Comparing the solutions to the two previous questions, the code
+using the <tt>db.php</tt> library seemed simpler. One reason for
+this is that you don't need to add explicit code to check for the
+success or otherwise of the DB connection operation. Why do you not
+need this check?
+</p>
+<p><small>[<a id="q11a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/06/index.php##" onclick="toggleVisible(&#39;q11&#39;)">show answer</a>]</small></p>
+<div id="q11" style="color:#000099;display:none">
+One difference between <tt>pg_connect()</tt> and <tt>dbConnect()</tt>
+is that <tt>dbConnect()</tt> checks for the success of the database
+connection and does not return if the database cannot be connected to.
+In contrast, <tt>pg_connect()</tt> returns a value that can be
+interpreted as <tt>false</tt> if it cannot establish a database
+connection.
+</div>
+
+</li><li>
+<p>
+Write PHP code that prints a table of average prices for beers,
+in the format shown below:
+</p><pre>BEER                   AVG$
+-------------------- ------
+Burragorang Bock       3.50
+New                    3.26
+Old                    2.53
+Old Admiral            3.75
+Sparkling Ale          2.80
+Three Sheets           3.75
+Victoria Bitter        2.40
+</pre>
+The table should be printed in alphabetical order on beer name,
+and the the average price should be displayed to two decimal
+places.
+Use the <code>printf</code> format string <code>"%-20.20s&nbsp;%6.2f"</code>
+to display each line of the table.
+<p></p>
+<p><small>[<a id="q12a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/06/index.php##" onclick="toggleVisible(&#39;q12&#39;)">show answer</a>]</small></p>
+<div id="q12" style="color:#000099;display:none">
+<p>
+The first solution below uses an "obvious" approach:
+get the beers one-by-one; for each beer, get its average price.
+However, this is a <em>poor</em> way to solve
+the problem, despite the fact that it produces the correct output.
+However, it does show a use for the printf-like interpolation
+provided by <tt>mkSQL()</tt>.
+</p>
+<pre>&lt;?
+require("db.php");
+$db = dbConnect("dbname=GoodPubGuide");
+$q = "select name from Beers order by name";
+$r = dbQuery($db, mkSQL($q));
+echo "BEER                   AVG$\\n";
+echo "-------------------- ------\\n";
+$qq = "select avg(price) from Sells where beer = %s";
+while ($t = dbNext($r)) {
+	$avg = dbOneValue($db, mkSQL($qq, $t["name"]));
+	printf("%-20.20s %6.2f\\n", $t["name"], $avg);
+}
+?&gt;
+</pre>
+<p>
+Since there are 19 beers in the database,
+the above code requires 19 separate queries, which means 19 transmissions
+from the PHP engine to the database system (not a cheap operation), when
+it can easily be solved using a single query. Use the database to do all
+of the <q>data-crunching</q>; don't do this in PHP. You should almost never
+need to use <code>dbQuery()</code> inside a loop for another query. You
+should try, whereever possible, to get the required data for each PHP script
+using a single query. Even if the data requires complex manipulation,
+so that you can't do it in one pass from the DB, it's cheaper to load
+it into a (big) PHP array and then manipulate it there, than to invoke
+many queries on the database.
+</p>
+<p>
+The following version achieves the same result in a single query,
+thus making more effective use of the database.
+</p>
+<pre>&lt;?
+require("db.php");
+$db = dbConnect("dbname=GoodPubGuide");
+$q = "select beer, avg(price) from Sells group by beer order by beer";
+$r = dbQuery($db, mkSQL($q));
+echo "BEER                   AVG$\\n";
+echo "-------------------- ------\\n";
+while ($t = dbNext($r))
+	printf("%-20.20s %6.2f\\n", $t["beer"], $t["avg"]);
+?&gt;
+</pre>
+</div>
+
+</li><li>
+<p>
+Write some PHP code that could be embedded in a Web page
+to produce a list of bars and their addresses as an HTML table.
+</p>
+<p><small>[<a id="q13a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/06/index.php##" onclick="toggleVisible(&#39;q13&#39;)">show answer</a>]</small></p>
+<div id="q13" style="color:#000099;display:none">
+<pre>&lt;?
+require("db.php");
+$db=dbConnect("dbname=GoodPubGuide");
+$result = dbQuery($db, "select name,addr from Bars");
+if (!is_resource($result)) exit( "Can't get result for query.\\n");
+echo &lt;&lt;&lt;TableHead
+&lt;table border=1 cellpadding=5 cellspacing=0&gt;
+&lt;tr&gt;&lt;td&gt;#&lt;/td&gt;&lt;td&gt;&lt;b&gt;Name&lt;/b&gt;&lt;/td&gt;&lt;td align="right"&gt;&lt;b&gt;Address&lt;/b&gt;&lt;/tr&gt;\\n
+TableHead;
+while ($tuple = dbNext($result)) {
+	list($name,$addr) = $tuple;
+	echo "&lt;tr&gt;&lt;td&gt;$i&lt;/td&gt;&lt;td&gt;$name&lt;/td&gt;".
+	     "&lt;td align=right&gt;$addr&lt;/td&gt;&lt;/tr&gt;\\n";
+}
+echo "&lt;/table&gt;\n";
+?&gt;
+</pre>
+<p>
+Note that the <q>heredoc</q> (string inside <code>TableHead</code>)
+uses an explicit newline char at the end of the last line.
+</p>
+</div>
+
+</li><li>
+<p>
+Write a PHP web script that accepts a single CGI parameter
+giving the name of a drinker, and displays information about
+that drinker: name, address, phone, beers drunk, bars frequented.
+<!--Use the Assignment 2 <tt>http.php</tt> library to process the CGI parameter.-->
+The script could be invoked using a URL like:
+</p>
+<pre>http://...../drinker.php?drinker=John
+</pre>
+<p><small>[<a id="q14a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/06/index.php##" onclick="toggleVisible(&#39;q14&#39;)">show answer</a>]</small></p>
+<div id="q14" style="color:#000099;display:none">
+<p>
+</p>
+<pre>&lt;?
+// collect CGI parameter; fail if none provided
+
+$v = getParams(array(
+        'name' =&gt; array("string","required")
+));
+
+$db=dbConnect("dbname=GoodPubGuide");
+
+// collec basic information about drinker
+$q = "select name,addr,phone from Drinkers where name = %s";
+$drinker = dbOneTuple($db, mkSQL($q, $v["drinker"]);
+if (empty($drinker)) {
+	echo "&lt;html&gt;&lt;body&gt;&lt;center&gt;No Such Drinker&lt;/center&gt;&lt;/body&gt;&lt;/html&gt;\\n";
+	exit;
+}
+
+// collect beers liked in an array of beer names
+// and then convert array to html string
+$q = "select beer from Likes where drinker = %s";
+$r = dbQuery($db, mkSQL($q, v["drinker"]));
+$beers = array();
+while ($t = dbNext($r)) $beers[] = $t["beer"];
+if (count($beers &gt; 0)
+	$beers = join("&lt;br&gt;",$beers);
+else
+	$beers = "No beers liked";
+
+// collect bars frequented in an array of bar names
+// and then convert array to html string
+$q = "select bar from Frequents where drinker = %s";
+$r = dbQuery($db, mkSQL($q, v["drinker"]));
+$bars = array();
+while ($t = dbNext($r)) $bars[] = $t["bar"];
+if (count($bars &gt; 0)
+	$bars = join("&lt;br&gt;",$bars);
+else
+	$bars = "No bars liked";
+
+// Rest of script produces HTML
+// Note the embedded PHP to produce the values computer above
+?&gt;
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;Display Drinker Info&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+&lt;h3&gt;Drinker Information&lt;/h3&gt;
+&lt;table cellpadding="10"&gt;
+&lt;tr&gt;&lt;td&gt; Name &lt;/td&gt;&lt;td&gt; &lt;?=$drinker["name"]?&gt; &lt;/td&gt;&lt;tr&gt;
+&lt;tr&gt;&lt;td&gt; Address &lt;/td&gt;&lt;td&gt; &lt;?=$drinker["addr"]?&gt; &lt;/td&gt;&lt;tr&gt;
+&lt;tr&gt;&lt;td&gt; Phone &lt;/td&gt;&lt;td&gt; &lt;?=$drinker["phone"]?&gt; &lt;/td&gt;&lt;tr&gt;
+&lt;tr&gt;&lt;td&gt; Beers Liked &lt;/td&gt;&lt;td&gt; &lt;?=$beers?&gt; &lt;/td&gt;&lt;tr&gt;
+&lt;tr&gt;&lt;td&gt; Favourite Bars &lt;/td&gt;&lt;td&gt; &lt;?=$bars?&gt; &lt;/td&gt;&lt;tr&gt;
+&lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+</div>
+
+
+
+</li></ol></body></html>

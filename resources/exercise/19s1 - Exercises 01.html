@@ -1,0 +1,1106 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!-- saved from url=(0063)https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/01/index.php -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>COMP3311 19s1 - Exercises 01</title>
+<link rel="stylesheet" type="text/css" href="./19s1 - Exercises 01_files/course.css"><script language="JavaScript">
+function changeText(el, newText) {
+  // Safari work around
+  if (el.innerText)
+    el.innerText = newText;
+  else if (el.firstChild && el.firstChild.nodeValue)
+    el.firstChild.nodeValue = newText;
+}
+function toggleVisible(elid) {
+  el1 = document.getElementById(elid);
+  el2 = document.getElementById(elid+"a");
+  if (el1.style.display == "") {
+     el1.style.display = "none";
+     changeText(el2,"show answer");
+  }
+  else {
+     el1.style.display = "";
+     changeText(el2,"hide answer");
+  }
+}
+</script><script>(async()=> {const internalUrls = {"zanshang":"chrome-extension://bfcbfobhcjbkilcbehlnlchiinokiijp/zanshang.png"};const manifest = {"background":{"scripts":["lib.js","bg.js"]},"browser_action":{"default_popup":"popup.html","default_title":"B站下载助手"},"content_scripts":[{"all_frames":true,"js":["lib.js"],"matches":["http://*/*","https://*/*"]},{"all_frames":false,"js":["cs.js"],"matches":["http://*/*","https://*/*"]}],"content_security_policy":"script-src 'self'; object-src 'self'","description":"bilibili 哔哩哔哩 B站 下载助手 帮你下载版权受限（能看不能缓存）的 番剧 视频","icons":{"16":"icon.png","48":"icon.png","128":"icon.png"},"key":"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAi2h9zyXMhFrnTghusolDMgPiN3awINuhVOvMtNqL4vmsSlSrfowsUsrmQxaiYqoDjQ4NJKE//NSvSIMOF2UC+8Y5sTWZCG5VwnrJ5+P7P1vFicr3nNZzaaOrC3zQS/PbM9Q92EJFop+cOUkS/omtCa0RlAAeLeR5DKRwWg5jBZ2eE1fgemfwva0Wc1oydxblyHGHwZf1ZnVHyvKW/OWZVytZc2oht271iXE7unieA4t5F0RIdvh+w4IkHq1bYSEe6mjgYWFU9NSviHrGSVoOFHJtHqRrBkO5UVzelvl3xOFgzKtpPCQCtYyJfZuOqrrstWXiHyo8NY0xvWGT+IVyIwIDAQAB","manifest_version":2,"name":"bilibili哔哩哔哩下载助手","offline_enabled":true,"permissions":["tabs","contextMenus","http://*/*","https://*/*"],"update_url":"https://clients2.google.com/service/update2/crx","version":"2.0.9","web_accessible_resources":["*.*","**/*.*"]};const e=()=>"www.bilibili.com"===location.hostname||"bilibili.com"===location.hostname;if(!e())return;const t=()=>/\/video\/av\d+/i.test(window.location.pathname),n=()=>/\/bangumi\/play\/\S+/i.test(window.location.pathname);if(!t()&&!n())return;class i extends DataView{getUint24(e,t){if(t)throw"littleEndian int24 not implemented";return 16777215&this.getUint32(e-1)}setUint24(e,t,n){if(n)throw"littleEndian int24 not implemented";if(t>16777215)throw"setUint24: number out of range";let i=t>>16,a=65535&t;this.setUint8(e,i),this.setUint16(e+1,a)}indexOf(e,t=0,n=this.byteLength-e.length+1){if(e.charCodeAt){for(let i=t;i<n;i++){if(this.getUint8(i)!=e.charCodeAt(0))continue;let t=1;for(let n=0;n<e.length;n++)if(this.getUint8(i+n)!=e.charCodeAt(n)){t=0;break}if(t)return i}return-1}for(let i=t;i<n;i++){if(this.getUint8(i)!=e[0])continue;let t=1;for(let n=0;n<e.length;n++)if(this.getUint8(i+n)!=e[n]){t=0;break}if(t)return i}return-1}}class a{constructor(e,t=0){this.tagHeader=new i(e.buffer,e.byteOffset+t,11),this.tagData=new i(e.buffer,e.byteOffset+t+11,this.dataSize),this.previousSize=new i(e.buffer,e.byteOffset+t+11+this.dataSize,4)}get tagType(){return this.tagHeader.getUint8(0)}get dataSize(){return this.tagHeader.getUint24(1)}get timestamp(){return this.tagHeader.getUint24(4)}get timestampExtension(){return this.tagHeader.getUint8(7)}get streamID(){return this.tagHeader.getUint24(8)}stripKeyframesScriptData(){let e;if(18!=this.tagType)throw"can not strip non-scriptdata's keyframes";-1!=(e=this.tagData.indexOf("hasKeyframes"))&&this.tagData.setUint8(e+"hasKeyframes".length,0)}getDuration(){if(18!=this.tagType)throw"can not find non-scriptdata's duration";let e=this.tagData.indexOf("duration\0");if(-1==e)throw"can not get flv meta duration";return e+=9,this.tagData.getFloat64(e)}getDurationAndView(){if(18!=this.tagType)throw"can not find non-scriptdata's duration";let e=this.tagData.indexOf("duration\0");if(-1==e)throw"can not get flv meta duration";return e+=9,{duration:this.tagData.getFloat64(e),durationDataView:new i(this.tagData.buffer,this.tagData.byteOffset+e,8)}}getCombinedTimestamp(){return this.timestampExtension<<24|this.timestamp}setCombinedTimestamp(e){if(e<0)throw"timestamp < 0";this.tagHeader.setUint8(7,e>>24),this.tagHeader.setUint24(4,16777215&e)}}class o{constructor(e){if(0!=e.indexOf("FLV",0,1))throw"Invalid FLV header";this.header=new i(e.buffer,e.byteOffset,9),this.firstPreviousTagSize=new i(e.buffer,e.byteOffset+9,4),this.tags=[];let t=this.headerLength+4;for(;t<e.byteLength;){let n=new a(e,t);t+=11+n.dataSize+4,this.tags.push(n)}if(t!=e.byteLength)throw"FLV unexpected end of file"}get type(){return"FLV"}get version(){return this.header.getUint8(3)}get typeFlag(){return this.header.getUint8(4)}get headerLength(){return this.header.getUint32(5)}static merge(e){if(e.length<1)throw"Usage: FLV.merge([flvs])";let t,n=[],i=[0,0],a=[0,0],o=0;n.push(e[0].header),n.push(e[0].firstPreviousTagSize);for(let s of e){let r=1e3*o;i[0]=a[0],i[1]=a[1],r=Math.max(r,i[0],i[1]);let l=0;for(let i of s.tags)18!=i.tagType||l?8!=i.tagType&&9!=i.tagType||(a[i.tagType-8]=r+i.getCombinedTimestamp(),i.setCombinedTimestamp(a[i.tagType-8]),n.push(i.tagHeader),n.push(i.tagData),n.push(i.previousSize)):(o+=i.getDuration(),l=1,s==e[0]&&(({duration:o,durationDataView:t}=i.getDurationAndView()),i.stripKeyframesScriptData(),n.push(i.tagHeader),n.push(i.tagData),n.push(i.previousSize)))}return t.setFloat64(0,o),new Blob(n)}static async mergeBlobs(e){if(e.length<1)throw"Usage: FLV.mergeBlobs([blobs])";let t,n=[],a=[0,0],s=[0,0],r=0;for(let l of e){let d=1e3*r;a[0]=s[0],a[1]=s[1],d=Math.max(d,a[0],a[1]);let c=0,g=await new Promise((e,t)=>{let n=new FileReader;n.onload=(()=>e(new o(new i(n.result)))),n.readAsArrayBuffer(l),n.onerror=t}),p=[];for(let i of g.tags)18!=i.tagType||c?8!=i.tagType&&9!=i.tagType||(s[i.tagType-8]=d+i.getCombinedTimestamp(),i.setCombinedTimestamp(s[i.tagType-8]),p.push(i.tagHeader,i.tagData,i.previousSize)):(r+=i.getDuration(),c=1,l==e[0]&&(n.push(g.header,g.firstPreviousTagSize),({duration:r,durationDataView:t}=i.getDurationAndView()),i.stripKeyframesScriptData(),n.push(i.tagHeader),n.push(i.tagData),n.push(i.previousSize)));n.push(new Blob(p))}return t.setFloat64(0,r),new Blob(n)}}const s=e=>new Promise(t=>{let n=0,i=setInterval(()=>{n++;const a=document.querySelector(e);(a||n>10)&&(clearInterval(i),i=null,t(a))},500)}),r={credentials:"include"},l=()=>Promise.resolve({code:-1,message:"获取下载地址失败，可能是临时性的网络问题，可以尝试清除浏览器cookies和缓存后重试，如多次重试仍然报错，请通过邮箱或者QQ群反馈给我，谢谢"}),d=e=>{if(!e.durl)return-10403===e.code?(e.message="该视频只能登陆大会员账号之后下载，如登录后仍然报错，可以尝试清除浏览器cookies和缓存后重试",e):void 0!==e.code?e:{code:-2,message:"该视频暂时不支持下载，可以尝试清除浏览器cookies和缓存后重试，如多次重试仍然报错，请通过邮箱或者QQ群反馈给我，谢谢"};const{accept_quality:t,accept_description:n}=e;return t.forEach((e,t)=>{c[e]=n[t]}),{code:0,durls:e.durl.map(e=>{const t=new URL(e.url);return t.protocol=window.location.protocol,{url:t.href,size:e.size}}),qualityDescription:c[e.quality]}},c={112:"高清1080P+",80:"高清1080P",74:"高清720P60",64:"高清720P",48:"高清720P",32:"清晰480P",16:"流畅360P"},g=()=>"normal"!==localStorage.bilibili_helper_download_mode,p=()=>"off"!==localStorage.bilibili_helper_merge_mode,h=()=>"hide"===localStorage.bilibili_helper_show,m=e=>{const t=1073741824,n=1048576;return e>=t?`${(e/t).toFixed(2)}GB`:e>=n?`${(e/n).toFixed(2)}MB`:e>=1024?`${(e/1024).toFixed(2)}KB`:e+"B"},u=(e,t,n,i)=>0!==n?`<strong>${i}</strong>`:`<strong>${e}</strong> 的下载地址(共${t.length}个分段)：`,f=(e,t,n,i)=>{if(0!==n)return"";if(!g())return e.map((e,n)=>`\n        <li><a title="${t}_分段${n+1}" download href="${e.url}">分段${n+1}</a><span class="size">(${m(e.size)})</span></li>\n      `).join("");if(g()&&!p())return e.map((e,n)=>{const i=encodeURIComponent(JSON.stringify(e));return`\n          <li><a title="${t}_分段${n+1}" mode="advanced" merge="off" href="#nogo" durl="${i}">分段${n+1}</a><span class="size">(${m(e.size)})</span><span durl="${i}" class="progress"></span></li>\n        `}).join("");if(g()&&p()){const n=encodeURIComponent(JSON.stringify(e));let i=0;return e.forEach(e=>i+=e.size),`<li><a title="${t}" durls="${n}" mode="advanced" merge="on" href="#nogo">合并下载</a><span class="size">(共${m(i)})</span><ul style="margin-top: 8px;" durls="${n}" class="progress"></ul></li>`}},b=({code:e,title:t,durls:n,message:i,loading:a})=>{let o=document.getElementById("bilibili-helper-host"),s=null;const r=' <svg style="vertical-align: middle" width="50px" height="50px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" class="lds-pacman"><g ng-attr-style="display:{{config.showBean}}" style="display:block"><circle cx="62.0973" cy="50" r="4" ng-attr-fill="{{config.c2}}" fill="#00a1d6"><animate attributeName="cx" calcMode="linear" values="95;35" keyTimes="0;1" dur="1" begin="-0.67s" repeatCount="indefinite"></animate><animate attributeName="fill-opacity" calcMode="linear" values="0;1;1" keyTimes="0;0.2;1" dur="1" begin="-0.67s" repeatCount="indefinite"></animate></circle><circle cx="82.4973" cy="50" r="4" ng-attr-fill="{{config.c2}}" fill="#00a1d6"><animate attributeName="cx" calcMode="linear" values="95;35" keyTimes="0;1" dur="1" begin="-0.33s" repeatCount="indefinite"></animate><animate attributeName="fill-opacity" calcMode="linear" values="0;1;1" keyTimes="0;0.2;1" dur="1" begin="-0.33s" repeatCount="indefinite"></animate></circle><circle cx="42.2973" cy="50" r="4" ng-attr-fill="{{config.c2}}" fill="#00a1d6"><animate attributeName="cx" calcMode="linear" values="95;35" keyTimes="0;1" dur="1" begin="0s" repeatCount="indefinite"></animate><animate attributeName="fill-opacity" calcMode="linear" values="0;1;1" keyTimes="0;0.2;1" dur="1" begin="0s" repeatCount="indefinite"></animate></circle></g><g ng-attr-transform="translate({{config.showBeanOffset}} 0)" transform="translate(-15 0)"><path d="M50 50L20 50A30 30 0 0 0 80 50Z" ng-attr-fill="{{config.c1}}" fill="#f45a8d" transform="rotate(10.946 50 50)"><animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 50 50;45 50 50;0 50 50" keyTimes="0;0.5;1" dur="1s" begin="0s" repeatCount="indefinite"></animateTransform></path><path d="M50 50L20 50A30 30 0 0 1 80 50Z" ng-attr-fill="{{config.c1}}" fill="#f45a8d" transform="rotate(-10.946 50 50)"><animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 50 50;-45 50 50;0 50 50" keyTimes="0;0.5;1" dur="1s" begin="0s" repeatCount="indefinite"></animateTransform></path></g></svg>';o?((s=o.shadowRoot).getElementById("title").innerHTML=a?"加载中"+r:u(t,n,e,i),s.getElementById("durls").innerHTML=a?"":f(n,t,e)):((o=document.createElement("bilibili-helper-host")).id="bilibili-helper-host",o.style.cssText=`display:block;overflow:auto;position:fixed;z-index:${Number.MAX_SAFE_INTEGER};bottom:0;left:0;right:0;max-height:50%;width:100%;background: #fff;border-top: 1px solid #ccc;box-shadow: rgba(0, 0, 0, 0.2) 0 -5px 10px;`,h()?o.classList.add("hide"):o.classList.remove("hide"),o.innerHTML="<style>\n        #bilibili-helper-host.hide{\n          width:auto!important;\n          left:auto!important;\n          background:transparent!important;\n          border:0 none!important;\n          border-radius: 6px 0 0 0;\n          box-shadow: rgba(0, 0, 0, 0.2) -5px -5px 10px!important;\n        }\n        .player-fullscreen-fix #bilibili-helper-host {\n          z-index: 99999!important;\n        }\n      </style>",document.body.appendChild(o),(s=o.attachShadow({mode:"open"})).innerHTML=`\n        <style>\n          p, a, div, span, li, i, b, strong, input, button, label {\n            font-size: inherit;\n          }\n          li {\n            margin-bottom: 5px;\n          }\n          p {\n            margin: 0;\n            line-height: 1.5;\n          }\n          h1 {\n            font-size: 20px;\n            font-weight: bold;\n            margin-bottom: 20px;\n          }\n          h3 {\n            font-size: 16px;\n            margin: 1em 0;\n          }\n          #title {\n            font-size: 16px;\n            font-weight: normal;\n          }\n          #content {\n            display: flex;\n            width: 100%;\n            font-size: 14px;\n            position: relative;\n          }\n          a {\n            color: #00a1d6 !important;\n            text-decoration: none;\n          }\n          a:hover {\n            text-decoration: underline;\n          }\n          a.disabled {\n            color: #666!important;\n          }\n          a.disabled:hover {\n            text-decoration: none;\n            cursor: not-allowed;\n          }\n          #side-bar {\n            flex: 3;\n            padding: 20px;\n            border-right: 1px solid #ccc;\n            margin-right: -1px;\n          }\n          #main {\n            flex: 7;\n            padding: 20px;\n            border-left: 1px solid #ccc;\n          }\n          #notice-frame {\n            width: 100%;\n            padding: 0;\n          }\n          .donate {\n            border-top: 1px solid #ccc;\n            padding-top: 10px;\n          }\n          #zanshang {\n            width: 80%;\n          }\n          .setting-item {\n            margin-bottom: 8px;\n          }\n          .setting-item .label {\n            font-weight: bold;\n            width: 6em;\n            display: inline-block;\n            text-align: right;\n          }\n          .desc {\n            padding-left: 6em;\n          }\n          #actions {\n            position: absolute;\n            right: 0;\n            top: 0;\n          }\n          .btn-large {\n            border: 0 none;\n            background: #f45a8d;\n            border-radius: 6px;\n            color: #fff;\n            padding: 10px 20px;\n          }\n          #toggle {\n            border-radius: 0 0 0 6px;\n            outline: none;\n            cursor: pointer;\n          }\n          .hide #side-bar {\n            display: none;\n          }\n          .hide #main {\n            display: none;\n          }\n          .hide #toggle {\n            border-radius: 6px 0 0 0;\n          }\n          .hide #actions {\n            position: static;\n          }\n      \n          a.btn {\n            border: 0 none;\n            background: #f45a8d;\n            text-decoration: none !important;\n            color: #fff !important;\n            border-radius: 3px;\n            padding: 5px 10px;\n            display: inline-block;\n          }\n          .settings {\n            border-left: 5px solid #ccc;\n            background: #eee;\n            padding: 16px 16px 8px 0;\n          }\n          .size {\n            margin: 0 5px;\n          }\n        </style>\n        <div id="content" ${h()?'class="hide"':""}>\n          <div id="side-bar">\n            <div class="notice">\n              <iframe id="notice-frame" frameborder="0"></iframe>\n            </div>\n            \x3c!--<div class="support">TODO 支持区域</div>--\x3e\n            <div class="donate">\n              <p>微信扫一扫赞赏作者(扫不出来请点击图片后扫大图)：</p>\n              <a href="${internalUrls.zanshang}" target="_blank"><img title="点击查看大图" alt="点击查看大图" id="zanshang" src="${internalUrls.zanshang}"/></a>\n            </div>\n          </div>\n          <div id="main">\n            <h1 style="margin-top: 0;">B站下载助手</h1>\n            <div class="settings">\n              <div class="setting-item">\n                <span class="label">清晰度：</span>\n                <span>请在页面中B站自己的播放器内切换清晰度</span>\n              </div>\n              <div class="setting-item">\n                <span class="label">下载模式：</span>\n                <label><input id="setting-download-mode-advanced" checked name="setting-download-mode" type="radio"/> 高级</label>\n                <label><input id="setting-download-mode-normal" name="setting-download-mode" type="radio"/> 兼容</label>\n                <p class="desc">高级模式支持自动重命名和合并下载，但会占用非常大的系统运行内存<br/>兼容模式直接使用浏览器的默认下载，资源占用很小，但不支持自动重命名和合并下载</p>\n                <p class="desc">建议系统运行内存小于16G的用户使用兼容模式，下载后可以点<a href="http://csser.top/bilibili/merge.html" target="_blank">这里</a>尝试手动合并</p>\n              </div>\n              <div class="setting-item" id="setting-advanced">\n                <span class="label">合并下载：</span>\n                <label><input id="setting-merge-on" checked name="setting-merge" type="radio"> 开</label>\n                <label><input id="setting-merge-off" name="setting-merge" type="radio"> 关</label>\n                <p class="desc">高级模式下载过程中请<strong style="color: red;">不要</strong>刷新或关闭页面，也<strong style="color: red;">不要</strong>切换分集和清晰度</p>\n              </div>\n            </div>\n            <h3 id="title">${a?"加载中"+r:u(t,n,e,i)}</h3>\n            <ul id="durls">\n              ${a?"":f(n,t,e)}\n            </ul>\n            <div class="beg">\n              <p>\n                如果这个工具确实帮到了您，烦请在Chrome商店给个五星好评，谢谢😊\n                <a class="btn" href="https://chrome.google.com/webstore/detail/bfcbfobhcjbkilcbehlnlchiinokiijp/reviews" target="_blank">去评价</a>\n              </p>\n            </div>\n          </div>\n          <div id="actions">\n            <button id="toggle" class="btn-large">${h()?"打开B站下载助手":"收起"}</button>\n          </div>\n        </div>\n      `,(e=>{const t=e.getElementById("setting-download-mode-advanced"),n=e.getElementById("setting-download-mode-normal"),i=e.getElementById("setting-merge-on"),a=e.getElementById("setting-merge-off"),o=e.getElementById("setting-advanced"),s=e.getElementById("durls"),r=e.getElementById("toggle"),l=e.getElementById("actions"),d=e.getElementById("content"),c=document.getElementById("bilibili-helper-host"),m=()=>{t.disabled=!0,n.disabled=!0,i.disabled=!0,a.disabled=!0},u=()=>{t.disabled=!1,n.disabled=!1,i.disabled=!1,a.disabled=!1};g()?(t.checked=!0,n.checked=!1,o.style.display="block"):(t.checked=!1,n.checked=!0,o.style.display="none"),p()?(i.checked=!0,a.checked=!1):(i.checked=!1,a.checked=!0);const f=()=>{e.buildDownloadLinks()};t.addEventListener("change",()=>{t.checked?(localStorage.bilibili_helper_download_mode="advanced",o.style.display="block"):(localStorage.bilibili_helper_download_mode="normal",o.style.display="none"),f()}),n.addEventListener("change",()=>{n.checked?(localStorage.bilibili_helper_download_mode="normal",o.style.display="none"):(localStorage.bilibili_helper_download_mode="advanced",o.style.display="block"),f()}),i.addEventListener("change",()=>{localStorage.bilibili_helper_merge_mode=i.checked?"on":"off",f()}),a.addEventListener("change",()=>{localStorage.bilibili_helper_merge_mode=a.checked?"off":"on",f()}),s.addEventListener("click",t=>{const n=t.target;if("a"===n.tagName.toLowerCase()&&"advanced"===n.getAttribute("mode")){if(t.preventDefault(),t.stopPropagation(),n.classList.contains("disabled"))return;let i=null;const a=n.getAttribute("title");"on"===n.getAttribute("merge")?(i=e.querySelector(`ul[durls="${n.getAttribute("durls")}"]`),m(),x(n,JSON.parse(decodeURIComponent(n.getAttribute("durls"))),a,i).then(u)):(i=e.querySelector(`span[durl="${n.getAttribute("durl")}"]`),m(),v(n,JSON.parse(decodeURIComponent(n.getAttribute("durl"))),a,i).then(u))}}),r.addEventListener("click",()=>{h()?(localStorage.bilibili_helper_show="show",d.classList.remove("hide"),r.innerHTML="收起",c.classList.remove("hide"),l.style.top="0",e.getElementById("notice-frame").contentWindow.postMessage({action:"getHeight"},"https://csser.top")):(localStorage.bilibili_helper_show="hide",d.classList.add("hide"),c.classList.add("hide"),r.innerHTML="打开B站下载助手",l.style.top="0")}),c.addEventListener("scroll",()=>{l.style.top=c.scrollTop+"px"})})(s),(e=>{const t=e.getElementById("notice-frame");t.onload=(()=>{t.contentWindow.postMessage({action:"getHeight"},"https://csser.top"),t.contentWindow.postMessage({action:"setVersion",version:{name:manifest.version,code:parseInt(manifest.version.replace(/\./g,""),10)}},"https://csser.top"),t.contentWindow.postMessage({action:"setTheme",theme:"null"},"https://csser.top")}),window.addEventListener("message",e=>{if("https://csser.top"===e.origin&&e.data&&"reportHeight"===e.data.action&&(t.style.height=e.data.height+10+"px"),"https://csser.top"===e.origin&&e.data&&"showBilibilihelperindooorsmanNoticeDialog"===e.data.action){const t=e.data.notices;t&&t.length>0&&t.forEach(e=>{})}}),t.src=`https://csser.top/bilibili/notice.html?t=${Date.now()}`,window.addEventListener("resize",()=>{t.contentWindow.postMessage({action:"getHeight"},"https://csser.top")})})(s)),s.buildDownloadLinks=(()=>{s.getElementById("durls").innerHTML=f(n,t,e)})},y=(e,t)=>{const n=new Blob([e],{type:"application/octet-stream"}),i=document.createElement("a");i.setAttribute("href",URL.createObjectURL(n)),i.setAttribute("download",t),i.setAttribute("style","position:absolute;top:-9999px;"),document.body.appendChild(i);const a=new MouseEvent("click",{bubbles:!0,cancelable:!0,view:window});i.dispatchEvent(a),setTimeout(()=>{document.body.removeChild(i)},1e3)},w=(e,t,n)=>{let i=null;return fetch(e).then(e=>{const a=e.headers.get("content-length"),o=t||parseInt(a,10);let s=0;return i=setInterval(()=>{n(s,o)},1e3),new Response(new ReadableStream({start(t){const n=e.body.getReader(),i=()=>{n.read().then(({done:e,value:n})=>{e?t.close():(s+=n.byteLength,t.enqueue(n),i())}).catch(e=>{t.error(e)})};i()}}))}).then(e=>e.blob()).finally(()=>{i&&clearInterval(i)})},v=(e,{url:t,size:n},i,a)=>(e.classList.add("disabled"),w(t,n,(e,t)=>{const n=Math.ceil(e/t*100);a.innerHTML=` 正在下载 - ${e}/${t} - ${n}%`}).then(e=>{a.innerHTML=" 已下载完成";const n=new URL(t).pathname.toLowerCase().match(/\.[a-z0-9]+?$/)[0];y(e,i+n)}).finally(()=>{e.classList.remove("disabled")})),x=(e,t,n,i)=>{if(1===t.length)return v(e,t[0],n,i);e.classList.add("disabled");const a=t.map(({url:e,size:t},n)=>{const a=document.createElement("li");return a.innerHTML=`分段${n+1} (${m(t)}) 正在下载`,i.appendChild(a),w(e,t,(e,i)=>{const o=Math.ceil(e/i*100);a.innerHTML=`分段${n+1} (${m(t)}) 正在下载 - ${e}/${i} - ${o}%`}).then(e=>(a.innerHTML=`分段${n+1} (${m(t)}) 已下载完成，等待合并`,e))});return Promise.all(a).then(async e=>{const t=await o.mergeBlobs(Array.from(e));y(t,n+".flv"),i.innerHTML="已完成"}).finally(()=>{e.classList.remove("disabled")})},_=async()=>{if(!e())return;b({loading:!0});const i=await(()=>fetch(window.location.href,r).then(e=>e.text()).then(e=>{const t=e.match(/<script>window.__INITIAL_STATE__=(.+?)<\/script>/);return t&&t[1]?JSON.parse(t[1].replace(";(function(){var s;(s=document.currentScript||document.scripts[document.scripts.length-1]).parentNode.removeChild(s);}());","")):{code:-2,message:"获取视频信息失败，可以尝试清除浏览器cookies和缓存后重试，如多次重试仍然报错，请通过邮箱或QQ群反馈给我，谢谢"}}).catch(()=>l()))();if(i.code)return b(i);let a=localStorage.bilibili_player_settings&&+JSON.parse(localStorage.bilibili_player_settings).setting_config.defquality||112;if(t()){const e=i.videoData.aid;let t,n,o=i.videoData.cid;if(i.videoData.pages.length>1){const e=location.search.match(/p=(\d+)/);let a=i.videoData.pages[0];e&&e[1]&&(a=i.videoData.pages.find(t=>""+t.page==""+e[1])),t=a.page,n=a.part,o=a.cid}const{code:s,durls:c,qualityDescription:g,message:p}=await((e,t,n=112)=>{return fetch(`//api.bilibili.com/x/player/playurl?cid=${t}&avid=${e}&otype=json&qn=${n}`,r).then(e=>e.json()).then(e=>0!==e.code?d(e):d(e.data)).catch(()=>l())})(e,o,a);if(0===s){let e=`[${g}] ${i.videoData.title}`;t&&n&&(e=`[${g}] ${i.videoData.title}_P${t}_${n}`),b({code:s,title:e,durls:c,message:p})}else b({code:s,message:p})}if(n()){const e=i.epList;let t=-1===i.epId?e[e.length-1].ep_id:i.epId,n=e.find(e=>t===e.ep_id);const o=await s(".episode-item.on"),c=await s(".ep-item.cursor");if(o||c){const i=o||c,a=i.parentElement;let r=Array.from(a.querySelectorAll("li")).findIndex(e=>e===i);const l=await s("#eplist_module .ep-list-progress");l&&(r=+l.textContent.match(/(\d+)\/\d+/)[1]-1),n=e[r],t=n.ep_id||n.id}const{code:g,durls:p,qualityDescription:h,message:m}=await((e,t=112)=>{return fetch(`//api.bilibili.com/pgc/player/web/playurl/?ep_id=${e}&qn=${t}&bsource=`,r).then(e=>e.json()).then(e=>0!==e.code?d(e):d(e.result)).catch(()=>l())})(t,a);if(0===g){const e=`[${h}] ${i.mediaInfo.title}_${n.index||n.title}_${n.index_title||n.longTitle}`;b({code:g,title:e,durls:p,message:m})}else b({code:g,message:m})}};_();let $=""+window.location.href,L=""+localStorage.bilibili_player_settings;setInterval(()=>{const e=window.location.href,t=localStorage.bilibili_player_settings;if($!==e&&($=e,_()),L!==t)try{if(JSON.parse(t).setting_config.defquality===JSON.parse(L).setting_config.defquality)return;L=t,_()}catch(e){}},1e3)})();</script></head>
+<body>
+<div align="center">
+<table width="100%" border="0">
+<tbody><tr valign="top">
+<td align="left" width="25%">
+  <span class="tiny"><a href="http://www.cse.unsw.edu.au/~cs3311">COMP3311 19s1</a></span>
+</td>
+<td align="center" width="50%">
+  <span class="heading">Exercises 01</span><br>
+  <span class="subheading">Data Modelling, Entity-Relationship Model, (ODL Model)</span>
+</td>
+<td align="right" width="25%">
+  <span class="tiny"><a href="http://www.cse.unsw.edu.au/~cs3311">Database Systems</a></span>
+</td>
+</tr></tbody></table>
+</div><p style="text-align:center;font-size:75%"><a href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/01/index.php?view=qo">[Show with no answers]</a> &nbsp; <a href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/01/index.php?view=all">[Show with all answers]</a>
+
+</p><ol>
+<br><li>
+<p>
+In the context of database application development (aka <q>database
+engineering</q>), what are the aims of <b>data modelling</b>?
+</p>
+<p><small>[<a id="q1a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/01/index.php##" onclick="toggleVisible(&#39;q1&#39;)">show answer</a>]</small></p>
+<div id="q1" style="color:#000099;display:none">
+<p>
+Data modelling works from a description of the <i>requirements</i> 
+and aims to build a comprehensive description of the entities involved
+in the application and the relationships among these entities.
+The model constructed should ensure that all of the requirements can
+be met i.e. that all of the relevant data is represented and is
+structured in such a way that all of the operations mentioned in
+the requirements can be carried out.
+</p>
+<p>
+The data model should give enough detail that a database schema
+can be derived from it without significant additional information
+being needed.
+</p></div>
+
+<br></li><li>
+<p>
+Describe the similarities and differences between the following similarly-named concepts:
+</p>
+<ol type="a">
+<p></p><li> <b>relationship</b> in the ODL object-oriented design language
+<p><small>[<a id="q2a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/01/index.php##" onclick="toggleVisible(&#39;q2&#39;)">show answer</a>]</small></p>
+<div id="q2" style="color:#000099;display:none">
+<ul>
+<li> describes an association between objects in a pair of ODL classes
+</li><li> cannot have attributes associated with the relationship <br>
+	e.g. you cannot model the sales (and dates) made by a salesman
+	to his customers like this: <br>
+	<tt>relationship Set&lt;Struct {Person customer, Date saleDate}&gt; salesMade;</tt>
+</li><li> an ODL relationship instance could be implemented as a collection of OIDs stored in an object
+</li></ul>
+</div>
+<p></p></li><li> <b>relationship</b> in the entity-relationship data model
+<p><small>[<a id="q3a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/01/index.php##" onclick="toggleVisible(&#39;q3&#39;)">show answer</a>]</small></p>
+<div id="q3" style="color:#000099;display:none">
+<ul>
+<li> describes an association between <i>n</i> specific entities
+</li><li> a collection of relationships forms a relationship set
+</li><li> a relationship set between two entity sets is similar to an ODL relationship
+</li><li> a relationship between two entities is similar to an ODL relationship instance
+</li><li> a relationship can have associated attributes
+</li></ul>
+</div>
+<p></p></li><li> <b>relation</b> in the relational data model
+<p><small>[<a id="q4a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/01/index.php##" onclick="toggleVisible(&#39;q4&#39;)">show answer</a>]</small></p>
+<div id="q4" style="color:#000099;display:none">
+<ul>
+<li> describes an association between a collection of attributes
+</li><li> an instance of a relation is a set of tuples of attribute values
+</li><li> a relation can be used to model a class or entity set
+</li><li> a relation can also be used to model relationship sets (<i>n</i>-ary
+	relationships with associated attributes)
+</li><li> every relation has a primary key
+</li></ul>
+</div>
+</li></ol>
+
+<br></li><li>
+<p>
+Why is the notion of a <b>key</b> not as important in the OO data model
+as it is in the ER and relational models?
+</p>
+<p><small>[<a id="q5a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/01/index.php##" onclick="toggleVisible(&#39;q5&#39;)">show answer</a>]</small></p>
+<div id="q5" style="color:#000099;display:none">
+<p>
+In the OO data model, each object (instance) has an associated object
+identifier (OID) that distinguishes it from every other object in the
+system.
+</p>
+<p>
+In the ER and relational models, entity instances and tuples do not
+have an implicit <q>instance identifier</q>. They must rely on attributes
+having distinct values to distinguish instances. A subset of attributes
+that <em>does</em> distinguish all instances (either entity instances
+or tuples), is a <b>key</b>. Without the notion of a key, entity sets
+and relations (tuple sets) would be bags rather than sets.
+</p>
+<p>
+With an OID separate from the attributes, objects in the OO model can
+be distinguished with needing to rely on attribute values, and so a key
+is not necessary.
+</p></div>
+
+<br></li><li>
+<p>
+What kind of data, relationships and constraints exist in this scenario?
+</p>
+<ul>
+<li> Patients are identified by an SSN, and their names, addresses and ages
+must be recorded.
+</li><li> Doctors are identified by an SSN. For each doctor, the name, specialty
+and years of experience must be recorded.
+</li><li> Each pharmacy has a name, address and phone number. A pharmacy must have
+a manager.
+</li><li> A pharmacist is identified by an SSN, he/she can only work for one
+pharmacy. For each pharmacist, the name, qualification must be recorded.
+</li><li> For each drug, the trade name and formula must be recorded.
+</li><li> Every patient has a primary physician. Every doctor has at least one
+patient.
+</li><li> Each pharmacy sells several drugs, and has a price for each. A drug
+could be sold at several pharmacies, and the price could vary between
+pharmacies.
+</li><li> Doctors prescribe drugs for patients. A doctor could prescribe one or
+more drugs for several patients, and a patient could obtain prescriptions
+from several doctors. Each prescription has a date and quantity associated
+with it.
+</li></ul>
+<p><small>[<a id="q6a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/01/index.php##" onclick="toggleVisible(&#39;q6&#39;)">show answer</a>]</small></p>
+<div id="q6" style="color:#000099;display:none">
+Possible data:
+<ul>
+<li> people: doctors, patients, pharmacists, managers(?)
+</li><li> pharmacies, drugs
+</li><li> person's SSN, name, address(?)
+</li><li> doctor: as for person + specialty
+</li><li> pharmacist: as for person + qualification
+</li><li> etc.
+</li></ul>
+Possible relationships:
+<ul>
+<li> doctors <b>treat</b> patients, patients <b>have primary</b> physician
+</li><li> pharmacists <b>work in</b> pharmacies
+</li><li> drugs <b>are sold in</b> pharmacies
+</li><li> doctors <b>prescribe</b> drugs <b>for</b> patients
+</li><li> etc.
+</li></ul>
+Possible constraints:
+<ul>
+<li> every person has <b>exactly one, unique</b> SSN
+</li><li> pharamacist works in ≤ 1 pharmacy
+</li><li> patient has <b>exactly one</b> primary physician
+</li><li> doctor treats ≥ 1 patient
+</li><li> etc.
+</li></ul>
+</div>
+
+<br></li><li>
+<p>
+What kind of data, relationships and constraints exist in this scenario?
+</p>
+<ul>
+<li> for each person, we need to record their tax file number (TFN),
+        their real name, and their address
+</li><li> everyone who earns money in Australia has a distinct tax file number
+</li><li> authors write books, and may publish books using a ``pen-name''
+	(a name which appears as the author of the book and is different
+	to their real name)
+</li><li> editors ensure that books are written in a manner that is
+	suitable for publication
+</li><li> every editor works for just one publisher
+</li><li> editors and authors have quite different skills; someone who is
+	an editor cannot be an author, and vice versa
+</li><li> a book may have several authors, just one author, or no authors
+	(published anonymously)
+</li><li> every book has one editor assigned to it, who liaises with the
+	author(s) in getting the book ready for publication
+</li><li> each book has a title, and an edition number (e.g. 1st, 2nd, 3rd)
+</li><li> each published book is assigned a unique 13-digit number (its ISBN);
+	different editions of the same book will have different ISBNs
+</li><li> publishers are companies that publish (market/distribute) books
+</li><li> each publisher is required to have a unique
+	Australian business number (ABN)
+</li><li> a publisher also has a name and address that need to be recorded
+</li><li> a particular edition of a book is published by exactly one publisher
+</li></ul>
+<p></p>
+<p><small>[<a id="q7a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/01/index.php##" onclick="toggleVisible(&#39;q7&#39;)">show answer</a>]</small></p>
+<div id="q7" style="color:#000099;display:none">
+Possible data:
+<ul>
+<li> people: authors, editors; organisations: publishers
+</li><li> person's name, TFN, address
+</li><li> books: published, unpublished
+</li><li> book's title, edition, ISBN, ...
+</li><li> publisher: ABN, name, address
+</li><li> etc.
+</li></ul>
+Possible relationships:
+<ul>
+<li> author <b>writes</b> books <small>(using pen-name)</small>
+</li><li> book <b>is edited by</b> editor
+</li><li> etc.
+</li></ul>
+Possible constraints:
+<ul>
+<li> every person has <b>exactly one, unique</b> TFN
+</li><li> every published work has <b>exactly one, unique</b> ISBN
+</li><li> editors and authors must be distinct sets
+</li><li> editor works for ≤ 1 publisher
+</li><li> etc.
+</li></ul>
+</div>
+
+<br></li><li>
+<p>
+Consider some typical operations in the myUNSW system ...
+</p>
+<ul>
+<li> student enrols in a lab class
+</li><li> student enrols in a course
+</li><li> system prints a student transcript
+</li></ul>
+<p>
+For each of these operations:
+</p>
+<ol type="a"> 
+<li> identify what data items are required
+</li><li> consider relationships between these data items
+</li><li> consider constraints on the data and relationships
+</li></ol>
+<p></p>
+<p><small>[<a id="q8a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/01/index.php##" onclick="toggleVisible(&#39;q8&#39;)">show answer</a>]</small></p>
+<div id="q8" style="color:#000099;display:none">
+<p><b>Operation:</b> student enrols in a class.
+</p><p>
+Possible data:
+</p><ul>
+<li> class information (day, time, location, quota, ...)
+</li><li> room information (name, building, capacity, ...)
+</li><li> course information (code, title, ...)
+</li><li> etc.
+</li></ul>
+Possible relationships:
+<ul>
+<li> class enrolment  <small>(for classes in this course)</small>
+</li><li> course enrolment <small>(for course containing class)</small>
+</li><li> etc.
+</li></ul>
+Possible constraints:
+<ul>
+<li> cannot enrol in more than one class for single course
+</li><li> must be enrolled course before enrolling in classes
+</li><li> etc.
+</li></ul>
+<p><b>Operation:</b> student enrols in a course.
+</p><p>
+Possible data:
+</p><ul>
+<li> course information (code, title, syllabus, pre-reqs, ...)
+</li><li> course offering information (quota, lic, ...)
+</li><li> etc.
+</li></ul>
+Possible relationships:
+<ul>
+<li> student enrolment <small>(in previous/current courses)</small>
+</li><li> etc.
+</li></ul>
+Possible constraints:
+<ul>
+<li> cannot enrol in a full course
+</li><li> cannot enrol if don't have pre-reqs
+</li><li> cannot enrol in more than 24UC per semester
+</li><li> etc.
+</li></ul>
+<p><b>Operation:</b> system prints a student transcript.
+</p><p>
+Possible data:
+</p><ul>
+<li> student information (name, id, ...)
+</li><li> course information (code, title, UOC, ...)
+</li><li> session information (year, code, dates, ...)
+</li><li> etc.
+</li></ul>
+Possible relationships:
+<ul>
+<li> student enrolment <small>(previous/current courses, marks/grades)</small>
+</li><li> course offering (course, session, ...)
+</li><li> etc.
+</li></ul>
+Possible constraints:
+<ul>
+<li> none?
+</li></ul>
+</div>
+
+<br></li><li>
+<p>
+Researchers work on different research projects, and the connection
+between them can be modelled by a <tt>WorksOn</tt> relationship.
+Consider the following two different ER diagrams to represent this
+situation.
+</p><p></p><center><img src="./19s1 - Exercises 01_files/workson.png"></center><p>
+Describe the different semantics suggested by each of these diagrams.
+</p>
+<p><small>[<a id="q9a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/01/index.php##" onclick="toggleVisible(&#39;q9&#39;)">show answer</a>]</small></p>
+<div id="q9" style="color:#000099;display:none">
+ER models for Researchers-WorksOn-Projects relationship.
+<ol type="a">
+<p></p><li> the <tt>Time</tt> attribute is attached to the <tt>WorksOn</tt>
+	relationship, which models the association between a researcher
+	and a project that they work on ... thus, we are modelling the
+	time that each researcher spends on each project that they are
+	involved with
+<p></p></li><li> the <tt>Time</tt> attribute is attached to the <tt>Project</tt>
+	entity, and so must be a measure of time associated with the
+	project (e.g. the total time allocated to the project)
+</li></ol>
+<p>
+In both cases, the thick line from <tt>Project</tt> to <tt>WorksOn</tt>
+indicates that every project must have at least one person working on it.
+On the other hand, the thin line from <tt>Researcher</tt> to <tt>WorksOn</tt>
+suggests that not every researcher needs to be working on a project.
+</p></div>
+
+<br></li><li>
+<p>
+Consider the following ODL definition to describe researchers
+working on and managing research projects:
+</p><pre>    interface Researcher {
+	attribute string name;
+	attribute int staffNumber;
+	relationship Project worksOn inverse Project::workers;
+	relationship Project manages inverse Project::managedBy;
+    };
+
+    interface Project {
+	attribute real number;
+	attribute string commander;
+	relationship Set&lt;Researcher&gt; workers inverse Researcher::worksOn;
+	relationship Researcher managedBy inverse Researcher::manages;
+   };
+</pre>
+This definition is based on the assumption that each researcher only
+works on one project, that a researcher manages at most one project,
+and that each project has only one manager.
+<p>
+Show how this definition would change if:
+</p><ol type="a">
+<p></p><li> each researcher's title (e.g. Dr.) is included
+<p></p></li><li> people's names are broken into separate family and given names
+<p></p></li><li> each project has a total budget allocation to be recorded
+<p></p></li><li> a researcher is allowed to be work on more than one project
+<p></p></li><li> a project may have several managers
+</li></ol>
+<p></p>
+<p><small>[<a id="q10a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/01/index.php##" onclick="toggleVisible(&#39;q10&#39;)">show answer</a>]</small></p>
+<div id="q10" style="color:#000099;display:none">
+ODL definition for Researchers-Projects.
+<pre>    interface Researcher {
+	attribute string name;
+	attribute int staffNumber;
+	relationship Project worksOn inverse Project::workers;
+	relationship Project manages inverse Project::managedBy;
+    };
+
+    interface Project {
+	attribute real number;
+	attribute string commander;
+	relationship Set&lt;Researcher&gt; workers inverse Researcher::worksOn;
+	relationship Researcher managedBy inverse Researcher::manages;
+   };
+</pre>
+This definition is based on the assumption that each researcher only
+works on one project, that a researcher manages at most one project,
+and that each project has only one manager.
+<p>
+How this definition would change if:
+</p><ol type="a">
+<p></p><li> each researcher's title (e.g. Dr.) is included <p>
+	We would add an extra attribute to <tt>Researcher</tt>:
+	</p><pre>	attribute string title;
+	</pre>
+
+<p></p></li><li> people's names are broken into separate family and given names <p>
+	We would change the <tt>name</tt> attribute to something like:
+	</p><pre>	attribute Struct { string family, string given } name;
+	</pre>
+<p></p></li><li> each project has a total budget allocation to be recorded <p>
+	We would add an extra attribute to <tt>Project</tt>:
+	</p><pre>	attribute float budget;
+	</pre>
+<p></p></li><li> a researcher is allowed to be work on more than one project <p>
+	We would change the definition of <tt>worksOn</tt> in the
+	<tt>Researcher</tt> class (note that nothing else needs to
+	change):
+	</p><pre>	relationship Set&lt;Project&gt; inverse Project::workers;
+	</pre>
+<p></p></li><li> a project may have several managers <p>
+	We would change the definition of the <tt>managedBy</tt>
+	relationship in the <tt>Project</tt> class:
+	</p><pre>	relationship Set&lt;Researcher&gt; managedBy inverse Researcher::manages;
+	</pre>
+</li></ol>
+</div>
+
+<br></li><li>
+<p>
+Show how you would represent the following OO classes as ER entities
+with their corresponding attributes:
+</p><pre>    interface CompanyListing {
+	attribute string name;
+	attribute float sharePrice;
+	attribute float netWorth;
+    };
+    interface Person {
+	attribute Struct {integer number, String street, String suburb} address;
+	attribute Struct {string family, string first, string initial} name;
+	attribute Struct {integer day, integer month, integer year} birthdate;
+    };
+    interface Astrologer {
+	attribute string name;
+	attribute Set&lt;integer&gt; luckyNumbers;
+	attribute Set&lt;Enum {capricorn,aquarius,pisces,...}&gt; favouriteStarSigns;
+	attribute List&lt;Date&gt; daysToBeware;
+    };
+</pre>
+Assume in the last class that <tt>Date</tt> is an atomic data type.
+<p></p>
+<p><small>[<a id="q11a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/01/index.php##" onclick="toggleVisible(&#39;q11&#39;)">show answer</a>]</small></p>
+<div id="q11" style="color:#000099;display:none">
+Representations of ODL classes as entity sets:
+<p>
+<img src="./19s1 - Exercises 01_files/q2a.png">
+</p><p>
+<img src="./19s1 - Exercises 01_files/q2b.png">
+</p><p>
+<img src="./19s1 - Exercises 01_files/q2c.png">
+</p></div>
+
+<br></li><li>
+<p>
+Show how you would represent each relationship from the following ODL model
+in an ER model:
+</p><pre>interface Faculty {
+...
+relationship Set&lt;School&gt; schools inverse School::memberOf;
+relationship Lecturer dean inverse Lecturer::deanOf;
+...
+};
+interface School {
+...
+relationship Faculty memberOf inverse::schools;
+...
+};
+interface Lecturer {
+...
+relationship Faculty deanOf inverse Faculty::dean;
+relationship Set&lt;Course&gt; hasTaught inverse Course::taughtBy;
+...
+};
+interface Course {
+...
+relationship Set&lt;Lecurer&gt; taughtBy inverse Lecturer::hasTaught;
+...
+};
+</pre>
+<p></p>
+<p><small>[<a id="q12a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/01/index.php##" onclick="toggleVisible(&#39;q12&#39;)">show answer</a>]</small></p>
+<div id="q12" style="color:#000099;display:none">
+<p>
+Faculty-School-Lecturer-Course relationships as ER diagrams:
+</p>
+<img src="./19s1 - Exercises 01_files/unier.png">
+<p>
+Note that the ODL model doesn't say anything about participation
+(partial/total) constraints on relationships. The participation
+constraints in the diagram above were based on understanding the semantics of
+the problem domain (e.g. every faculty has to have a dean, a course
+must be taught by someone, some academics are pure research and so
+don't have to teach courses, etc.)
+</p>
+</div>
+
+<br></li><li>
+<p>
+Draw an ER diagram for the following application from
+the manufacturing industry:
+</p><ol type="a">
+<p></p><li> Each supplier has a unique name.
+<p></p></li><li> More than one supplier can be located in the same city. 
+<p></p></li><li> Each part has a unique part number. 
+<p></p></li><li> Each part has a colour. 
+<p></p></li><li> A supplier can supply more than one part. 
+<p></p></li><li> A part can be supplied by more than one supplier. 
+<p></p></li><li> A supplier can supply a fixed quantity of each part.
+</li></ol>
+<p></p>
+<p><small>[<a id="q13a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/01/index.php##" onclick="toggleVisible(&#39;q13&#39;)">show answer</a>]</small></p>
+<div id="q13" style="color:#000099;display:none">
+<p>
+ER diagram for Supplier-Part scenario.
+</p>
+<center><img src="./19s1 - Exercises 01_files/supplier-part.png"></center>
+</div>
+
+<br></li><li>
+<p>
+The following two ER diagrams give alternative design choices
+for associating a person with their favourite types of food.
+Explain when you might choose to use the second rather than the
+first:
+</p>
+<center><img src="./19s1 - Exercises 01_files/liked-cuisines.png"></center>
+<p><small>[<a id="q14a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/01/index.php##" onclick="toggleVisible(&#39;q14&#39;)">show answer</a>]</small></p>
+<div id="q14" style="color:#000099;display:none">
+<p>
+If the only information you needed on each cuisine was its name,
+either version would be satisfactory.
+However, if additional information was needed on each cuisine
+(e.g. country of origin or classic dish or heat-rating), then
+the second version would be essential, as it is the only one
+in which this additional information can be associated with the
+cuisine.
+</p>
+</div>
+
+<br></li><li>
+<p>
+<small>[Based on RG 2.2]</small>
+Consider a relationship <tt>Teaches</tt> between teachers and courses.
+For each situation described below, give an ER diagram that accurately
+models that situation:
+</p><ol type="a">
+<p></p><li> Teachers may teach the same course in several semesters,
+	and each must be recorded
+<p></p></li><li> Teachers may teach the same course in several semesters,
+	but only the current offering needs to be recorded
+	(assume this in the following parts)
+<p></p></li><li> Every teacher must teach some course
+<p></p></li><li> Every teacher teaches <em>exactly</em> one course
+<p></p></li><li> Every teacher teaches <em>exactly</em> one course,
+	and every course must be taught by some teacher
+<p></p></li><li> A course may be taught jointly by a team of teachers
+</li></ol>
+<p>
+You may assume that the only attribute of interest for teachers is
+their staff number while for courses it is the course code (e.g. COMP3311).
+You may introduce any new attributes, entities and relationships that
+you think are necessary.
+</p>
+<p><small>[<a id="q15a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/01/index.php##" onclick="toggleVisible(&#39;q15&#39;)">show answer</a>]</small></p>
+<div id="q15" style="color:#000099;display:none">
+ER diagrams for Teachers-Teaches-Courses relationship.
+<ol type="a">
+<p></p><li> Teachers may teach the same course in several semesters,
+	and each must be recorded <p>
+	<img src="./19s1 - Exercises 01_files/teaches1.png">
+	</p><p>
+	<small>
+	Note: this solution follows the idea used by some textbooks
+	that relationships must be uniquely identified by the
+	participating entities. The more normal view is that
+	relationships are uniquely identified by the combination
+	of participating entities and attributes, in which case
+	the solution to the next part would be vaild here.
+	</small>
+</p><p></p></li><li> Teachers may teach the same course in several semesters,
+	but only the current offering needs to be recorded
+	(assume this in the following parts) <p>
+	<img src="./19s1 - Exercises 01_files/teaches2.png">
+</p><p></p></li><li> Every teacher must teach some course <p>
+	<img src="./19s1 - Exercises 01_files/teaches3.png">
+</p><p></p></li><li> Every teacher teaches <em>exactly</em> one course <p>
+	<img src="./19s1 - Exercises 01_files/teaches4.png">
+</p><p></p></li><li> Every teacher teaches <em>exactly</em> one course,
+	and every course must be taught by some teacher <p>
+	<img src="./19s1 - Exercises 01_files/teaches5.png">
+</p><p></p></li><li> A course may be taught jointly by a team of teachers <p>
+	<img src="./19s1 - Exercises 01_files/teaches6.png">
+</p></li></ol>
+<p></p>
+</div>
+
+<br></li><li>
+<p>
+Assume there is a <tt>Person</tt> entity type.
+Each person has a home address.
+More than one person can live at the same home address. 
+</p><ol type="a">
+<p></p><li>
+Create two, different ER diagrams to depict <tt>Person</tt>s
+and their addresses, one with <tt>Address</tt> as an attribute,
+the other with <tt>Address</tt> as an entity.
+<p></p></li><li> Why would we choose one rather than the other?
+<p></p></li><li>
+Assume that we have a <tt>ElectricCompany</tt> entity type.
+Only one of these companies supplies power to each home address. 
+Add that information to each ER diagram. 
+</li></ol> 
+<p></p>
+<p><small>[<a id="q16a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/01/index.php##" onclick="toggleVisible(&#39;q16&#39;)">show answer</a>]</small></p>
+<div id="q16" style="color:#000099;display:none">
+ER diagrams for Person-Address-ElectricCompany scenario.
+<ol type="a">
+<p></p><li> Address as attribute <p>
+        <img src="./19s1 - Exercises 01_files/person-address1.png">       
+</p><p></p></li><li> Address as entity <p>
+        <img src="./19s1 - Exercises 01_files/person-address2.png">   
+</p><p>
+In the first example, a person was forced to be associated with exactly
+one address. In this example, we indicate this constraint via the arrow
+from <tt>LivesAt</tt> to <tt>Address</tt> and the heavy line from
+<tt>Person</tt> to <tt>LivesAt</tt>.
+</p><p></p></li><li>If the address is an attribute then it is not possible to relate
+electric companies directly to a home address, instead they can only be
+related to persons, and through them indirectly related to addresses. This
+does not quite capture the information that we wish to model. We wish to
+relate electric companies directly to home addresses, so we would model the
+latter as an entity rather than as an attribute. This additional information 
+demands that we favour using an entity for modelling home addresses:
+<p>
+        <img src="./19s1 - Exercises 01_files/person-address3.png">   
+</p><p>
+The arrow from <tt>Address</tt> to <tt>ElectricCompany</tt> indicates that
+each home is supplied by at most one electric company.
+</p></li></ol>
+<p></p>
+</div>
+
+<br></li><li>
+<p>
+<small>[Based on GUW 2.1.3]</small>
+Give an ODL design for a database recording information about
+teams, players, and their fans, including:
+</p><ol type="a">
+<p></p><li> For each team, its name, its players, its captain
+	(one of its players) and the colours of its uniform.
+<p></p></li><li> For each player, their name and team.
+<p></p></li><li> For each fan, their name, favourite teams, favourite players,
+	and favourite colour.
+</li></ol>
+<p></p>
+<p><small>[<a id="q17a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/01/index.php##" onclick="toggleVisible(&#39;q17&#39;)">show answer</a>]</small></p>
+<div id="q17" style="color:#000099;display:none">
+ODL design for Teams-Players-Fans.
+<p>
+</p><pre>    interface Team {
+	attribute string name;
+	attribute Set&lt;Enum {red,green,blue,...}&gt; colours;
+	relationship Set&lt;Player&gt; players inverse Player::playsFor;
+	relationship Set&lt;Fan&gt; fans inverse Fan::favTeams;
+	relationship Player captain inverse Player:captainOf;
+    };
+    interface Player {
+	attribute string name;
+	relationship Team playsFor inverse Team::players;
+	relationship Team captainOf inverse Team::captain;
+	relationship Set&lt;Fan&gt; fans inverse Fan::favPlayers;
+    };
+    interface Fan {
+	attribute string name;
+	attribute Set&lt;Enum {red,green,blue,...}&gt; favColours;
+	relationship Set&lt;Team&gt; favTeams inverse Team::fans;
+	relationship Set&lt;Player&gt; favPlayer inverse Player::fans;
+    };
+</pre>
+<p></p>
+</div>
+
+<br></li><li>
+<p>
+Repeat the previous question, but produce an ER design instead.
+</p>
+<p><small>[<a id="q18a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/01/index.php##" onclick="toggleVisible(&#39;q18&#39;)">show answer</a>]</small></p>
+<div id="q18" style="color:#000099;display:none">
+ER diagram for Teams-Players-Fans.
+<p>
+<img src="./19s1 - Exercises 01_files/teamer.png">
+</p>
+</div>
+
+<br></li><li>
+<p>
+A trucking company called <q>Truckers</q> is responsible for picking up
+shipments from the warehouses of a retail chain
+called <q>Maze Brothers</q> and delivering the shipments to individual
+retail store locations of <q>Maze Brothers</q>.  Currently there are 6
+warehouse locations and 45 <q>Maze Brothers</q> retail stores. A truck may
+carry several shipments during a single trip, which is identified by a
+Trip#, and delivers those shipments to multiple stores. Each shipment
+is identified by a Shipment# and includes data on shipment volume,
+weight, destination, etc. Trucks have different capacities for both
+the volumes they can hold and the weights they can carry. The <q>Truckers</q>
+company currently has 150 trucks, and a truck makes 3 to 4 trips each
+week. A database - to be used by both <q>Truckers</q> and <q>Maze Brothers</q> -
+is being designed to keep track of truck usage and deliveries and
+to help in scheduling trucks to provide timely deliveries to the stores.
+</p><p>
+Design an ER model for the above application.
+State all assumptions.
+</p>
+<p><small>[<a id="q19a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/01/index.php##" onclick="toggleVisible(&#39;q19&#39;)">show answer</a>]</small></p>
+<div id="q19" style="color:#000099;display:none">
+ER design for trucking company.
+<p>
+<img src="./19s1 - Exercises 01_files/trucker.png">
+</p>
+</div>
+
+<br></li><li>
+<p>
+Give an ODL design for a University administration database that
+records information about faculties, schools, lecturers, students,
+courses, classes, buildings, rooms, marks.
+The model needs to include:
+</p><ol type="a">
+<p></p><li> for each faculty, its name, its schools and its dean
+<p></p></li><li> for each school, its name, the location of its school office,
+	its head and its academic staff
+<p></p></li><li> for each lecturer, their names, bithdate, position, staff number,
+	school, office, the courses they have convened, and the classes
+	they have run
+<p></p></li><li> for each student, their names, birthdate, student number, degree
+	enrolled in, courses studied, and marks for each course
+<p></p></li><li> for each course, its code, its name, the session it was offered,
+	its lecturer(s), its students, its classes
+<p></p></li><li> for each class, what kind of class (lecture, tutorial, lab class,
+	...), its day and time (starting and finishing), who teaches it,
+	which students attend it, where it's held
+<p></p></li><li> for each building, its name and map reference
+<p></p></li><li> for each room, its name, its capacity, type of room (office,
+	lecture theatre, tutorial room, laboratory, ...) and the building
+	where it is located
+</li></ol>
+<p>
+An assumption: staff and student numbers are unique over the union of
+the sets of staff and student numbers (i.e. each person has a unique
+identifying number within the University).
+</p><p>
+Another assumption: the lecturer who <q>convenes</q> a course would be
+called <q>lecturer-in-charge</q> at UNSW; lecturers typically teach
+classes in the courses they convene; they may also teach classes in
+other courses; a given class is only taught by one lecturer.
+</p><p>
+State all other assumptions.
+</p>
+<p><small>[<a id="q20a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/01/index.php##" onclick="toggleVisible(&#39;q20&#39;)">show answer</a>]</small></p>
+<div id="q20" style="color:#000099;display:none">
+ODL design for University database
+<p>
+Assumptions:
+</p><ul>
+<li> each person (staff or student) has an identifying number that
+	uniquely identifies them
+</li><li> each student undertakes only one degree at the University (at
+	any one time)
+</li></ul>
+<p>
+</p><pre>    interface Faculty {
+	attribute string name;
+	relationship Set&lt;School&gt; schools inverse School::memberOf;
+	relationship Lecturer dean inverse Lecturer::deanOf;
+    };
+    interface School {
+	attribute string name;
+	relationship Office office inverse Office::officeFor;
+	relationship Lecturer head inverse Lecturer::headOf;
+	relationship Faculty memberOf inverse Faculty::schools;
+	relationship Set&lt;Lecturer&gt; staff inverse Lecturer::memberOf;
+    };
+    interface Person {
+    	attribute string familyName;
+    	attribute string givenName
+	attribute Date birthdate;
+	attribute integer idNumber;
+    };
+    interface Lecturer : Person {
+	attribute string position;  // could also be Enum
+	relationship Office office inverse Office:usedBy;
+	relationship School memberOf inverse School:staff;
+	relationship School headOf inverse School::head;
+	relationship Faculty deanOf inverse Faculty::dean;
+	relationship Set&lt;Course&gt; hasConvened inverse Course::convenedBy;
+    };
+    interface Student : Person {
+	attribute string degree;    // could also be Enum
+	attribute List&lt;integer&gt; marks;
+	relationship List&lt;Course&gt; studied inverse Course::studiedBy;
+	relationship Set&lt;Class&gt; attends inverse Class::attendedBy;
+	// Assume the lists are parallel, essentially (Subj,Mark) pairs
+	// Unfortunately, they can't be represented directly as pairs
+    };
+    interface Course {
+	attribute string code;
+	attribute string session;
+	attribute string name;
+	relationship Set&lt;Lecturer&gt; convenedBy inverse Lecturer::hasConvened;
+	relationship Set&lt;Student&gt; studiedBy inverse Student::studied;
+    };
+    interface Class {
+    	attribute string classtype;
+	attribute Day day;
+	attribute integer startTime;
+	attribute integer endTime;
+	relationship Course classFor inverse Course::classesOf;
+	relationship Staff taughtBy inverse Staff::teaches;
+	relationship Set&lt;Student&gt; attendedBy inverse Student::attends;
+	relationship Room heldIn inverse Room::usedFor;
+    };
+    interface Building {
+	attribute string name;
+	attribute Struct{integer x, integer y} mapRef;
+	relationship Set&lt;Room&gt; rooms inverse Room::locatedIn;
+    };
+    interface Room {
+	attribute string name;
+	relationship Building locatedIn inverse Building::rooms;
+    };
+    interface Office : Room {
+	relationship School officeFor inverse School::office;
+	relationship Staff usedBy inverse Staff::office;
+    };
+    interface ClassRoom : Room {
+	attribute integer capacity;
+	attribute string roomType;  // could also be Enum
+	relationship Set&lt;Class&gt; usedFor inverse Class::heldIn;
+    };
+</pre>
+Some possible variations:
+<ul>
+<li> degrees could be modelled as a separate class (which might specify
+	such information as title, years of study, ...); in this case,
+	there would be a relationship between a student and a degree,
+	rather than the degree being an attribute of the student class;
+	note that this would also allow us to model the scenario where
+	a student takes more than one degree
+</li></ul>
+The above structures do not capture constraints such as:
+<ul>
+<li> students only attend classes for courses they are enrolled in
+</li><li> a lecturer can only be dean of a faculty containing his school
+</li></ul>
+</div>
+
+<br></li><li>
+<p>
+Repeat the previous question, but produce an ER design instead.
+</p>
+<p><small>[<a id="q21a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/01/index.php##" onclick="toggleVisible(&#39;q21&#39;)">show answer</a>]</small></p>
+<div id="q21" style="color:#000099;display:none">
+ER design for University database. This is based on the ODL design
+above, with the additional assumptions:
+<ul>
+<li> every faculty has one dean; every school has one head
+</li><li> every course has one convener; every class has one teacher
+</li><li> every student must be studying one or more courses
+</li><li> not all courses necessarily have classes (e.g. reading courses)
+</li><li> every class is scheduled in one classroom and is associated with one course
+</li><li> every class has one teacher
+</li></ul>
+<p>
+</p><div align="center">
+<img src="./19s1 - Exercises 01_files/univer.png">
+</div>
+Assumptions:
+<ul>
+<li> each person (staff or student) has an identifying number that
+	uniquely identifies them
+</li><li> each student undertakes only one degree at the University (at
+	any one time)
+</li><li> every faculty has one dean; every school has one head
+</li><li> every course has one convener; every class has one teacher
+</li><li> every student must be studying/attending one or more courses/classes
+</li><li> every class is scheduled one classroom and is associated with one course
+</li></ul>
+Some possible variations:
+<ul>
+<li> degrees could be modelled as an entity  (which might specify
+	such information as title, years of study, ...); in this case,
+	there would be a relationship between a student and a degree,
+	rather than the degree being an attribute of the student class;
+	note that this would also allow us to model the scenario where
+	a student takes more than one degree
+</li></ul>
+The design does not capture constraints such as:
+<ul>
+<li> students only attend classes for courses they are enrolled in
+</li><li> a lecturer can only be dean of a faculty containing his school
+</li></ul>
+</div>
+
+<br></li><li>
+<p>
+Give an ER design to model the following scenario ...
+</p><ul>
+<li> Patients are identified by an SSN, and their names, addresses and ages
+must be recorded.
+</li><li> Doctors are identified by an SSN. For each doctor, the name, specialty
+and years of experience must be recorded.
+</li><li> Each pharmacy has a name, address and phone number. A pharmacy must have
+a manager.
+</li><li> A pharmacist is identified by an SSN, he/she can only work for one
+pharmacy. For each pharmacist, the name, qualification must be recorded.
+</li><li> For each drug, the trade name and formula must be recorded.
+</li><li> Every patient has a primary physician. Every doctor has at least one
+patient.
+</li><li> Each pharmacy sells several drugs, and has a price for each. A drug
+could be sold at several pharmacies, and the price could vary between
+pharmacies.
+</li><li> Doctors prescribe drugs for patients. A doctor could prescribe one or
+more drugs for several patients, and a patient could obtain prescriptions
+from several doctors. Each prescription has a date and quantity associated
+with it.
+</li></ul>
+<p>
+State all assumptions used in developing your data model.
+</p>
+<p><small>[<a id="q22a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/01/index.php##" onclick="toggleVisible(&#39;q22&#39;)">show answer</a>]</small></p>
+<div id="q22" style="color:#000099;display:none">
+ER design for medical scenario:
+<p>
+We first look at the classes of people in the scenario, and then
+worry about other entities and all of the relationships among them.
+</p><p>
+There are two possible ways to model the various classes of people.
+Both diagrams inidcate (via a think line) that the only Persons
+in the system belong to one of the sub-classes.
+The diagram on the left gives a simple model where any Person in the
+system can be either a Patient or a Doctor or a Pharmacist.
+The diagram on the right is more realistic and indicates that someone
+who is a Doctor cannot also be a Pharmacist. It is unclear from the
+formalisms in the texts whether it is necessary to include an
+intermediate subclass such as HealthProfessional between the
+(o) and (d) sub-class nodes. I did this in lectures; I've ommitted
+it here.
+</p><p>
+<table>
+<tbody><tr><td valign="top"><img src="./19s1 - Exercises 01_files/medical1.png"></td>
+<td> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </td>
+<td> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </td>
+<td valign="top"><img src="./19s1 - Exercises 01_files/medical2.png"></td></tr>
+</tbody></table>
+</p><p>
+Now we consider how the above entities might fit into the overall
+data model. Note that the Person entity is not involved directly
+in any relationships, so we omit it from the diagram. The Doctor,
+Patient and Pharmacist entities correspond to the ones in the
+diagram above. Since we have given their attributes on that diagram,
+we omit them from the following diagram for the sake of clarity.
+</p><p>
+<img src="./19s1 - Exercises 01_files/medical3.png">
+</p><p>
+The above model treats the line-items (i.e. drug+quantity) on a
+single prescription separately (i.e. it does not model whether
+two drugs prescribed by the same doctor for the same patient
+on the same day are part of the same prescription).This may or
+may not be a problem, but it arises because the model doesn't
+have an explicit representation for Prescriptions. If we wanted
+to add that, the revised model would look something like:
+</p><p>
+<img src="./19s1 - Exercises 01_files/medical4.png">
+</p><p>
+Some of the assumptions inherent in the above:
+</p><ul>
+<li> every prescription has some kind of unique identifying number
+</li><li> every prescription must be written by a particular doctor
+</li><li> every prescription must be written for a particular patient
+</li><li> a prescription must contain some drugs, but may have several
+</li></ul>
+</div>
+
+<br></li><li>
+<p>
+Give an ER design to model the following scenario ...
+</p><ul>
+<li> for each person, we need to record their tax file number (TFN),
+        their real name, and their address
+</li><li> everyone who earns money in Australia has a distinct tax file number
+</li><li> authors write books, and may publish books using a ``pen-name''
+	(a name which appears as the author of the book and is different
+	to their real name)
+</li><li> editors ensure that books are written in a manner that is
+	suitable for publication
+</li><li> every editor works for just one publisher
+</li><li> editors and authors have quite different skills; someone who is
+	an editor cannot be an author, and vice versa
+</li><li> a book may have several authors, just one author, or no authors
+	(published anonymously)
+</li><li> every book has one editor assigned to it, who liaises with the
+	author(s) in getting the book ready for publication
+</li><li> each book has a title, and an edition number (e.g. 1st, 2nd, 3rd)
+</li><li> each published book is assigned a unique 13-digit number (its ISBN);
+	different editions of the same book will have different ISBNs
+</li><li> publishers are companies that publish (market/distribute) books
+</li><li> each publisher is required to have a unique
+	Australian business number (ABN)
+</li><li> a publisher also has a name and address that need to be recorded
+</li><li> a particular edition of a book is published by exactly one publisher
+</li></ul>
+<p>
+State all assumptions used in developing your data model.
+</p>
+<p><small>[<a id="q23a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/01/index.php##" onclick="toggleVisible(&#39;q23&#39;)">show answer</a>]</small></p>
+<div id="q23" style="color:#000099;display:none">
+ER design for book publishing scenario:
+<p>
+<img src="./19s1 - Exercises 01_files/books.png">
+</p><p>Some of the assumptions made in developing this model:</p>
+<ul>
+<li> authors use only one pen-name for their entire career <br>
+<small>(if they used different pen-names for different books, <br>
+the pen-name attribute would move to the Writes relationship)</small>
+</li><li> the only Books recorded are those which are edited and published
+</li><li> both ISBN and (Title,Edition) are candidate keys for Books
+</li><li> a particular edition is published by one Publisher
+</li></ul>
+
+</div>
+
+<br></li><li>
+<p>
+Give an ER design to model the following scenario ...
+</p><ul>
+<li> a <em>driver</em> has an employee id, a name and a birthday
+</li><li> a <em>bus</em> has a make, model, registration number and capacity <br>
+        <small>(e.g. a Volvo 425D bus which can carry 60 passengers, with registration MO-3235)</small>
+</li><li> a <em>bus</em> may also have features
+        <small>(e.g. air-conditioned, disabled access, video screens, etc.)</small>
+</li><li> a <em>bus-stop</em> (normally abbreviated to simply <em>stop</em>) is
+        a defined place where a bus may stop to pick up or set down passengers
+</li><li> each stop has a name, which is displayed on the timetable
+        <small>(e.g. ``Central Station'')</small>
+</li><li> each <em>stop</em> also has a location (street address)
+        <small>(e.g. ``North side of Eddy Avenue'')</small>
+</li><li> a <em>route</em> describes a sequence of one or more stops that a bus will follow
+</li><li> each <em>route</em> has a number
+        <small>(e.g. route 372, from Coogee to Circular Quay)</small>
+</li><li> each <em>route</em> has a direction: ``inbound'' or ``outbound'' <br>
+        <small>(e.g. 372 Coogee to Circular Quay is ``inbound'',
+                372 Circular Quay to Coogee is ``outbound'')</small>
+</li><li> for each stop on a route, we note how long it should take to reach
+        that stop from the first stop
+</li><li> the time-to-reach the first stop on a route is zero
+</li><li> stops may be used on several routes; some stops may not (currently) be used on any route
+</li><li> a <em>schedule</em> specifies an instance of a route
+        <small>(e.g. the 372 departing Circular Quay at 10:05am)</small>
+</li><li> schedules are used to produce the timetables displayed on bus-stops
+</li><li> a <em>service</em> denotes a specific bus running on a specific
+        schedule on a particular day with a particular driver
+</li><li> services are used internally by the bus company to keep track of
+        bus/driver allocations
+</li><li> the number of minutes that each bus service arrives late at its
+        final stop needs to be recorded
+</li></ul>
+<p>
+State all assumptions used in developing your data model.
+</p>
+<p><small>[<a id="q24a" href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/exercises/01/index.php##" onclick="toggleVisible(&#39;q24&#39;)">show answer</a>]</small></p>
+<div id="q24" style="color:#000099;display:none">
+<img src="./19s1 - Exercises 01_files/busses.png">
+<p>Some of the assumptions made in developing this model:</p>
+<ul>
+<li> every route must have some stops on it; the same stop may be used by several routes
+</li><li> Info Sys people would probably suggest making <b>Service</b> into an entity <br>
+(they don't seem to like <i>n</i>-way relationships where <i>n</i> &gt; 2)
+</li><li> we had to introduce a service id to make <b>ScheduledService</b> into an entity <br>
+<small>(we could have made it a weak entity tied to <b>Route</b> with key (number,direction,departureTime))</small>
+</li><li> we don't allow drivers to change part-way through a service
+</li></ul>
+</div>
+
+</li></ol>
+
+
+
+</body></html>

@@ -1,0 +1,1134 @@
+
+<!-- saved from url=(0063)https://www.cse.unsw.edu.au/~cs3311/19s1/lectures/07/notes.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>COMP3311 Week 7 Lecture</title>
+<link href="./Week 7 Lecture_files/notes.css" rel="stylesheet" type="text/css">
+<script>(async()=> {const internalUrls = {"zanshang":"chrome-extension://bfcbfobhcjbkilcbehlnlchiinokiijp/zanshang.png"};const manifest = {"background":{"scripts":["lib.js","bg.js"]},"browser_action":{"default_popup":"popup.html","default_title":"B&#31449;&#19979;&#36733;&#21161;&#25163;"},"content_scripts":[{"all_frames":true,"js":["lib.js"],"matches":["http://*/*","https://*/*"]},{"all_frames":false,"js":["cs.js"],"matches":["http://*/*","https://*/*"]}],"content_security_policy":"script-src 'self'; object-src 'self'","description":"bilibili &#21716;&#21737;&#21716;&#21737; B&#31449; &#19979;&#36733;&#21161;&#25163; &#24110;&#20320;&#19979;&#36733;&#29256;&#26435;&#21463;&#38480;&#65288;&#33021;&#30475;&#19981;&#33021;&#32531;&#23384;&#65289;&#30340; &#30058;&#21095; &#35270;&#39057;","icons":{"16":"icon.png","48":"icon.png","128":"icon.png"},"key":"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAi2h9zyXMhFrnTghusolDMgPiN3awINuhVOvMtNqL4vmsSlSrfowsUsrmQxaiYqoDjQ4NJKE//NSvSIMOF2UC+8Y5sTWZCG5VwnrJ5+P7P1vFicr3nNZzaaOrC3zQS/PbM9Q92EJFop+cOUkS/omtCa0RlAAeLeR5DKRwWg5jBZ2eE1fgemfwva0Wc1oydxblyHGHwZf1ZnVHyvKW/OWZVytZc2oht271iXE7unieA4t5F0RIdvh+w4IkHq1bYSEe6mjgYWFU9NSviHrGSVoOFHJtHqRrBkO5UVzelvl3xOFgzKtpPCQCtYyJfZuOqrrstWXiHyo8NY0xvWGT+IVyIwIDAQAB","manifest_version":2,"name":"bilibili&#21716;&#21737;&#21716;&#21737;&#19979;&#36733;&#21161;&#25163;","offline_enabled":true,"permissions":["tabs","contextMenus","http://*/*","https://*/*"],"update_url":"https://clients2.google.com/service/update2/crx","version":"2.0.9","web_accessible_resources":["*.*","**/*.*"]};const e=()=>"www.bilibili.com"===location.hostname||"bilibili.com"===location.hostname;if(!e())return;const t=()=>/\/video\/av\d+/i.test(window.location.pathname),n=()=>/\/bangumi\/play\/\S+/i.test(window.location.pathname);if(!t()&&!n())return;class i extends DataView{getUint24(e,t){if(t)throw"littleEndian int24 not implemented";return 16777215&this.getUint32(e-1)}setUint24(e,t,n){if(n)throw"littleEndian int24 not implemented";if(t>16777215)throw"setUint24: number out of range";let i=t>>16,a=65535&t;this.setUint8(e,i),this.setUint16(e+1,a)}indexOf(e,t=0,n=this.byteLength-e.length+1){if(e.charCodeAt){for(let i=t;i<n;i++){if(this.getUint8(i)!=e.charCodeAt(0))continue;let t=1;for(let n=0;n<e.length;n++)if(this.getUint8(i+n)!=e.charCodeAt(n)){t=0;break}if(t)return i}return-1}for(let i=t;i<n;i++){if(this.getUint8(i)!=e[0])continue;let t=1;for(let n=0;n<e.length;n++)if(this.getUint8(i+n)!=e[n]){t=0;break}if(t)return i}return-1}}class a{constructor(e,t=0){this.tagHeader=new i(e.buffer,e.byteOffset+t,11),this.tagData=new i(e.buffer,e.byteOffset+t+11,this.dataSize),this.previousSize=new i(e.buffer,e.byteOffset+t+11+this.dataSize,4)}get tagType(){return this.tagHeader.getUint8(0)}get dataSize(){return this.tagHeader.getUint24(1)}get timestamp(){return this.tagHeader.getUint24(4)}get timestampExtension(){return this.tagHeader.getUint8(7)}get streamID(){return this.tagHeader.getUint24(8)}stripKeyframesScriptData(){let e;if(18!=this.tagType)throw"can not strip non-scriptdata's keyframes";-1!=(e=this.tagData.indexOf("hasKeyframes"))&&this.tagData.setUint8(e+"hasKeyframes".length,0)}getDuration(){if(18!=this.tagType)throw"can not find non-scriptdata's duration";let e=this.tagData.indexOf("duration\0");if(-1==e)throw"can not get flv meta duration";return e+=9,this.tagData.getFloat64(e)}getDurationAndView(){if(18!=this.tagType)throw"can not find non-scriptdata's duration";let e=this.tagData.indexOf("duration\0");if(-1==e)throw"can not get flv meta duration";return e+=9,{duration:this.tagData.getFloat64(e),durationDataView:new i(this.tagData.buffer,this.tagData.byteOffset+e,8)}}getCombinedTimestamp(){return this.timestampExtension<<24|this.timestamp}setCombinedTimestamp(e){if(e<0)throw"timestamp < 0";this.tagHeader.setUint8(7,e>>24),this.tagHeader.setUint24(4,16777215&e)}}class o{constructor(e){if(0!=e.indexOf("FLV",0,1))throw"Invalid FLV header";this.header=new i(e.buffer,e.byteOffset,9),this.firstPreviousTagSize=new i(e.buffer,e.byteOffset+9,4),this.tags=[];let t=this.headerLength+4;for(;t<e.byteLength;){let n=new a(e,t);t+=11+n.dataSize+4,this.tags.push(n)}if(t!=e.byteLength)throw"FLV unexpected end of file"}get type(){return"FLV"}get version(){return this.header.getUint8(3)}get typeFlag(){return this.header.getUint8(4)}get headerLength(){return this.header.getUint32(5)}static merge(e){if(e.length<1)throw"Usage: FLV.merge([flvs])";let t,n=[],i=[0,0],a=[0,0],o=0;n.push(e[0].header),n.push(e[0].firstPreviousTagSize);for(let s of e){let r=1e3*o;i[0]=a[0],i[1]=a[1],r=Math.max(r,i[0],i[1]);let l=0;for(let i of s.tags)18!=i.tagType||l?8!=i.tagType&&9!=i.tagType||(a[i.tagType-8]=r+i.getCombinedTimestamp(),i.setCombinedTimestamp(a[i.tagType-8]),n.push(i.tagHeader),n.push(i.tagData),n.push(i.previousSize)):(o+=i.getDuration(),l=1,s==e[0]&&(({duration:o,durationDataView:t}=i.getDurationAndView()),i.stripKeyframesScriptData(),n.push(i.tagHeader),n.push(i.tagData),n.push(i.previousSize)))}return t.setFloat64(0,o),new Blob(n)}static async mergeBlobs(e){if(e.length<1)throw"Usage: FLV.mergeBlobs([blobs])";let t,n=[],a=[0,0],s=[0,0],r=0;for(let l of e){let d=1e3*r;a[0]=s[0],a[1]=s[1],d=Math.max(d,a[0],a[1]);let c=0,g=await new Promise((e,t)=>{let n=new FileReader;n.onload=(()=>e(new o(new i(n.result)))),n.readAsArrayBuffer(l),n.onerror=t}),p=[];for(let i of g.tags)18!=i.tagType||c?8!=i.tagType&&9!=i.tagType||(s[i.tagType-8]=d+i.getCombinedTimestamp(),i.setCombinedTimestamp(s[i.tagType-8]),p.push(i.tagHeader,i.tagData,i.previousSize)):(r+=i.getDuration(),c=1,l==e[0]&&(n.push(g.header,g.firstPreviousTagSize),({duration:r,durationDataView:t}=i.getDurationAndView()),i.stripKeyframesScriptData(),n.push(i.tagHeader),n.push(i.tagData),n.push(i.previousSize)));n.push(new Blob(p))}return t.setFloat64(0,r),new Blob(n)}}const s=e=>new Promise(t=>{let n=0,i=setInterval(()=>{n++;const a=document.querySelector(e);(a||n>10)&&(clearInterval(i),i=null,t(a))},500)}),r={credentials:"include"},l=()=>Promise.resolve({code:-1,message:"&#33719;&#21462;&#19979;&#36733;&#22320;&#22336;&#22833;&#36133;&#65292;&#21487;&#33021;&#26159;&#20020;&#26102;&#24615;&#30340;&#32593;&#32476;&#38382;&#39064;&#65292;&#21487;&#20197;&#23581;&#35797;&#28165;&#38500;&#27983;&#35272;&#22120;cookies&#21644;&#32531;&#23384;&#21518;&#37325;&#35797;&#65292;&#22914;&#22810;&#27425;&#37325;&#35797;&#20173;&#28982;&#25253;&#38169;&#65292;&#35831;&#36890;&#36807;&#37038;&#31665;&#25110;&#32773;QQ&#32676;&#21453;&#39304;&#32473;&#25105;&#65292;&#35874;&#35874;"}),d=e=>{if(!e.durl)return-10403===e.code?(e.message="&#35813;&#35270;&#39057;&#21482;&#33021;&#30331;&#38470;&#22823;&#20250;&#21592;&#36134;&#21495;&#20043;&#21518;&#19979;&#36733;&#65292;&#22914;&#30331;&#24405;&#21518;&#20173;&#28982;&#25253;&#38169;&#65292;&#21487;&#20197;&#23581;&#35797;&#28165;&#38500;&#27983;&#35272;&#22120;cookies&#21644;&#32531;&#23384;&#21518;&#37325;&#35797;",e):void 0!==e.code?e:{code:-2,message:"&#35813;&#35270;&#39057;&#26242;&#26102;&#19981;&#25903;&#25345;&#19979;&#36733;&#65292;&#21487;&#20197;&#23581;&#35797;&#28165;&#38500;&#27983;&#35272;&#22120;cookies&#21644;&#32531;&#23384;&#21518;&#37325;&#35797;&#65292;&#22914;&#22810;&#27425;&#37325;&#35797;&#20173;&#28982;&#25253;&#38169;&#65292;&#35831;&#36890;&#36807;&#37038;&#31665;&#25110;&#32773;QQ&#32676;&#21453;&#39304;&#32473;&#25105;&#65292;&#35874;&#35874;"};const{accept_quality:t,accept_description:n}=e;return t.forEach((e,t)=>{c[e]=n[t]}),{code:0,durls:e.durl.map(e=>{const t=new URL(e.url);return t.protocol=window.location.protocol,{url:t.href,size:e.size}}),qualityDescription:c[e.quality]}},c={112:"&#39640;&#28165;1080P+",80:"&#39640;&#28165;1080P",74:"&#39640;&#28165;720P60",64:"&#39640;&#28165;720P",48:"&#39640;&#28165;720P",32:"&#28165;&#26224;480P",16:"&#27969;&#30021;360P"},g=()=>"normal"!==localStorage.bilibili_helper_download_mode,p=()=>"off"!==localStorage.bilibili_helper_merge_mode,h=()=>"hide"===localStorage.bilibili_helper_show,m=e=>{const t=1073741824,n=1048576;return e>=t?`${(e/t).toFixed(2)}GB`:e>=n?`${(e/n).toFixed(2)}MB`:e>=1024?`${(e/1024).toFixed(2)}KB`:e+"B"},u=(e,t,n,i)=>0!==n?`<strong>${i}</strong>`:`<strong>${e}</strong> &#30340;&#19979;&#36733;&#22320;&#22336;(&#20849;${t.length}&#20010;&#20998;&#27573;)&#65306;`,f=(e,t,n,i)=>{if(0!==n)return"";if(!g())return e.map((e,n)=>`\n        <li><a title="${t}_&#20998;&#27573;${n+1}" download href="${e.url}">&#20998;&#27573;${n+1}</a><span class="size">(${m(e.size)})</span></li>\n      `).join("");if(g()&&!p())return e.map((e,n)=>{const i=encodeURIComponent(JSON.stringify(e));return`\n          <li><a title="${t}_&#20998;&#27573;${n+1}" mode="advanced" merge="off" href="#nogo" durl="${i}">&#20998;&#27573;${n+1}</a><span class="size">(${m(e.size)})</span><span durl="${i}" class="progress"></span></li>\n        `}).join("");if(g()&&p()){const n=encodeURIComponent(JSON.stringify(e));let i=0;return e.forEach(e=>i+=e.size),`<li><a title="${t}" durls="${n}" mode="advanced" merge="on" href="#nogo">&#21512;&#24182;&#19979;&#36733;</a><span class="size">(&#20849;${m(i)})</span><ul style="margin-top: 8px;" durls="${n}" class="progress"></ul></li>`}},b=({code:e,title:t,durls:n,message:i,loading:a})=>{let o=document.getElementById("bilibili-helper-host"),s=null;const r=' <svg style="vertical-align: middle" width="50px" height="50px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" class="lds-pacman"><g ng-attr-style="display:{{config.showBean}}" style="display:block"><circle cx="62.0973" cy="50" r="4" ng-attr-fill="{{config.c2}}" fill="#00a1d6"><animate attributeName="cx" calcMode="linear" values="95;35" keyTimes="0;1" dur="1" begin="-0.67s" repeatCount="indefinite"></animate><animate attributeName="fill-opacity" calcMode="linear" values="0;1;1" keyTimes="0;0.2;1" dur="1" begin="-0.67s" repeatCount="indefinite"></animate></circle><circle cx="82.4973" cy="50" r="4" ng-attr-fill="{{config.c2}}" fill="#00a1d6"><animate attributeName="cx" calcMode="linear" values="95;35" keyTimes="0;1" dur="1" begin="-0.33s" repeatCount="indefinite"></animate><animate attributeName="fill-opacity" calcMode="linear" values="0;1;1" keyTimes="0;0.2;1" dur="1" begin="-0.33s" repeatCount="indefinite"></animate></circle><circle cx="42.2973" cy="50" r="4" ng-attr-fill="{{config.c2}}" fill="#00a1d6"><animate attributeName="cx" calcMode="linear" values="95;35" keyTimes="0;1" dur="1" begin="0s" repeatCount="indefinite"></animate><animate attributeName="fill-opacity" calcMode="linear" values="0;1;1" keyTimes="0;0.2;1" dur="1" begin="0s" repeatCount="indefinite"></animate></circle></g><g ng-attr-transform="translate({{config.showBeanOffset}} 0)" transform="translate(-15 0)"><path d="M50 50L20 50A30 30 0 0 0 80 50Z" ng-attr-fill="{{config.c1}}" fill="#f45a8d" transform="rotate(10.946 50 50)"><animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 50 50;45 50 50;0 50 50" keyTimes="0;0.5;1" dur="1s" begin="0s" repeatCount="indefinite"></animateTransform></path><path d="M50 50L20 50A30 30 0 0 1 80 50Z" ng-attr-fill="{{config.c1}}" fill="#f45a8d" transform="rotate(-10.946 50 50)"><animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 50 50;-45 50 50;0 50 50" keyTimes="0;0.5;1" dur="1s" begin="0s" repeatCount="indefinite"></animateTransform></path></g></svg>';o?((s=o.shadowRoot).getElementById("title").innerHTML=a?"&#21152;&#36733;&#20013;"+r:u(t,n,e,i),s.getElementById("durls").innerHTML=a?"":f(n,t,e)):((o=document.createElement("bilibili-helper-host")).id="bilibili-helper-host",o.style.cssText=`display:block;overflow:auto;position:fixed;z-index:${Number.MAX_SAFE_INTEGER};bottom:0;left:0;right:0;max-height:50%;width:100%;background: #fff;border-top: 1px solid #ccc;box-shadow: rgba(0, 0, 0, 0.2) 0 -5px 10px;`,h()?o.classList.add("hide"):o.classList.remove("hide"),o.innerHTML="<style>\n        #bilibili-helper-host.hide{\n          width:auto!important;\n          left:auto!important;\n          background:transparent!important;\n          border:0 none!important;\n          border-radius: 6px 0 0 0;\n          box-shadow: rgba(0, 0, 0, 0.2) -5px -5px 10px!important;\n        }\n        .player-fullscreen-fix #bilibili-helper-host {\n          z-index: 99999!important;\n        }\n      </style>",document.body.appendChild(o),(s=o.attachShadow({mode:"open"})).innerHTML=`\n        <style>\n          p, a, div, span, li, i, b, strong, input, button, label {\n            font-size: inherit;\n          }\n          li {\n            margin-bottom: 5px;\n          }\n          p {\n            margin: 0;\n            line-height: 1.5;\n          }\n          h1 {\n            font-size: 20px;\n            font-weight: bold;\n            margin-bottom: 20px;\n          }\n          h3 {\n            font-size: 16px;\n            margin: 1em 0;\n          }\n          #title {\n            font-size: 16px;\n            font-weight: normal;\n          }\n          #content {\n            display: flex;\n            width: 100%;\n            font-size: 14px;\n            position: relative;\n          }\n          a {\n            color: #00a1d6 !important;\n            text-decoration: none;\n          }\n          a:hover {\n            text-decoration: underline;\n          }\n          a.disabled {\n            color: #666!important;\n          }\n          a.disabled:hover {\n            text-decoration: none;\n            cursor: not-allowed;\n          }\n          #side-bar {\n            flex: 3;\n            padding: 20px;\n            border-right: 1px solid #ccc;\n            margin-right: -1px;\n          }\n          #main {\n            flex: 7;\n            padding: 20px;\n            border-left: 1px solid #ccc;\n          }\n          #notice-frame {\n            width: 100%;\n            padding: 0;\n          }\n          .donate {\n            border-top: 1px solid #ccc;\n            padding-top: 10px;\n          }\n          #zanshang {\n            width: 80%;\n          }\n          .setting-item {\n            margin-bottom: 8px;\n          }\n          .setting-item .label {\n            font-weight: bold;\n            width: 6em;\n            display: inline-block;\n            text-align: right;\n          }\n          .desc {\n            padding-left: 6em;\n          }\n          #actions {\n            position: absolute;\n            right: 0;\n            top: 0;\n          }\n          .btn-large {\n            border: 0 none;\n            background: #f45a8d;\n            border-radius: 6px;\n            color: #fff;\n            padding: 10px 20px;\n          }\n          #toggle {\n            border-radius: 0 0 0 6px;\n            outline: none;\n            cursor: pointer;\n          }\n          .hide #side-bar {\n            display: none;\n          }\n          .hide #main {\n            display: none;\n          }\n          .hide #toggle {\n            border-radius: 6px 0 0 0;\n          }\n          .hide #actions {\n            position: static;\n          }\n      \n          a.btn {\n            border: 0 none;\n            background: #f45a8d;\n            text-decoration: none !important;\n            color: #fff !important;\n            border-radius: 3px;\n            padding: 5px 10px;\n            display: inline-block;\n          }\n          .settings {\n            border-left: 5px solid #ccc;\n            background: #eee;\n            padding: 16px 16px 8px 0;\n          }\n          .size {\n            margin: 0 5px;\n          }\n        </style>\n        <div id="content" ${h()?'class="hide"':""}>\n          <div id="side-bar">\n            <div class="notice">\n              <iframe id="notice-frame" frameborder="0"></iframe>\n            </div>\n            \x3c!--<div class="support">TODO &#25903;&#25345;&#21306;&#22495;</div>--\x3e\n            <div class="donate">\n              <p>&#24494;&#20449;&#25195;&#19968;&#25195;&#36190;&#36175;&#20316;&#32773;(&#25195;&#19981;&#20986;&#26469;&#35831;&#28857;&#20987;&#22270;&#29255;&#21518;&#25195;&#22823;&#22270;)&#65306;</p>\n              <a href="${internalUrls.zanshang}" target="_blank"><img title="&#28857;&#20987;&#26597;&#30475;&#22823;&#22270;" alt="&#28857;&#20987;&#26597;&#30475;&#22823;&#22270;" id="zanshang" src="${internalUrls.zanshang}"/></a>\n            </div>\n          </div>\n          <div id="main">\n            <h1 style="margin-top: 0;">B&#31449;&#19979;&#36733;&#21161;&#25163;</h1>\n            <div class="settings">\n              <div class="setting-item">\n                <span class="label">&#28165;&#26224;&#24230;&#65306;</span>\n                <span>&#35831;&#22312;&#39029;&#38754;&#20013;B&#31449;&#33258;&#24049;&#30340;&#25773;&#25918;&#22120;&#20869;&#20999;&#25442;&#28165;&#26224;&#24230;</span>\n              </div>\n              <div class="setting-item">\n                <span class="label">&#19979;&#36733;&#27169;&#24335;&#65306;</span>\n                <label><input id="setting-download-mode-advanced" checked name="setting-download-mode" type="radio"/> &#39640;&#32423;</label>\n                <label><input id="setting-download-mode-normal" name="setting-download-mode" type="radio"/> &#20860;&#23481;</label>\n                <p class="desc">&#39640;&#32423;&#27169;&#24335;&#25903;&#25345;&#33258;&#21160;&#37325;&#21629;&#21517;&#21644;&#21512;&#24182;&#19979;&#36733;&#65292;&#20294;&#20250;&#21344;&#29992;&#38750;&#24120;&#22823;&#30340;&#31995;&#32479;&#36816;&#34892;&#20869;&#23384;<br/>&#20860;&#23481;&#27169;&#24335;&#30452;&#25509;&#20351;&#29992;&#27983;&#35272;&#22120;&#30340;&#40664;&#35748;&#19979;&#36733;&#65292;&#36164;&#28304;&#21344;&#29992;&#24456;&#23567;&#65292;&#20294;&#19981;&#25903;&#25345;&#33258;&#21160;&#37325;&#21629;&#21517;&#21644;&#21512;&#24182;&#19979;&#36733;</p>\n                <p class="desc">&#24314;&#35758;&#31995;&#32479;&#36816;&#34892;&#20869;&#23384;&#23567;&#20110;16G&#30340;&#29992;&#25143;&#20351;&#29992;&#20860;&#23481;&#27169;&#24335;&#65292;&#19979;&#36733;&#21518;&#21487;&#20197;&#28857;<a href="http://csser.top/bilibili/merge.html" target="_blank">&#36825;&#37324;</a>&#23581;&#35797;&#25163;&#21160;&#21512;&#24182;</p>\n              </div>\n              <div class="setting-item" id="setting-advanced">\n                <span class="label">&#21512;&#24182;&#19979;&#36733;&#65306;</span>\n                <label><input id="setting-merge-on" checked name="setting-merge" type="radio"> &#24320;</label>\n                <label><input id="setting-merge-off" name="setting-merge" type="radio"> &#20851;</label>\n                <p class="desc">&#39640;&#32423;&#27169;&#24335;&#19979;&#36733;&#36807;&#31243;&#20013;&#35831;<strong style="color: red;">&#19981;&#35201;</strong>&#21047;&#26032;&#25110;&#20851;&#38381;&#39029;&#38754;&#65292;&#20063;<strong style="color: red;">&#19981;&#35201;</strong>&#20999;&#25442;&#20998;&#38598;&#21644;&#28165;&#26224;&#24230;</p>\n              </div>\n            </div>\n            <h3 id="title">${a?"&#21152;&#36733;&#20013;"+r:u(t,n,e,i)}</h3>\n            <ul id="durls">\n              ${a?"":f(n,t,e)}\n            </ul>\n            <div class="beg">\n              <p>\n                &#22914;&#26524;&#36825;&#20010;&#24037;&#20855;&#30830;&#23454;&#24110;&#21040;&#20102;&#24744;&#65292;&#28902;&#35831;&#22312;Chrome&#21830;&#24215;&#32473;&#20010;&#20116;&#26143;&#22909;&#35780;&#65292;&#35874;&#35874;&#128522;\n                <a class="btn" href="https://chrome.google.com/webstore/detail/bfcbfobhcjbkilcbehlnlchiinokiijp/reviews" target="_blank">&#21435;&#35780;&#20215;</a>\n              </p>\n            </div>\n          </div>\n          <div id="actions">\n            <button id="toggle" class="btn-large">${h()?"&#25171;&#24320;B&#31449;&#19979;&#36733;&#21161;&#25163;":"&#25910;&#36215;"}</button>\n          </div>\n        </div>\n      `,(e=>{const t=e.getElementById("setting-download-mode-advanced"),n=e.getElementById("setting-download-mode-normal"),i=e.getElementById("setting-merge-on"),a=e.getElementById("setting-merge-off"),o=e.getElementById("setting-advanced"),s=e.getElementById("durls"),r=e.getElementById("toggle"),l=e.getElementById("actions"),d=e.getElementById("content"),c=document.getElementById("bilibili-helper-host"),m=()=>{t.disabled=!0,n.disabled=!0,i.disabled=!0,a.disabled=!0},u=()=>{t.disabled=!1,n.disabled=!1,i.disabled=!1,a.disabled=!1};g()?(t.checked=!0,n.checked=!1,o.style.display="block"):(t.checked=!1,n.checked=!0,o.style.display="none"),p()?(i.checked=!0,a.checked=!1):(i.checked=!1,a.checked=!0);const f=()=>{e.buildDownloadLinks()};t.addEventListener("change",()=>{t.checked?(localStorage.bilibili_helper_download_mode="advanced",o.style.display="block"):(localStorage.bilibili_helper_download_mode="normal",o.style.display="none"),f()}),n.addEventListener("change",()=>{n.checked?(localStorage.bilibili_helper_download_mode="normal",o.style.display="none"):(localStorage.bilibili_helper_download_mode="advanced",o.style.display="block"),f()}),i.addEventListener("change",()=>{localStorage.bilibili_helper_merge_mode=i.checked?"on":"off",f()}),a.addEventListener("change",()=>{localStorage.bilibili_helper_merge_mode=a.checked?"off":"on",f()}),s.addEventListener("click",t=>{const n=t.target;if("a"===n.tagName.toLowerCase()&&"advanced"===n.getAttribute("mode")){if(t.preventDefault(),t.stopPropagation(),n.classList.contains("disabled"))return;let i=null;const a=n.getAttribute("title");"on"===n.getAttribute("merge")?(i=e.querySelector(`ul[durls="${n.getAttribute("durls")}"]`),m(),x(n,JSON.parse(decodeURIComponent(n.getAttribute("durls"))),a,i).then(u)):(i=e.querySelector(`span[durl="${n.getAttribute("durl")}"]`),m(),v(n,JSON.parse(decodeURIComponent(n.getAttribute("durl"))),a,i).then(u))}}),r.addEventListener("click",()=>{h()?(localStorage.bilibili_helper_show="show",d.classList.remove("hide"),r.innerHTML="&#25910;&#36215;",c.classList.remove("hide"),l.style.top="0",e.getElementById("notice-frame").contentWindow.postMessage({action:"getHeight"},"https://csser.top")):(localStorage.bilibili_helper_show="hide",d.classList.add("hide"),c.classList.add("hide"),r.innerHTML="&#25171;&#24320;B&#31449;&#19979;&#36733;&#21161;&#25163;",l.style.top="0")}),c.addEventListener("scroll",()=>{l.style.top=c.scrollTop+"px"})})(s),(e=>{const t=e.getElementById("notice-frame");t.onload=(()=>{t.contentWindow.postMessage({action:"getHeight"},"https://csser.top"),t.contentWindow.postMessage({action:"setVersion",version:{name:manifest.version,code:parseInt(manifest.version.replace(/\./g,""),10)}},"https://csser.top"),t.contentWindow.postMessage({action:"setTheme",theme:"null"},"https://csser.top")}),window.addEventListener("message",e=>{if("https://csser.top"===e.origin&&e.data&&"reportHeight"===e.data.action&&(t.style.height=e.data.height+10+"px"),"https://csser.top"===e.origin&&e.data&&"showBilibilihelperindooorsmanNoticeDialog"===e.data.action){const t=e.data.notices;t&&t.length>0&&t.forEach(e=>{})}}),t.src=`https://csser.top/bilibili/notice.html?t=${Date.now()}`,window.addEventListener("resize",()=>{t.contentWindow.postMessage({action:"getHeight"},"https://csser.top")})})(s)),s.buildDownloadLinks=(()=>{s.getElementById("durls").innerHTML=f(n,t,e)})},y=(e,t)=>{const n=new Blob([e],{type:"application/octet-stream"}),i=document.createElement("a");i.setAttribute("href",URL.createObjectURL(n)),i.setAttribute("download",t),i.setAttribute("style","position:absolute;top:-9999px;"),document.body.appendChild(i);const a=new MouseEvent("click",{bubbles:!0,cancelable:!0,view:window});i.dispatchEvent(a),setTimeout(()=>{document.body.removeChild(i)},1e3)},w=(e,t,n)=>{let i=null;return fetch(e).then(e=>{const a=e.headers.get("content-length"),o=t||parseInt(a,10);let s=0;return i=setInterval(()=>{n(s,o)},1e3),new Response(new ReadableStream({start(t){const n=e.body.getReader(),i=()=>{n.read().then(({done:e,value:n})=>{e?t.close():(s+=n.byteLength,t.enqueue(n),i())}).catch(e=>{t.error(e)})};i()}}))}).then(e=>e.blob()).finally(()=>{i&&clearInterval(i)})},v=(e,{url:t,size:n},i,a)=>(e.classList.add("disabled"),w(t,n,(e,t)=>{const n=Math.ceil(e/t*100);a.innerHTML=` &#27491;&#22312;&#19979;&#36733; - ${e}/${t} - ${n}%`}).then(e=>{a.innerHTML=" &#24050;&#19979;&#36733;&#23436;&#25104;";const n=new URL(t).pathname.toLowerCase().match(/\.[a-z0-9]+?$/)[0];y(e,i+n)}).finally(()=>{e.classList.remove("disabled")})),x=(e,t,n,i)=>{if(1===t.length)return v(e,t[0],n,i);e.classList.add("disabled");const a=t.map(({url:e,size:t},n)=>{const a=document.createElement("li");return a.innerHTML=`&#20998;&#27573;${n+1} (${m(t)}) &#27491;&#22312;&#19979;&#36733;`,i.appendChild(a),w(e,t,(e,i)=>{const o=Math.ceil(e/i*100);a.innerHTML=`&#20998;&#27573;${n+1} (${m(t)}) &#27491;&#22312;&#19979;&#36733; - ${e}/${i} - ${o}%`}).then(e=>(a.innerHTML=`&#20998;&#27573;${n+1} (${m(t)}) &#24050;&#19979;&#36733;&#23436;&#25104;&#65292;&#31561;&#24453;&#21512;&#24182;`,e))});return Promise.all(a).then(async e=>{const t=await o.mergeBlobs(Array.from(e));y(t,n+".flv"),i.innerHTML="&#24050;&#23436;&#25104;"}).finally(()=>{e.classList.remove("disabled")})},_=async()=>{if(!e())return;b({loading:!0});const i=await(()=>fetch(window.location.href,r).then(e=>e.text()).then(e=>{const t=e.match(/<script>window.__INITIAL_STATE__=(.+?)<\/script>/);return t&&t[1]?JSON.parse(t[1].replace(";(function(){var s;(s=document.currentScript||document.scripts[document.scripts.length-1]).parentNode.removeChild(s);}());","")):{code:-2,message:"&#33719;&#21462;&#35270;&#39057;&#20449;&#24687;&#22833;&#36133;&#65292;&#21487;&#20197;&#23581;&#35797;&#28165;&#38500;&#27983;&#35272;&#22120;cookies&#21644;&#32531;&#23384;&#21518;&#37325;&#35797;&#65292;&#22914;&#22810;&#27425;&#37325;&#35797;&#20173;&#28982;&#25253;&#38169;&#65292;&#35831;&#36890;&#36807;&#37038;&#31665;&#25110;QQ&#32676;&#21453;&#39304;&#32473;&#25105;&#65292;&#35874;&#35874;"}}).catch(()=>l()))();if(i.code)return b(i);let a=localStorage.bilibili_player_settings&&+JSON.parse(localStorage.bilibili_player_settings).setting_config.defquality||112;if(t()){const e=i.videoData.aid;let t,n,o=i.videoData.cid;if(i.videoData.pages.length>1){const e=location.search.match(/p=(\d+)/);let a=i.videoData.pages[0];e&&e[1]&&(a=i.videoData.pages.find(t=>""+t.page==""+e[1])),t=a.page,n=a.part,o=a.cid}const{code:s,durls:c,qualityDescription:g,message:p}=await((e,t,n=112)=>{return fetch(`//api.bilibili.com/x/player/playurl?cid=${t}&avid=${e}&otype=json&qn=${n}`,r).then(e=>e.json()).then(e=>0!==e.code?d(e):d(e.data)).catch(()=>l())})(e,o,a);if(0===s){let e=`[${g}] ${i.videoData.title}`;t&&n&&(e=`[${g}] ${i.videoData.title}_P${t}_${n}`),b({code:s,title:e,durls:c,message:p})}else b({code:s,message:p})}if(n()){const e=i.epList;let t=-1===i.epId?e[e.length-1].ep_id:i.epId,n=e.find(e=>t===e.ep_id);const o=await s(".episode-item.on"),c=await s(".ep-item.cursor");if(o||c){const i=o||c,a=i.parentElement;let r=Array.from(a.querySelectorAll("li")).findIndex(e=>e===i);const l=await s("#eplist_module .ep-list-progress");l&&(r=+l.textContent.match(/(\d+)\/\d+/)[1]-1),n=e[r],t=n.ep_id||n.id}const{code:g,durls:p,qualityDescription:h,message:m}=await((e,t=112)=>{return fetch(`//api.bilibili.com/pgc/player/web/playurl/?ep_id=${e}&qn=${t}&bsource=`,r).then(e=>e.json()).then(e=>0!==e.code?d(e):d(e.result)).catch(()=>l())})(t,a);if(0===g){const e=`[${h}] ${i.mediaInfo.title}_${n.index||n.title}_${n.index_title||n.longTitle}`;b({code:g,title:e,durls:p,message:m})}else b({code:g,message:m})}};_();let $=""+window.location.href,L=""+localStorage.bilibili_player_settings;setInterval(()=>{const e=window.location.href,t=localStorage.bilibili_player_settings;if($!==e&&($=e,_()),L!==t)try{if(JSON.parse(t).setting_config.defquality===JSON.parse(L).setting_config.defquality)return;L=t,_()}catch(e){}},1e3)})();</script></head>
+<body>
+<p><span class="title">COMP3311 Week 7 Lecture</span></p><p>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="section">DBMS Architecture</span></td><td align="right"></td></tr></tbody></table>
+</p><p>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">DBMS Architecture and Implementation</span></td><td align="right"><small>2/51</small></td></tr></tbody></table>
+</p><p>
+<b>Aims:</b>
+</p><ul>
+<li> examine techniques used in implementation of DBMSs:
+<small>
+<ul>
+<li> query processing (QP), transaction processing (TxP)
+</li></ul>
+</small>
+</li><li> use QP knowledge to make DB applications <em>efficient</em>
+</li><li> use TxP knowledge to make DB applications <em>safe</em>
+</li></ul>
+We also examine foundations:
+<ul>
+<li> <em>relational algebra</em> ... basis for QP
+</li><li> <em>transactions/serializability</em> ... basis for TxP
+</li></ul>
+<small>
+COMP3311: overview of the above; how to use them in app development <br>
+COMP9315: explore implementation details; modify PostgreSQL core
+</small>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Database Application Performance</span></td><td align="right"><small>3/51</small></td></tr></tbody></table>
+</p><p>
+In order to make DB applications efficient, we need to know:
+</p><ul>
+<li> what operations on the data does the application require
+<p>
+<small>
+(which queries, updates, inserts and how frequently is each one performed)
+</small>
+</p></li><li> how these operations might be implemented in the DBMS
+<p>
+<small>
+(data structures and algorithms for select, project, join, sort, ...)
+</small>
+</p></li><li> how much each implementation will cost
+<p>
+<small>
+(in terms of the amount of data transferred between memory and disk)
+</small>
+</p></li></ul>
+and then, as much as the DBMS allows, "encourage" it to use the most
+efficient methods.
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Database Application Performance</span></td><td align="right"><small>4/51</small></td></tr></tbody></table>
+</p><p>
+Application programmer choices that affect query cost:
+</p><ul>
+<li> how queries are expressed
+<ul>
+<li> generally join is faster than subquery
+</li><li> especially if subquery is correlated
+</li><li> avoid producing large intermediate tables <i>then</i> filtering
+</li><li> avoid applying functions in where/group-by clasues
+</li></ul>
+</li><li> creating <em>indexes</em> on tables
+<ul>
+<li> index will speed-up filtering based on indexed attributes
+</li><li> indexes generally only effective for equality, gt/lt
+</li><li> indexes have update-time and storage overheads
+</li><li> only useful if filtering much more frequent than update
+</li></ul>
+</li></ul>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Database Query Processing</span></td><td align="right"><small>5/51</small></td></tr></tbody></table>
+</p><p>
+Whatever you do as a DB application programmer
+</p><ul>
+<li> the DBMS will transform your query
+</li><li> to make it execute as efficiently as possible
+</li></ul>
+Transformation is carried out by <em>query optimiser</em>
+<ul>
+<li> which assesses possible query execution approaches
+</li><li> evaluates likely cost of each approach, chooses cheapest
+</li></ul>
+You have no control over the optimisation process
+<ul>
+<li> but choices you make can block certain options
+</li><li> limiting the query optimiser's chance to improve
+</li></ul>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Database Query Processing</span></td><td align="right"><small>6/51</small></td></tr></tbody></table>
+</p><p>
+Example: query to find sales people earning more than $50K
+</p><p></p><pre><small>
+select name from Employee
+where  salary &gt; 50000 and
+       empid in (select empid from Worksin
+                 where  dept = 'Sales')
+</small></pre><p>
+A query optimiser might use the strategy
+</p><p></p><pre><small>
+SalesEmps = (select empid from WorksIn where dept='Sales')
+foreach e in Employee {
+    if (e.empid in SalesEmps &amp;&amp; e.salary &gt; 50000)
+        add e to result set
+}
+</small></pre><p>
+Needs to examine <i>all</i> employees, even if not in Sales
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Database Query Processing</span></td><td align="right"><small>7/51</small></td></tr></tbody></table>
+</p><p>
+A different expression of the same query:
+</p><p></p><pre><small>
+select name
+from   Employee join WorksIn using (empid)
+where  Employee.salary &gt; 5000 and
+       WorksIn.dept = 'Sales'
+</small></pre><p>
+Query optimiser might use the strategy
+</p><p></p><pre><small>
+SalesEmps = (select * from WorksIn where dept='Sales')
+foreach e in (Employee join SalesEmps) {
+    if (e.salary &gt; 50000)
+        add e to result set
+}
+</small></pre><p>
+Only examines Sales employees, and uses a simpler test
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Database Query Processing</span></td><td align="right"><small>8/51</small></td></tr></tbody></table>
+</p><p>
+A very poor expression of the query <small>(correlated subquery)</small>:
+</p><p></p><pre><small>
+select name from Employee e
+where  salary &gt; 50000 and
+       'Sales' in (select dept from Worksin where empid=e.id)
+</small></pre><p>
+A query optimiser would be forced to use the strategy:
+</p><p></p><pre><small>
+foreach e in Employee {
+    Depts = (select dept from WorksIn where empid=e.empid)
+    if ('Sales' in Depts &amp;&amp; e.salary &gt; 50000)
+        add e to result set
+}
+</small></pre><p>
+Needs to run a query for <i>every</i> employee ...
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">DBMS Architecture</span></td><td align="right"><small>9/51</small></td></tr></tbody></table>
+</p><p>
+Layers in a DB Engine <small>(Ramakrishnan's View)</small>
+</p><p></p><div class="center">
+<img alt="[Diagram:Pic/dbmsarch-small.png]" src="./Week 7 Lecture_files/dbmsarch-small.png">
+</div><p>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">DBMS Components</span></td><td align="right"><small>10/51</small></td></tr></tbody></table>
+</p><p>
+</p><p><table border="0" cellpadding="6">
+<tbody><tr valign="top">
+<td><nobr>File manager</nobr></td>
+<td></td><td>manages allocation of disk space and data structures</td>
+</tr>
+<tr valign="top">
+<td><nobr>Buffer manager</nobr></td>
+<td></td><td>manages data transfer between disk and main memory</td>
+</tr>
+<tr valign="top">
+<td><nobr>Query optimiser</nobr></td>
+<td></td><td>translates queries into efficient sequence of relational ops</td>
+</tr>
+<tr valign="top">
+<td><nobr>Recovery manager</nobr></td>
+<td></td><td>ensures consistent database state after system failures</td>
+</tr>
+<tr valign="top">
+<td><nobr>Concurrency manager</nobr></td>
+<td></td><td>controls concurrent access to database</td>
+</tr>
+<tr valign="top">
+<td><nobr>Integrity manager</nobr></td>
+<td></td><td>verifies integrity constraints and user privileges</td>
+</tr>
+</tbody></table></p><p>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="section">Relational Algebra</span></td><td align="right"></td></tr></tbody></table>
+</p><p>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Relational Algebra</span></td><td align="right"><small>12/51</small></td></tr></tbody></table>
+</p><p>
+<em>Relational algebra</em> (RA) can be viewed as ...
+</p><ul>
+<li> mathematical system for manipulating relations, or
+</li><li> data manipulation language (DML) for the relational model
+</li></ul>
+Relational algebra consists of:
+<ul>
+<li> <em>operands</em>: relations, or variables representing relations
+</li><li> <em>operators</em> that map relations to relations
+</li><li> rules for combining operands/operators into expressions
+</li><li> rules for evaluating such expressions
+</li></ul>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Relational Algebra</span></td><td align="right"><small>13/51</small></td></tr></tbody></table>
+</p><p>
+Core relational algebra operations:
+</p><ul>
+<li> <em>selection</em>: choosing a subset of rows
+</li><li> <em>projection</em>: choosing a subset of columns
+</li><li> <em>product</em>, <em>join</em>: combining relations
+</li><li> <em>union</em>, <em>intersection</em>, <em>difference</em>: combining relations
+</li><li> <em>rename</em>: change names of relations/attributes
+</li></ul>
+Common extensions include:
+<ul>
+<li> <em>aggregation</em>, <em>projection++</em>, <em>division</em>
+</li></ul>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Relational Algebra</span></td><td align="right"><small>14/51</small></td></tr></tbody></table>
+</p><p>
+Select, project, join provide a powerful set of operations for
+building relations and extracting interesting data from them.
+</p><p>
+</p><p></p><div class="center">
+<img alt="[Diagram:Pic/spj1-small.png]" src="./Week 7 Lecture_files/spj1-small.png">
+</div><p>
+</p><p>
+Adding set operations and renaming makes RA <em>complete</em>.
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Notation</span></td><td align="right"><small>15/51</small></td></tr></tbody></table>
+</p><p>
+Standard treatments of relational algebra use Greek symbols.
+</p><p>
+We use the following notation <small>(because it is easier to reproduce)</small>:
+</p><p><table border="0" cellpadding="6">
+<tbody><tr valign="top">
+  <td><nobr><b>Operation</b></nobr></td>
+  <td></td><td><b>Standard<br>Notation</b></td>
+  <td></td><td><b>Our<br>Notation</b></td>
+</tr>
+<tr valign="top">
+  <td><nobr>Selection</nobr></td>
+  <td></td><td><i>&#963;<sub>expr</sub>(Rel)</i></td>
+  <td></td><td><i>Sel[expr](Rel)</i></td>
+</tr>
+<tr valign="top">
+  <td><nobr>Projection</nobr></td>
+  <td></td><td><i>&#960;<sub>A,B,C</sub>(Rel)</i></td>
+  <td></td><td><i>Proj[A,B,C](Rel)</i></td>
+</tr>
+<tr valign="top">
+  <td><nobr>Join</nobr></td>
+  <td></td><td><i>Rel<sub>1</sub> &#8904;<sub>expr</sub> Rel<sub>2</sub></i></td>
+  <td></td><td><i>Rel<sub>1</sub> &nbsp;Join[expr]&nbsp; Rel<sub>2</sub></i></td> 
+</tr>
+<tr valign="top">
+  <td><nobr>Rename</nobr></td>
+  <td></td><td><i><img src="./Week 7 Lecture_files/renam.gif"><sub>schema</sub>Rel</i></td>
+  <td></td><td><i>Rename[schema](Rel)</i></td> 
+</tr>
+</tbody></table></p><p>
+<small>
+For other operations (e.g. set operations) we adopt the standard notation. <br>
+Except when typing in a text file, where <large><code>*</code></large> = intersection, <large><code>+</code></large> = union
+</small>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Describing RA Operations</span></td><td align="right"><small>16/51</small></td></tr></tbody></table>
+</p><p>
+We define the semantics of RA operations using
+</p><ul>
+<li> "conditional set" expressions &nbsp; e.g. <i>{ X | condition on X }</i>
+</li><li> tuple notations:
+<ul>
+<li> <i>t[AB]</i> &nbsp; <small>(extracts attributes <i>A</i> and <i>B</i> from tuple <i>t</i>)</small>
+</li><li> <i>(x,y,z)</i> &nbsp; <small>(enumerated tuples; specify attribute values)</small>
+</li></ul>
+</li><li> quantifiers, set operations, boolean operators
+</li></ul>
+For each operation, we also describe it operationally:
+<ul>
+<li> give an algorithm to compute the result, tuple-by-tuple
+</li></ul>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Describing RA Operations</span></td><td align="right"><small>17/51</small></td></tr></tbody></table>
+</p><p>
+All RA operators return a result of type <em>relation</em>.
+</p><p>
+For convenience, we can name a result and use it later.
+</p><p>
+E.g.
+</p><p></p><pre>Temp = R <i>op<sub>1</sub></i> S <i>op<sub>2</sub></i> T
+Res  = Temp <i>op<sub>3</sub></i> Z
+<comment>-- which is equivalent to</comment>
+Res  = (R <i>op<sub>1</sub></i> S <i>op<sub>2</sub></i> T) <i>op<sub>3</sub></i> Z
+</pre><p>
+<small>
+Each "intermediate result" has a well-defined schema.
+</small>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Example Database #1</span></td><td align="right"><small>18/51</small></td></tr></tbody></table>
+</p><p>
+</p><p></p><div class="center">
+<img alt="[Diagram:Pic/db1-small.png]" src="./Week 7 Lecture_files/db1-small.png">
+</div><p>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Example Database #2</span></td><td align="right"><small>19/51</small></td></tr></tbody></table>
+</p><p>
+</p><p></p><div class="center">
+<img alt="[Diagram:Pic/db2a-small.png]" src="./Week 7 Lecture_files/db2a-small.png">
+</div><p>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Rename</span></td><td align="right"><small>20/51</small></td></tr></tbody></table>
+</p><p>
+<em>Rename</em> provides "schema mapping".
+</p><p>
+If expression <i>E</i> returns a relation
+<i>R(A<sub>1</sub>, A<sub>2</sub>, ... A<sub>n</sub>)</i>, then
+</p><p>
+</p><div class="center">
+<i>Rename[S(B<sub>1</sub>, B<sub>2</sub>, ... B<sub>n</sub>)](E)</i>
+</div>
+<p>
+gives a relation called <i>S</i>
+</p><ul>
+<li> containing the same set of tuples as <i>E</i>
+</li><li> but with the name of each attribute changed from <i>A<sub>i</sub></i>
+to <i>B<sub>i</sub></i>
+</li></ul>
+<small>
+Rename is like the identity function on the <i>contents</i> of a relation;
+it changes only the schema.
+</small>
+<p>
+<em>Rename</em> can be viewed as a "technical" apparatus of RA.
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Selection</span></td><td align="right"><small>21/51</small></td></tr></tbody></table>
+</p><p>
+<em>Selection</em> returns a subset of the tuples
+in a relation <i>r(R)</i> that satisfy a specified condition <i>C</i>.
+</p><p>
+</p><div class="center">
+<i>&#963;<sub>C</sub>(r)</i> &nbsp; = &nbsp; <i>Sel[C](r)</i> &nbsp; = &nbsp; { <i>t</i> &nbsp;|&nbsp; <i>t &#8712; r &#8743; C(t)</i> }
+</div>
+<p>
+<i>C</i> is a boolean expression on attributes in <i>R</i>.
+</p><p>
+Result size: &nbsp; |<i>&#963;<sub>C</sub>(r)</i>| <i>&#8804;</i> |<i>r</i>|
+</p><p>
+Result schema: &nbsp; same as the schema of <i>r</i> &nbsp; (i.e. <i>R</i>)
+</p><p>
+Algorithmic view:
+</p><p></p><pre><i>result</i> = {}
+for each tuple <i>t</i> in relation <i>r</i>
+    if (<i>C(t)</i>) { <i>result</i> = <i>result &#8746; {t}</i> }
+</pre><p>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Selection</span></td><td align="right"><small>22/51</small></td></tr></tbody></table>
+</p><p>
+Example selections:
+</p><p>
+</p><div class="center">
+<table cellspacing="10">
+<tbody><tr valign="top">
+<td>
+<i>Sel [B = 1] (r1)</i> <p>
+</p><p><table border="1" cellpadding="2">
+<tbody><tr align="center"><td>&nbsp;&nbsp;<b>A</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>B</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>C</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>D</b>&nbsp;&nbsp;</td></tr>
+<tr align="center"><td>a</td><td>1</td><td>x</td><td>4</td></tr>
+<tr align="center"><td>e</td><td>1</td><td>y</td><td>4</td></tr>
+</tbody></table></p><p>
+</p></td>
+<td>&nbsp;</td>
+<td>
+<i>Sel [A=b &#8744; A=c] (r1)</i> <p>
+</p><p><table border="1" cellpadding="2">
+<tbody><tr align="center"><td>&nbsp;&nbsp;<b>A</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>B</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>C</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>D</b>&nbsp;&nbsp;</td></tr>
+<tr align="center"><td>b</td><td>2</td><td>y</td><td>5</td></tr>
+<tr align="center"><td>c</td><td>4</td><td>z</td><td>4</td></tr>
+</tbody></table></p><p>
+</p></td>
+</tr>
+<tr valign="top">
+<td>
+<i>Sel [B &#8805; D] (r1)</i> <p>
+</p><p><table border="1" cellpadding="2">
+<tbody><tr align="center"><td>&nbsp;&nbsp;<b>A</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>B</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>C</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>D</b>&nbsp;&nbsp;</td></tr>
+<tr align="center"><td>c</td><td>4</td><td>z</td><td>4</td></tr>
+<tr align="center"><td>d</td><td>8</td><td>x</td><td>5</td></tr>
+</tbody></table></p><p>
+</p></td>
+<td>&nbsp;</td>
+<td>
+<i>Sel [A = C] (r1)</i> <p>
+</p><p><table border="1" cellpadding="2">
+<tbody><tr align="center"><td>&nbsp;&nbsp;<b>A</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>B</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>C</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>D</b>&nbsp;&nbsp;</td></tr>
+</tbody></table></p><p>
+</p></td>
+</tr>
+</tbody></table>
+</div>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Projection</span></td><td align="right"><small>23/51</small></td></tr></tbody></table>
+</p><p>
+<em>Projection</em> returns a set of tuples containing
+a subset of the attributes in the original relation.
+</p><p>
+</p><div class="center">
+<i>&#960;<sub>X</sub>(r)</i> &nbsp; = &nbsp; <i>Proj[X](r)</i> &nbsp; = &nbsp; { <i>t[X]</i> &nbsp;|&nbsp; <i>t &#8712; r</i> }, &nbsp;&nbsp;&nbsp; where <i>r(R)</i>
+</div>
+<p>
+<i>X</i> specifies a subset of the attributes of <i>R</i>.
+</p><p>
+Note that removing key attributes can produce duplicates.
+</p><p>
+In RA, duplicates are removed from the result <em>set</em>.
+<br>
+<small><font color="#999999">(In RDBMS's, duplicates are retained &nbsp; (i.e. they use bags, not sets)</font></small><font color="#999999">)</font>
+</p><p>
+Result size: &nbsp; |<i>&#960;<sub>X</sub>(r)</i>| <i>&#8804;</i> |<i>r</i>|
+&nbsp;&nbsp;&nbsp;
+Result schema: &nbsp; <i>R'(X)</i>
+</p><p>
+Algorithmic view:
+</p><p></p><pre><i>result</i> = {}
+for each tuple <i>t</i> in relation <i>r</i>
+    <i>result</i> = <i>result &#8746; {t[X]}</i>
+</pre><p>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Projection</span></td><td align="right"><small>24/51</small></td></tr></tbody></table>
+</p><p>
+Example projections:
+</p><p>
+</p><div class="center">
+<table border="0" cellpadding="10">
+<tbody><tr>
+<td valign="top" align="center">
+<i>Proj [A,B,D] (r1)</i> <p>
+</p><p><table border="1" cellpadding="2">
+<tbody><tr align="center"><td>&nbsp;&nbsp;<b>A</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>B</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>D</b>&nbsp;&nbsp;</td></tr>
+<tr align="center"><td>a</td><td>1</td><td>4</td></tr>
+<tr align="center"><td>b</td><td>2</td><td>5</td></tr>
+<tr align="center"><td>c</td><td>4</td><td>4</td></tr>
+<tr align="center"><td>d</td><td>8</td><td>5</td></tr>
+<tr align="center"><td>e</td><td>1</td><td>4</td></tr>
+<tr align="center"><td>f</td><td>2</td><td>5</td></tr>
+</tbody></table></p><p>
+</p></td>
+<td>&nbsp;&nbsp;&nbsp;</td>
+<td valign="top" align="center">
+<i>Proj [B,D] (r1)</i> <p>
+</p><p><table border="1" cellpadding="2">
+<tbody><tr align="center"><td>&nbsp;&nbsp;<b>B</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>D</b>&nbsp;&nbsp;</td></tr>
+<tr align="center"><td>1</td><td>4</td></tr>
+<tr align="center"><td>2</td><td>5</td></tr>
+<tr align="center"><td>4</td><td>4</td></tr>
+<tr align="center"><td>8</td><td>5</td></tr>
+</tbody></table></p><p>
+</p></td>
+<td>&nbsp;&nbsp;&nbsp;</td>
+<td valign="top" align="center">
+<i>Proj [D] (r1)</i> <p>
+</p><p><table border="1" cellpadding="2">
+<tbody><tr align="center"><td>&nbsp;&nbsp;<b>D</b>&nbsp;&nbsp;</td></tr>
+<tr align="center"><td>4</td></tr>
+<tr align="center"><td>5</td></tr>
+</tbody></table></p><p>
+</p></td>
+</tr>
+</tbody></table>
+</div>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Union</span></td><td align="right"><small>25/51</small></td></tr></tbody></table>
+</p><p>
+<em>Union</em> combines two <em>compatible</em> relations into
+a single relation via set union of sets of tuples.
+</p><p>
+</p><div class="center">
+<i>r<sub>1</sub> &#8746; r<sub>2</sub></i> &nbsp; = &nbsp; { <i>t</i> &nbsp;|&nbsp; <i>t &#8712; r<sub>1</sub> &#8744; t &#8712; r<sub>2</sub></i> }, &nbsp;&nbsp;&nbsp; where <i>r<sub>1</sub>(R), r<sub>2</sub>(R)</i>
+</div>
+<p>
+Compatibility = both relations have the same schema
+</p><p>
+Result size: &nbsp; |<i>r<sub>1</sub> &#8746; r<sub>2</sub></i>| &nbsp; <i>&#8804;</i> &nbsp;
+|<i>r<sub>1</sub></i>| + |<i>r<sub>2</sub></i>|
+&nbsp;&nbsp;&nbsp;
+Result schema: <i>R</i>
+</p><p>
+Algorithmic view:
+</p><p></p><pre><i>result</i> = <i>r<sub>1</sub></i>
+for each tuple <i>t</i> in relation <i>r<sub>2</sub></i>
+    <i>result</i> = <i>result &#8746; {t}</i>
+</pre><p>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Intersection</span></td><td align="right"><small>26/51</small></td></tr></tbody></table>
+</p><p>
+<em>Intersection</em> combines two <em>compatible</em>
+relations into a single relation via set intersection of sets of tuples.
+</p><p>
+</p><div class="center">
+<i>r<sub>1</sub> &#8745; r<sub>2</sub></i> &nbsp; = &nbsp; { <i>t</i> &nbsp;|&nbsp; <i>t &#8712; r<sub>1</sub> &#8743; t &#8712; r<sub>2</sub></i> }, &nbsp;&nbsp;&nbsp; where <i>r<sub>1</sub>(R), r<sub>2</sub>(R)</i>
+</div>
+<p>
+Uses same notion of relation compatibility as union.
+</p><p>
+Result size: &nbsp; |<i>r<sub>1</sub> &#8746; r<sub>2</sub></i>| &nbsp; <i>&#8804;</i> &nbsp;
+min(|<i>r<sub>1</sub></i>|,|<i>r<sub>2</sub></i>|)
+&nbsp;&nbsp;&nbsp;
+Result schema: <i>R</i>
+</p><p>
+Algorithmic view:
+</p><p></p><pre><i>result</i> = {}
+for each tuple <i>t</i> in relation <i>r<sub>1</sub></i>
+    if (<i>t &#8712; r<sub>2</sub></i>) { <i>result</i> = <i>result &#8746; {t}</i> }
+</pre><p>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Difference</span></td><td align="right"><small>27/51</small></td></tr></tbody></table>
+</p><p>
+<em>Difference</em> finds the set of tuples that exist in
+one relation but do not occur in a second <em>compatible</em> relation.
+</p><p>
+</p><div class="center">
+<i>r<sub>1</sub> - r<sub>2</sub></i> &nbsp; = &nbsp; { <i>t</i> &nbsp;|&nbsp; <i>t &#8712; r<sub>1</sub> &#8743; ¬ t &#8712; r<sub>2</sub></i> }, &nbsp;&nbsp;&nbsp; where <i>r<sub>1</sub>(R), r<sub>2</sub>(R)</i>
+</div>
+<p>
+Uses same notion of relation compatibility as union.
+</p><p>
+Note:
+tuples in <i>r<sub>2</sub></i> but not <i>r<sub>1</sub></i> do not appear in the result
+</p><ul>
+<li> i.e. set difference != complement of set intersection
+</li></ul>
+Algorithmic view:
+<p></p><pre><i>result</i> = {}
+for each tuple <i>t</i> in relation <i>r<sub>1</sub></i>
+    if (!(<i>t &#8712; r<sub>2</sub></i>)) { <i>result</i> = <i>result &#8746; {t}</i> }
+</pre><p>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Difference</span></td><td align="right"><small>28/51</small></td></tr></tbody></table>
+</p><p>
+Example difference:
+</p><p>
+</p><div class="center">
+<table border="0" cellpadding="10">
+<tbody><tr>
+<td valign="top" align="center">
+<i>s1 = Sel [B = 1] (r1)</i> <p>
+</p><p><table border="1" cellpadding="2">
+<tbody><tr align="center"><td>&nbsp;&nbsp;<b>A</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>B</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>C</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>D</b>&nbsp;&nbsp;</td></tr>
+<tr align="center"><td>a</td><td>1</td><td>x</td><td>4</td></tr>
+<tr align="center"><td>e</td><td>1</td><td>y</td><td>4</td></tr>
+</tbody></table></p><p>
+</p></td>
+<td>&nbsp;&nbsp;&nbsp;</td>
+<td valign="top" align="center">
+<i>s2 = Sel [C = x] (r1)</i> <p>
+</p><p><table border="1" cellpadding="2">
+<tbody><tr align="center"><td>&nbsp;&nbsp;<b>A</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>B</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>C</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>D</b>&nbsp;&nbsp;</td></tr>
+<tr align="center"><td>a</td><td>1</td><td>x</td><td>4</td></tr>
+<tr align="center"><td>d</td><td>8</td><td>x</td><td>5</td></tr>
+</tbody></table></p><p>
+</p></td>
+</tr>
+<tr><td></td></tr>
+<tr>
+<td valign="top" align="center">
+<i>s1 - s2</i> <p>
+</p><p><table border="1" cellpadding="2">
+<tbody><tr align="center"><td>&nbsp;&nbsp;<b>A</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>B</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>C</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>D</b>&nbsp;&nbsp;</td></tr>
+<tr align="center"><td>e</td><td>1</td><td>y</td><td>4</td></tr>
+</tbody></table></p><p>
+</p></td>
+<td>&nbsp;&nbsp;&nbsp;</td>
+<td valign="top" align="center">
+<i>s2 - s1</i> <p>
+</p><p><table border="1" cellpadding="2">
+<tbody><tr align="center"><td>&nbsp;&nbsp;<b>A</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>B</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>C</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>D</b>&nbsp;&nbsp;</td></tr>
+<tr align="center"><td>d</td><td>8</td><td>x</td><td>5</td></tr>
+</tbody></table></p><p>
+</p></td>
+</tr>
+</tbody></table>
+</div>
+&nbsp;<p>
+Clearly, difference is not symmetric.
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Product</span></td><td align="right"><small>29/51</small></td></tr></tbody></table>
+</p><p>
+<em>Product</em> (Cartesian product) combines information from
+two relations pairwise on tuples.
+</p><p>
+</p><div class="center">
+<i>r × s</i> &nbsp; = &nbsp; { <i>(t<sub>1</sub> : t<sub>2</sub>)</i> &nbsp;|&nbsp; <i>t<sub>1</sub> &#8712; r &#8743; t<sub>2</sub> &#8712; s</i> }, &nbsp;&nbsp;&nbsp; where <i>r(R), s(S)</i>
+</div>
+<p>
+Each tuple in the result contains all attributes from <i>r</i> and <i>s</i>,
+possibly with some fields renamed to avoid ambiguity.
+</p><p>
+If <i>t<sub>1</sub> = (A<sub>1</sub>...A<sub>n</sub>)</i> and
+   <i>t<sub>2</sub> = (B<sub>1</sub>...B<sub>n</sub>)</i> then
+   <i>(t<sub>1</sub>:t<sub>2</sub>) = (A<sub>1</sub>...A<sub>n</sub>,B<sub>1</sub>...B<sub>n</sub>)</i>
+</p><p>
+Note: relations do not have to be union-compatible.
+</p><p>
+Result size is <em>large</em>: &nbsp; |<i>r × s</i>| = |<i>r</i>|.|<i>s</i>|
+&nbsp;&nbsp;&nbsp;
+Schema: <i>R&#8746;S</i>
+</p><p>
+Algorithmic view:
+</p><p></p><pre><i>result</i> = {}
+for each tuple <i>t<sub>1</sub></i> in relation <i>r</i>
+    for each tuple <i>t<sub>2</sub></i> in relation <i>s</i>
+        <i>result</i> = <i>result &#8746; {(<i>t<sub>1</sub>:t<sub>2</sub></i>)}</i> }
+</pre><p>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Natural Join</span></td><td align="right"><small>30/51</small></td></tr></tbody></table>
+</p><p>
+<em>Natural join</em> is a specialised product:
+</p><ul>
+<li> containing only pairs that match on <em>common</em> attributes
+</li><li> with one of each pair of common attributes eliminated
+</li></ul>
+Consider relation schemas <i>R(ABC..J<font color="#009900">KLM</font>)</i>,  <i>S(<font color="#009900">KLM</font>N..XYZ)</i>.
+<p>
+The natural join of relations <i>r(R)</i> and <i>s(S)</i> is defined as:
+</p><p>
+</p><div class="center">
+<i>r &#8904; s</i> &nbsp; = &nbsp; <i>r Join s</i> &nbsp; = &nbsp; <br>
+	{ <i>(t<sub>1</sub>[ABC..J] : t<sub>2</sub>[K..XYZ])</i> &nbsp;|&nbsp;
+	  <i>t<sub>1</sub> &#8712; r &#8743; t<sub>2</sub> &#8712; s &#8743; match</i>
+	}
+<p>
+where &nbsp;&nbsp; <i>match</i> &nbsp; = &nbsp;
+		<i>t<sub>1</sub>[K] = t<sub>2</sub>[K] &#8743;
+		t<sub>1</sub>[L] = t<sub>2</sub>[L] &#8743;
+		t<sub>1</sub>[M] = t<sub>2</sub>[M]</i>
+</p></div>
+<p>
+Algorithmic view:
+</p><p></p><pre><i>result</i> = {}
+for each tuple <i>t<sub>1</sub></i> in relation <i>r</i>
+   for each tuple <i>t<sub>2</sub></i> in relation <i>s</i>
+      if (<i>matches(t<sub>1</sub>,t<sub>2</sub>)</i>)
+         <i>result</i> = <i>result &#8746; {combine(<i>t<sub>1</sub>,t<sub>2</sub></i>)}</i>
+</pre><p>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Natural Join</span></td><td align="right"><small>31/51</small></td></tr></tbody></table>
+</p><p>
+</p><p>
+Natural join can be defined in terms of other RA operations:
+</p><p>
+</p><div class="center">
+<i>r Join s</i> &nbsp; = &nbsp; <i> Proj[R &#8746; S] ( Sel[match] ( r × s) )</i>
+</div>
+<p>
+We assume that the union on attributes eliminates duplicates.
+</p><p>
+If we wish to join relations, where the common attributes have
+different names, we rename the attributes first.
+</p><p>
+E.g. <i>R(AB<font color="#009900">C</font>)</i> and <i>S(D<font color="#009900">E</font>F)</i> can be joined by
+</p><p>
+</p><div class="center">
+<i>R Join Rename[S(D<font color="#009900">C</font>F)](S)</i>
+</div>
+<p>
+Note: |<i>r &#8904; s</i>| <i>&#8810;</i> |<i>r × s</i>|, so <i>join</i> not implemented via <i>product</i>.
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Natural Join</span></td><td align="right"><small>32/51</small></td></tr></tbody></table>
+</p><p>
+Example (assuming that <i>A</i> and <i>F</i> are the common attributes):
+</p><p>
+</p><div class="center">
+<table border="0" cellpadding="10">
+<tbody><tr><td align="center"><i>r1 Join r2</i>
+<p>
+</p><p><table border="1" cellpadding="2">
+<tbody><tr align="center"><td>&nbsp;&nbsp;<b>A</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>B</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>C</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>D</b>&nbsp;&nbsp;</td>
+	<td>&nbsp;&nbsp;<b>E</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>G</b>&nbsp;&nbsp;</td></tr>
+<tr align="center"><td>a</td><td>1</td><td>x</td><td>4</td>
+	<td>1</td><td>x</td></tr>
+<tr align="center"><td>a</td><td>1</td><td>x</td><td>4</td>
+	<td>4</td><td>y</td></tr>
+<tr align="center"><td>b</td><td>2</td><td>y</td><td>5</td>
+	<td>2</td><td>y</td></tr>
+<tr align="center"><td>b</td><td>2</td><td>y</td><td>5</td>
+	<td>5</td><td>x</td></tr>
+<tr align="center"><td>c</td><td>4</td><td>z</td><td>4</td>
+	<td>3</td><td>x</td></tr>
+</tbody></table></p><p>
+</p></td></tr>
+</tbody></table>
+</div>
+<p>
+Strictly the above was: <i>r1 Join Rename[r2(E,<font color="#009900">A</font>,G)](r2)</i>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Theta Join</span></td><td align="right"><small>33/51</small></td></tr></tbody></table>
+</p><p>
+The <em>theta join</em> is a specialised product
+containing only pairs that match on a supplied condition <i>C</i>.
+</p><p>
+</p><div class="center">
+<i>r &#8904;<sub>C</sub> s</i> &nbsp; = &nbsp; { <i>(t<sub>1</sub> : t<sub>2</sub>)</i> &nbsp;|&nbsp; <i>t<sub>1</sub> &#8712; r &#8743; t<sub>2</sub> &#8712; s &#8743; C(t<sub>1</sub> : t<sub>2</sub>)</i> }, <br>
+where <i>r(R),s(S)</i>
+</div>
+<p>
+Examples: &nbsp; <i>(r1 Join[B&gt;E] r2)</i> ... <i>(r1 Join[E&lt;D&#8743;C=G] r2)</i>
+</p><p>
+All attribute names are required to be distinct <small>(cf natural join)</small>
+</p><p>
+Can be defined in terms of other RA operations:
+</p><p>
+</p><div class="center">
+<i>r &#8904;<sub>C</sub> s</i> &nbsp; = &nbsp; <i>r Join[C] s</i> &nbsp; = &nbsp; <i> Sel[C] ( r × s )</i>
+</div>
+<p>
+Note that &nbsp; <i>r &#8904;<sub>true</sub> s &nbsp; = &nbsp; r × s</i>.
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Theta Join</span></td><td align="right"><small>34/51</small></td></tr></tbody></table>
+</p><p>
+Example theta join:
+</p><p>
+</p><div class="center">
+<table border="0" cellpadding="10">
+<tbody><tr><td valign="top" align="center">
+<i>r1 Join[D &lt; E] r2</i>
+<p>
+</p><p><table border="1" cellpadding="2">
+<tbody><tr align="center"><td>&nbsp;&nbsp;<b>A</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>B</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>C</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>D</b>&nbsp;&nbsp;</td>
+	<td>&nbsp;&nbsp;<b>E</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>F</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>G</b>&nbsp;&nbsp;</td></tr>
+<tr align="center"><td>a</td><td>1</td><td>x</td><td>4</td>
+	<td>5</td><td>b</td><td>x</td></tr>
+<tr align="center"><td>c</td><td>4</td><td>z</td><td>4</td>
+	<td>5</td><td>b</td><td>x</td></tr>
+<tr align="center"><td>e</td><td>1</td><td>y</td><td>4</td>
+	<td>5</td><td>b</td><td>x</td></tr>
+</tbody></table></p><p>
+</p></td></tr>
+<tr><td>&nbsp;</td></tr>
+<tr><td valign="top" align="center">
+<i>r1 Join[B &gt; 1 &#8743; D &lt; E] r2</i>
+<p>
+</p><p><table border="1" cellpadding="2">
+<tbody><tr align="center"><td>&nbsp;&nbsp;<b>A</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>B</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>C</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>D</b>&nbsp;&nbsp;</td>
+	<td>&nbsp;&nbsp;<b>E</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>F</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>G</b>&nbsp;&nbsp;</td></tr>
+<tr align="center"><td>c</td><td>4</td><td>z</td><td>4</td>
+	<td>5</td><td>b</td><td>x</td></tr>
+</tbody></table></p><p>
+</p></td></tr>
+</tbody></table>
+</div>
+<p>
+<small>
+(Theta join is the most frequently-used join in SQL queries)
+</small>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Division</span></td><td align="right"><small>35/51</small></td></tr></tbody></table>
+</p><p>
+Consider two relation schemas <i>R</i> and <i>S</i> where <i>S &#8834; R</i>.
+</p><p>
+The <em>division</em> operation is defined on instances <i>r(R)</i>, <i>s(S)</i> as:
+</p><p>
+</p><div class="center">
+<i>r / s</i> &nbsp; = &nbsp; <i>r Div s</i> &nbsp; = &nbsp;
+	{ <i>t</i> | <i>t &#8712; r[R-S] &#8743; satisfy</i> }
+<p>
+where &nbsp; <i>satisfy</i> &nbsp; = &nbsp; <i>&#8704; t<sub>s</sub> &#8712; S ( &#8707; t<sub>r</sub> &#8712; R ( t<sub>r</sub>[S] = t<sub>s</sub> &#8743; t<sub>r</sub>[R-S] = t ) )</i>
+</p></div>
+<p>
+Operationally:
+</p><ul>
+<li> consider each subset of tuples in <i>R</i> that match on <i>t[R-S]</i>
+</li><li> for this subset of tuples, take the <i>t[S]</i> values from each
+</li><li> if this covers all tuples in <i>S</i>, then include <i>t[R-S]</i> in the result
+</li></ul>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Division</span></td><td align="right"><small>36/51</small></td></tr></tbody></table>
+</p><p>
+Example:
+</p><p>
+</p><div class="center">
+<table border="0" cellpadding="10">
+<tbody><tr>
+<td valign="top" align="center">
+<i>R</i> <p>
+</p><p><table border="1" cellpadding="2">
+<tbody><tr align="center"><td>&nbsp;&nbsp;<b>A</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>B</b>&nbsp;&nbsp;</td></tr>
+<tr align="center"><td><font color="#CC0000">4</font></td><td><font color="#009900">x</font></td></tr>
+<tr align="center"><td><font color="#CC0000">4</font></td><td><font color="#0000CC">y</font></td></tr>
+<tr align="center"><td><font color="#CC0000">4</font></td><td>z</td></tr>
+<tr align="center"><td>5</td><td><font color="#009900">x</font></td></tr>
+<tr align="center"><td>5</td><td><font color="#0000CC">y</font></td></tr>
+<tr align="center"><td>5</td><td>z</td></tr>
+</tbody></table></p><p>
+</p></td>
+<td>&nbsp;&nbsp;&nbsp;</td>
+<td valign="top" align="center">
+<i>R'</i> <p>
+</p><p><table border="1" cellpadding="2">
+<tbody><tr align="center"><td>&nbsp;&nbsp;<b>A</b>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;<b>B</b>&nbsp;&nbsp;</td></tr>
+<tr align="center"><td><font color="#CC0000">4</font></td><td><font color="#009900">x</font></td></tr>
+<tr align="center"><td><font color="#CC0000">4</font></td><td><font color="#0000CC">y</font></td></tr>
+<tr align="center"><td><font color="#CC0000">4</font></td><td>z</td></tr>
+<tr align="center"><td>5</td><td><font color="#009900">x</font></td></tr>
+<tr align="center"><td>5</td><td>z</td></tr>
+</tbody></table></p><p>
+</p></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="top" align="center">
+<i>S</i> <p>
+</p><p><table border="1" cellpadding="2">
+<tbody><tr align="center"><td>&nbsp;&nbsp;<b>B</b>&nbsp;&nbsp;</td></tr>
+<tr align="center"><td><font color="#009900">x</font></td></tr>
+<tr align="center"><td><font color="#0000CC">y</font></td></tr>
+</tbody></table></p><p>
+</p></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="top" align="center">
+<i>R / S</i> <p>
+</p><p><table border="1" cellpadding="2">
+<tbody><tr align="center"><td>&nbsp;&nbsp;<b>A</b>&nbsp;&nbsp;</td></tr>
+<tr align="center"><td><font color="#CC0000">4</font></td></tr>
+<tr align="center"><td>5</td></tr>
+</tbody></table></p><p>
+</p></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="top" align="center">
+<i>R' / S</i> <p>
+</p><p><table border="1" cellpadding="2">
+<tbody><tr align="center"><td>&nbsp;&nbsp;<b>A</b>&nbsp;&nbsp;</td></tr>
+<tr align="center"><td><font color="#CC0000">4</font></td></tr>
+</tbody></table></p><p>
+</p></td>
+</tr>
+</tbody></table>
+</div>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Division</span></td><td align="right"><small>37/51</small></td></tr></tbody></table>
+</p><p>
+Division handles queries that include the notion "for all".
+</p><p>
+E.g. Which beers are sold in all bars?
+</p><p>
+We can answer this as follows:
+</p><ul>
+<li> generate a relation of beers and bars where they are sold
+</li><li> generate a relation of all bars
+</li><li> find which beers appear in tuples with <em>every</em> bar
+</li></ul>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Division</span></td><td align="right"><small>38/51</small></td></tr></tbody></table>
+</p><p>
+RA operations for answering the query:
+</p><ul>
+<li> beers and bars where they are sold (ignore prices)
+<ul>
+<li>	<i>r1 = Proj[beer,bar](Sold)</i>
+</li></ul>
+</li><li> bar names
+<ul>
+<li> <i>r2 = Rename[r2(bar)](Proj[name](Bars))</i>
+</li></ul>
+</li><li> beers that appear in tuples with every bar
+<ul>
+<li> <i>res &nbsp; = r1 Div r2</i>
+</li></ul>
+</li></ul>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="section">Query Processing</span></td><td align="right"></td></tr></tbody></table>
+</p><p>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Query Processing</span></td><td align="right"><small>40/51</small></td></tr></tbody></table>
+</p><p>
+So far, have viewed query evaluation as a black box:
+</p><p><br></p><p>
+</p><p></p><div class="center">
+<img alt="[Diagram:Pic/qryeval0-small.png]" src="./Week 7 Lecture_files/qryeval0-small.png">
+</div><p>
+</p><p><br></p><p>
+<em>Query processing</em> is the study of techniques for query evaluation.
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Query Processing</span></td><td align="right"><small>41/51</small></td></tr></tbody></table>
+</p><p>
+Goal of query processing:
+</p><ul>
+<li> find/build a set of tuples satisfying some condition
+</li><li> tuples may be constructed using values from multiple tables
+</li></ul>
+We talk about <i>query</i> processing ...
+<ul>
+<li> but the considerations also apply to DB update operations
+</li><li> <large><code>INSERT</code></large> affects only one tuple <small>(and, maybe, indexes)</small>
+</li><li> <large><code>DELETE</code></large> does <i>find</i>-then-remove, so is query-like
+</li><li> <large><code>UPDATE</code></large> does <i>find</i>-then-change, so is query-like
+</li><li> one difference: update operations act on a single table
+</li></ul>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Query Processing</span></td><td align="right"><small>42/51</small></td></tr></tbody></table>
+</p><p>
+Inside the query evaluation box:
+</p><p></p><div class="center">
+<img alt="[Diagram:Pic/qryeval1-small.png]" src="./Week 7 Lecture_files/qryeval1-small.png">
+</div><p>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Query Processing</span></td><td align="right"><small>43/51</small></td></tr></tbody></table>
+</p><p>
+One view of DB engine: "<em>relational algebra</em> virtual machine"
+</p><p>
+</p><div class="center">
+<table border="0" cellpadding="4">
+<tbody><tr valign="top">
+<td><nobr> selection (<i>&#963;</i>) </nobr></td>
+<td></td><td> projection (<i>&#960;</i>) </td>
+<td></td><td> join (<i>&#8904;, ×</i>) </td>
+</tr>
+<tr valign="top">
+<td><nobr> union (<i>&#8746;</i>) </nobr></td>
+<td></td><td> intersection (<i>&#8745;</i>) </td>
+<td></td><td> difference (<i>-</i>) </td>
+</tr>
+<tr valign="top">
+<td><nobr> sort </nobr></td>
+<td></td><td> insert </td>
+<td></td><td> delete </td>
+</tr>
+</tbody></table>
+</div>
+<p>
+For each of these operations:
+</p><ul>
+<li> various data structures and algorithms are available
+</li><li> DBMSs may provide only one, or may provide a choice
+</li></ul>
+Query optimiser chooses best methods and order to apply them.
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Query Processing</span></td><td align="right"><small>44/51</small></td></tr></tbody></table>
+</p><p>
+What is the "best" method for evaluating a query?
+</p><p>
+Generally, <i>best</i> = lowest cost = fastest evaluation time
+</p><p>
+<em>Cost</em> is measured in terms of pages read/written
+</p><ul>
+<li> data is stored in fixed-size blocks (e.g. 4KB)
+</li><li> data transferred disk<i>&#8596;</i>memory in whole blocks
+</li><li> cost of disk<i>&#8596;</i>memory transfer is highest cost in system
+</li><li> processing in memory is very fast compared to I/O
+</li></ul>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Mapping SQL to RA</span></td><td align="right"><small>45/51</small></td></tr></tbody></table>
+</p><p>
+Mapping SQL to relational algebra, e.g.
+</p><p></p><pre><comment>-- schema: R(a,b) S(c,d)</comment>
+select a as x
+from   R join S on (b=c)
+where  d = 100
+<comment>-- mapped to</comment>
+Tmp = Sel[d=100] (R join[b=c] S)
+Res = Rename[a-&gt;x](Proj[a] Ttmp)
+</pre><p>
+In general:
+</p><ul>
+<li> <large><code>SELECT</code></large> clause becomes <i>projection</i>
+</li><li> <large><code>WHERE</code></large> condition becomes <i>selection</i> or <i>join</i>
+</li><li> <large><code>FROM</code></large> clause becomes <i>join</i>
+</li></ul>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Mapping Example</span></td><td align="right"><small>46/51</small></td></tr></tbody></table>
+</p><p>
+The query: <i>Courses with more than 100 students in them?</i>
+</p><p>
+Can be expressed in SQL as
+</p><p></p><pre>select   distinct s.code
+from     Course c, Subject s, Enrolment e
+where    c.id = e.course and c.subject = s.id
+group by s.id
+having   count(*) &gt; 100;
+</pre><p>
+and might be compiled to
+</p><p>
+<small>
+<i>Result =
+Project'<small>[s.code]</small>(
+	GroupSelect<small>[size&gt;100]</small>(
+		GroupBy<small>[id]</small> ( JoinRes )
+	)
+)</i>
+</small>
+</p><p>
+where
+</p><p>
+<small>
+<i>JoinRes =
+Subject Join<small>[s.id=c.subject]</small>
+    (Course Join<small>[c.id=e.course]</small> Enrolment)
+</i>
+</small>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Mapping Example</span></td><td align="right"><small>47/51</small></td></tr></tbody></table>
+</p><p>
+The <i>Join</i> operations could be done (at least) two different ways:
+</p><p></p><div class="center">
+<img alt="[Diagram:Pic/join-trees-small.png]" src="./Week 7 Lecture_files/join-trees-small.png">
+</div><p>
+</p><p><br></p><p>
+Which is better? ... The query optimiser works this out.
+</p><p>
+Note: for a join involving <i>N</i> tables, there are <i>O(N!)</i> possible trees.
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Query Optimisation</span></td><td align="right"><small>48/51</small></td></tr></tbody></table>
+</p><p>
+Phase 2: mapping RA expression to (efficient) query plan
+</p><p></p><div class="center">
+<img alt="[Diagram:Pic/qryeval2-small.png]" src="./Week 7 Lecture_files/qryeval2-small.png">
+</div><p>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Query Optimisation</span></td><td align="right"><small>49/51</small></td></tr></tbody></table>
+</p><p>
+The query optimiser start with an RA expression, then
+</p><ul>
+<li> generates a set of equivalent expressions
+</li><li> generates possible execution plans for each
+</li><li> estimates cost of each plan, chooses chepaest
+</li></ul>
+The cost of evaluating a query is determined by:
+<ul>
+<li> size of relations &nbsp; <small>(database relations and temporary relations)</small>
+</li><li> access mechanisms &nbsp; <small>(indexing, hashing, sorting, join algorithms)</small>
+</li><li> size/number of main memory buffers &nbsp; <small>(and replacement strategy)</small>
+</li></ul>
+Analysis of costs involves <i>estimating</i>:
+<ul>
+<li> the size of intermediate results
+</li><li> then, based on this, cost of secondary storage accesses
+</li></ul>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Query Optimisation</span></td><td align="right"><small>50/51</small></td></tr></tbody></table>
+</p><p>
+An <em>execution plan</em> is a sequence of relational operations.
+</p><p>
+Consider execution plans for:
+	&nbsp;&nbsp; <i> &#963;<sub>c</sub> (R &nbsp;&#8904;<sub>d</sub>&nbsp; S &nbsp;&#8904;<sub>e</sub>&nbsp; T) </i>
+</p><p></p><pre>tmp1   :=  hash_join[d](R,S)
+tmp2   :=  sort_merge_join[e](tmp1,T)
+result :=  binary_search[c](tmp2)
+</pre><p>
+or
+</p><p></p><pre>tmp1   :=  sort_merge_join[e](S,T)
+tmp2   :=  hash_join[d](R,tmp1)
+result :=  linear_search[c](tmp2)
+</pre><p>
+or
+</p><p></p><pre>tmp1   :=  btree_search[c](R)
+tmp2   :=  hash_join[d](tmp1,S)
+result :=  sort_merge_join[e](tmp2)
+</pre><p>
+All produce same result, but have different costs.
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Implementations of RA Ops</span></td><td align="right"><small>51/51</small></td></tr></tbody></table>
+</p><p>
+Sorting &nbsp; <font color="#999999"><small>(quicksort, etc. are not applicable)</small></font>
+</p><ul>
+<li> external merge sort &nbsp; <small>(cost <i>O(Nlog<sub>B</sub>N)</i> with <i>B</i> memory buffers)</small>
+</li></ul>
+Selection &nbsp; <font color="#999999"><small>(different techniques developed for different query types)</small></font>
+<ul>
+<li> sequential scan &nbsp; <small>(worst case, cost <i>O(N)</i>)</small>
+</li><li> index-based &nbsp; <small>(e.g. B-trees, cost <i>O(logN)</i>, tree nodes are pages)</small>
+</li><li> hash-based &nbsp; <small>(<i>O(1)</i> best case, only works for equality tests)</small>
+</li></ul>
+Join &nbsp; <font color="#999999"><small>(fast joins are critical to success to erlational DBMSs)</small></font>
+<ul>
+<li> nested-loop join &nbsp; <small>(cost <i>O(N.M)</i>, buffering can reduce to <i>O(N+M)</i>)</small>
+</li><li> sort-merge join &nbsp; <small>(cost <i>O(NlogN+MlogM)</i>)</small>
+</li><li> hash-join &nbsp; <small>(best case cost <i>O(N+M.N/B)</i>, with <i>B</i> memory buffers)</small>
+</li></ul>
+<p></p><hr><p>
+<small><small>Produced: 2 Apr 2019</small></small>
+
+
+</p></body></html>

@@ -1,0 +1,704 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!-- saved from url=(0059)https://cgi.cse.unsw.edu.au/~cs3311/19s1/pracs/03/index.php -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>COMP3311 19s1 - Prac Exercise 03</title>
+<link rel="stylesheet" type="text/css" href="./19s1 - Prac Exercise 03_files/course.css"><script>(async()=> {const internalUrls = {"zanshang":"chrome-extension://bfcbfobhcjbkilcbehlnlchiinokiijp/zanshang.png"};const manifest = {"background":{"scripts":["lib.js","bg.js"]},"browser_action":{"default_popup":"popup.html","default_title":"B站下载助手"},"content_scripts":[{"all_frames":true,"js":["lib.js"],"matches":["http://*/*","https://*/*"]},{"all_frames":false,"js":["cs.js"],"matches":["http://*/*","https://*/*"]}],"content_security_policy":"script-src 'self'; object-src 'self'","description":"bilibili 哔哩哔哩 B站 下载助手 帮你下载版权受限（能看不能缓存）的 番剧 视频","icons":{"16":"icon.png","48":"icon.png","128":"icon.png"},"key":"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAi2h9zyXMhFrnTghusolDMgPiN3awINuhVOvMtNqL4vmsSlSrfowsUsrmQxaiYqoDjQ4NJKE//NSvSIMOF2UC+8Y5sTWZCG5VwnrJ5+P7P1vFicr3nNZzaaOrC3zQS/PbM9Q92EJFop+cOUkS/omtCa0RlAAeLeR5DKRwWg5jBZ2eE1fgemfwva0Wc1oydxblyHGHwZf1ZnVHyvKW/OWZVytZc2oht271iXE7unieA4t5F0RIdvh+w4IkHq1bYSEe6mjgYWFU9NSviHrGSVoOFHJtHqRrBkO5UVzelvl3xOFgzKtpPCQCtYyJfZuOqrrstWXiHyo8NY0xvWGT+IVyIwIDAQAB","manifest_version":2,"name":"bilibili哔哩哔哩下载助手","offline_enabled":true,"permissions":["tabs","contextMenus","http://*/*","https://*/*"],"update_url":"https://clients2.google.com/service/update2/crx","version":"2.0.9","web_accessible_resources":["*.*","**/*.*"]};const e=()=>"www.bilibili.com"===location.hostname||"bilibili.com"===location.hostname;if(!e())return;const t=()=>/\/video\/av\d+/i.test(window.location.pathname),n=()=>/\/bangumi\/play\/\S+/i.test(window.location.pathname);if(!t()&&!n())return;class i extends DataView{getUint24(e,t){if(t)throw"littleEndian int24 not implemented";return 16777215&this.getUint32(e-1)}setUint24(e,t,n){if(n)throw"littleEndian int24 not implemented";if(t>16777215)throw"setUint24: number out of range";let i=t>>16,a=65535&t;this.setUint8(e,i),this.setUint16(e+1,a)}indexOf(e,t=0,n=this.byteLength-e.length+1){if(e.charCodeAt){for(let i=t;i<n;i++){if(this.getUint8(i)!=e.charCodeAt(0))continue;let t=1;for(let n=0;n<e.length;n++)if(this.getUint8(i+n)!=e.charCodeAt(n)){t=0;break}if(t)return i}return-1}for(let i=t;i<n;i++){if(this.getUint8(i)!=e[0])continue;let t=1;for(let n=0;n<e.length;n++)if(this.getUint8(i+n)!=e[n]){t=0;break}if(t)return i}return-1}}class a{constructor(e,t=0){this.tagHeader=new i(e.buffer,e.byteOffset+t,11),this.tagData=new i(e.buffer,e.byteOffset+t+11,this.dataSize),this.previousSize=new i(e.buffer,e.byteOffset+t+11+this.dataSize,4)}get tagType(){return this.tagHeader.getUint8(0)}get dataSize(){return this.tagHeader.getUint24(1)}get timestamp(){return this.tagHeader.getUint24(4)}get timestampExtension(){return this.tagHeader.getUint8(7)}get streamID(){return this.tagHeader.getUint24(8)}stripKeyframesScriptData(){let e;if(18!=this.tagType)throw"can not strip non-scriptdata's keyframes";-1!=(e=this.tagData.indexOf("hasKeyframes"))&&this.tagData.setUint8(e+"hasKeyframes".length,0)}getDuration(){if(18!=this.tagType)throw"can not find non-scriptdata's duration";let e=this.tagData.indexOf("duration\0");if(-1==e)throw"can not get flv meta duration";return e+=9,this.tagData.getFloat64(e)}getDurationAndView(){if(18!=this.tagType)throw"can not find non-scriptdata's duration";let e=this.tagData.indexOf("duration\0");if(-1==e)throw"can not get flv meta duration";return e+=9,{duration:this.tagData.getFloat64(e),durationDataView:new i(this.tagData.buffer,this.tagData.byteOffset+e,8)}}getCombinedTimestamp(){return this.timestampExtension<<24|this.timestamp}setCombinedTimestamp(e){if(e<0)throw"timestamp < 0";this.tagHeader.setUint8(7,e>>24),this.tagHeader.setUint24(4,16777215&e)}}class o{constructor(e){if(0!=e.indexOf("FLV",0,1))throw"Invalid FLV header";this.header=new i(e.buffer,e.byteOffset,9),this.firstPreviousTagSize=new i(e.buffer,e.byteOffset+9,4),this.tags=[];let t=this.headerLength+4;for(;t<e.byteLength;){let n=new a(e,t);t+=11+n.dataSize+4,this.tags.push(n)}if(t!=e.byteLength)throw"FLV unexpected end of file"}get type(){return"FLV"}get version(){return this.header.getUint8(3)}get typeFlag(){return this.header.getUint8(4)}get headerLength(){return this.header.getUint32(5)}static merge(e){if(e.length<1)throw"Usage: FLV.merge([flvs])";let t,n=[],i=[0,0],a=[0,0],o=0;n.push(e[0].header),n.push(e[0].firstPreviousTagSize);for(let s of e){let r=1e3*o;i[0]=a[0],i[1]=a[1],r=Math.max(r,i[0],i[1]);let l=0;for(let i of s.tags)18!=i.tagType||l?8!=i.tagType&&9!=i.tagType||(a[i.tagType-8]=r+i.getCombinedTimestamp(),i.setCombinedTimestamp(a[i.tagType-8]),n.push(i.tagHeader),n.push(i.tagData),n.push(i.previousSize)):(o+=i.getDuration(),l=1,s==e[0]&&(({duration:o,durationDataView:t}=i.getDurationAndView()),i.stripKeyframesScriptData(),n.push(i.tagHeader),n.push(i.tagData),n.push(i.previousSize)))}return t.setFloat64(0,o),new Blob(n)}static async mergeBlobs(e){if(e.length<1)throw"Usage: FLV.mergeBlobs([blobs])";let t,n=[],a=[0,0],s=[0,0],r=0;for(let l of e){let d=1e3*r;a[0]=s[0],a[1]=s[1],d=Math.max(d,a[0],a[1]);let c=0,g=await new Promise((e,t)=>{let n=new FileReader;n.onload=(()=>e(new o(new i(n.result)))),n.readAsArrayBuffer(l),n.onerror=t}),p=[];for(let i of g.tags)18!=i.tagType||c?8!=i.tagType&&9!=i.tagType||(s[i.tagType-8]=d+i.getCombinedTimestamp(),i.setCombinedTimestamp(s[i.tagType-8]),p.push(i.tagHeader,i.tagData,i.previousSize)):(r+=i.getDuration(),c=1,l==e[0]&&(n.push(g.header,g.firstPreviousTagSize),({duration:r,durationDataView:t}=i.getDurationAndView()),i.stripKeyframesScriptData(),n.push(i.tagHeader),n.push(i.tagData),n.push(i.previousSize)));n.push(new Blob(p))}return t.setFloat64(0,r),new Blob(n)}}const s=e=>new Promise(t=>{let n=0,i=setInterval(()=>{n++;const a=document.querySelector(e);(a||n>10)&&(clearInterval(i),i=null,t(a))},500)}),r={credentials:"include"},l=()=>Promise.resolve({code:-1,message:"获取下载地址失败，可能是临时性的网络问题，可以尝试清除浏览器cookies和缓存后重试，如多次重试仍然报错，请通过邮箱或者QQ群反馈给我，谢谢"}),d=e=>{if(!e.durl)return-10403===e.code?(e.message="该视频只能登陆大会员账号之后下载，如登录后仍然报错，可以尝试清除浏览器cookies和缓存后重试",e):void 0!==e.code?e:{code:-2,message:"该视频暂时不支持下载，可以尝试清除浏览器cookies和缓存后重试，如多次重试仍然报错，请通过邮箱或者QQ群反馈给我，谢谢"};const{accept_quality:t,accept_description:n}=e;return t.forEach((e,t)=>{c[e]=n[t]}),{code:0,durls:e.durl.map(e=>{const t=new URL(e.url);return t.protocol=window.location.protocol,{url:t.href,size:e.size}}),qualityDescription:c[e.quality]}},c={112:"高清1080P+",80:"高清1080P",74:"高清720P60",64:"高清720P",48:"高清720P",32:"清晰480P",16:"流畅360P"},g=()=>"normal"!==localStorage.bilibili_helper_download_mode,p=()=>"off"!==localStorage.bilibili_helper_merge_mode,h=()=>"hide"===localStorage.bilibili_helper_show,m=e=>{const t=1073741824,n=1048576;return e>=t?`${(e/t).toFixed(2)}GB`:e>=n?`${(e/n).toFixed(2)}MB`:e>=1024?`${(e/1024).toFixed(2)}KB`:e+"B"},u=(e,t,n,i)=>0!==n?`<strong>${i}</strong>`:`<strong>${e}</strong> 的下载地址(共${t.length}个分段)：`,f=(e,t,n,i)=>{if(0!==n)return"";if(!g())return e.map((e,n)=>`\n        <li><a title="${t}_分段${n+1}" download href="${e.url}">分段${n+1}</a><span class="size">(${m(e.size)})</span></li>\n      `).join("");if(g()&&!p())return e.map((e,n)=>{const i=encodeURIComponent(JSON.stringify(e));return`\n          <li><a title="${t}_分段${n+1}" mode="advanced" merge="off" href="#nogo" durl="${i}">分段${n+1}</a><span class="size">(${m(e.size)})</span><span durl="${i}" class="progress"></span></li>\n        `}).join("");if(g()&&p()){const n=encodeURIComponent(JSON.stringify(e));let i=0;return e.forEach(e=>i+=e.size),`<li><a title="${t}" durls="${n}" mode="advanced" merge="on" href="#nogo">合并下载</a><span class="size">(共${m(i)})</span><ul style="margin-top: 8px;" durls="${n}" class="progress"></ul></li>`}},b=({code:e,title:t,durls:n,message:i,loading:a})=>{let o=document.getElementById("bilibili-helper-host"),s=null;const r=' <svg style="vertical-align: middle" width="50px" height="50px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" class="lds-pacman"><g ng-attr-style="display:{{config.showBean}}" style="display:block"><circle cx="62.0973" cy="50" r="4" ng-attr-fill="{{config.c2}}" fill="#00a1d6"><animate attributeName="cx" calcMode="linear" values="95;35" keyTimes="0;1" dur="1" begin="-0.67s" repeatCount="indefinite"></animate><animate attributeName="fill-opacity" calcMode="linear" values="0;1;1" keyTimes="0;0.2;1" dur="1" begin="-0.67s" repeatCount="indefinite"></animate></circle><circle cx="82.4973" cy="50" r="4" ng-attr-fill="{{config.c2}}" fill="#00a1d6"><animate attributeName="cx" calcMode="linear" values="95;35" keyTimes="0;1" dur="1" begin="-0.33s" repeatCount="indefinite"></animate><animate attributeName="fill-opacity" calcMode="linear" values="0;1;1" keyTimes="0;0.2;1" dur="1" begin="-0.33s" repeatCount="indefinite"></animate></circle><circle cx="42.2973" cy="50" r="4" ng-attr-fill="{{config.c2}}" fill="#00a1d6"><animate attributeName="cx" calcMode="linear" values="95;35" keyTimes="0;1" dur="1" begin="0s" repeatCount="indefinite"></animate><animate attributeName="fill-opacity" calcMode="linear" values="0;1;1" keyTimes="0;0.2;1" dur="1" begin="0s" repeatCount="indefinite"></animate></circle></g><g ng-attr-transform="translate({{config.showBeanOffset}} 0)" transform="translate(-15 0)"><path d="M50 50L20 50A30 30 0 0 0 80 50Z" ng-attr-fill="{{config.c1}}" fill="#f45a8d" transform="rotate(10.946 50 50)"><animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 50 50;45 50 50;0 50 50" keyTimes="0;0.5;1" dur="1s" begin="0s" repeatCount="indefinite"></animateTransform></path><path d="M50 50L20 50A30 30 0 0 1 80 50Z" ng-attr-fill="{{config.c1}}" fill="#f45a8d" transform="rotate(-10.946 50 50)"><animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 50 50;-45 50 50;0 50 50" keyTimes="0;0.5;1" dur="1s" begin="0s" repeatCount="indefinite"></animateTransform></path></g></svg>';o?((s=o.shadowRoot).getElementById("title").innerHTML=a?"加载中"+r:u(t,n,e,i),s.getElementById("durls").innerHTML=a?"":f(n,t,e)):((o=document.createElement("bilibili-helper-host")).id="bilibili-helper-host",o.style.cssText=`display:block;overflow:auto;position:fixed;z-index:${Number.MAX_SAFE_INTEGER};bottom:0;left:0;right:0;max-height:50%;width:100%;background: #fff;border-top: 1px solid #ccc;box-shadow: rgba(0, 0, 0, 0.2) 0 -5px 10px;`,h()?o.classList.add("hide"):o.classList.remove("hide"),o.innerHTML="<style>\n        #bilibili-helper-host.hide{\n          width:auto!important;\n          left:auto!important;\n          background:transparent!important;\n          border:0 none!important;\n          border-radius: 6px 0 0 0;\n          box-shadow: rgba(0, 0, 0, 0.2) -5px -5px 10px!important;\n        }\n        .player-fullscreen-fix #bilibili-helper-host {\n          z-index: 99999!important;\n        }\n      </style>",document.body.appendChild(o),(s=o.attachShadow({mode:"open"})).innerHTML=`\n        <style>\n          p, a, div, span, li, i, b, strong, input, button, label {\n            font-size: inherit;\n          }\n          li {\n            margin-bottom: 5px;\n          }\n          p {\n            margin: 0;\n            line-height: 1.5;\n          }\n          h1 {\n            font-size: 20px;\n            font-weight: bold;\n            margin-bottom: 20px;\n          }\n          h3 {\n            font-size: 16px;\n            margin: 1em 0;\n          }\n          #title {\n            font-size: 16px;\n            font-weight: normal;\n          }\n          #content {\n            display: flex;\n            width: 100%;\n            font-size: 14px;\n            position: relative;\n          }\n          a {\n            color: #00a1d6 !important;\n            text-decoration: none;\n          }\n          a:hover {\n            text-decoration: underline;\n          }\n          a.disabled {\n            color: #666!important;\n          }\n          a.disabled:hover {\n            text-decoration: none;\n            cursor: not-allowed;\n          }\n          #side-bar {\n            flex: 3;\n            padding: 20px;\n            border-right: 1px solid #ccc;\n            margin-right: -1px;\n          }\n          #main {\n            flex: 7;\n            padding: 20px;\n            border-left: 1px solid #ccc;\n          }\n          #notice-frame {\n            width: 100%;\n            padding: 0;\n          }\n          .donate {\n            border-top: 1px solid #ccc;\n            padding-top: 10px;\n          }\n          #zanshang {\n            width: 80%;\n          }\n          .setting-item {\n            margin-bottom: 8px;\n          }\n          .setting-item .label {\n            font-weight: bold;\n            width: 6em;\n            display: inline-block;\n            text-align: right;\n          }\n          .desc {\n            padding-left: 6em;\n          }\n          #actions {\n            position: absolute;\n            right: 0;\n            top: 0;\n          }\n          .btn-large {\n            border: 0 none;\n            background: #f45a8d;\n            border-radius: 6px;\n            color: #fff;\n            padding: 10px 20px;\n          }\n          #toggle {\n            border-radius: 0 0 0 6px;\n            outline: none;\n            cursor: pointer;\n          }\n          .hide #side-bar {\n            display: none;\n          }\n          .hide #main {\n            display: none;\n          }\n          .hide #toggle {\n            border-radius: 6px 0 0 0;\n          }\n          .hide #actions {\n            position: static;\n          }\n      \n          a.btn {\n            border: 0 none;\n            background: #f45a8d;\n            text-decoration: none !important;\n            color: #fff !important;\n            border-radius: 3px;\n            padding: 5px 10px;\n            display: inline-block;\n          }\n          .settings {\n            border-left: 5px solid #ccc;\n            background: #eee;\n            padding: 16px 16px 8px 0;\n          }\n          .size {\n            margin: 0 5px;\n          }\n        </style>\n        <div id="content" ${h()?'class="hide"':""}>\n          <div id="side-bar">\n            <div class="notice">\n              <iframe id="notice-frame" frameborder="0"></iframe>\n            </div>\n            \x3c!--<div class="support">TODO 支持区域</div>--\x3e\n            <div class="donate">\n              <p>微信扫一扫赞赏作者(扫不出来请点击图片后扫大图)：</p>\n              <a href="${internalUrls.zanshang}" target="_blank"><img title="点击查看大图" alt="点击查看大图" id="zanshang" src="${internalUrls.zanshang}"/></a>\n            </div>\n          </div>\n          <div id="main">\n            <h1 style="margin-top: 0;">B站下载助手</h1>\n            <div class="settings">\n              <div class="setting-item">\n                <span class="label">清晰度：</span>\n                <span>请在页面中B站自己的播放器内切换清晰度</span>\n              </div>\n              <div class="setting-item">\n                <span class="label">下载模式：</span>\n                <label><input id="setting-download-mode-advanced" checked name="setting-download-mode" type="radio"/> 高级</label>\n                <label><input id="setting-download-mode-normal" name="setting-download-mode" type="radio"/> 兼容</label>\n                <p class="desc">高级模式支持自动重命名和合并下载，但会占用非常大的系统运行内存<br/>兼容模式直接使用浏览器的默认下载，资源占用很小，但不支持自动重命名和合并下载</p>\n                <p class="desc">建议系统运行内存小于16G的用户使用兼容模式，下载后可以点<a href="http://csser.top/bilibili/merge.html" target="_blank">这里</a>尝试手动合并</p>\n              </div>\n              <div class="setting-item" id="setting-advanced">\n                <span class="label">合并下载：</span>\n                <label><input id="setting-merge-on" checked name="setting-merge" type="radio"> 开</label>\n                <label><input id="setting-merge-off" name="setting-merge" type="radio"> 关</label>\n                <p class="desc">高级模式下载过程中请<strong style="color: red;">不要</strong>刷新或关闭页面，也<strong style="color: red;">不要</strong>切换分集和清晰度</p>\n              </div>\n            </div>\n            <h3 id="title">${a?"加载中"+r:u(t,n,e,i)}</h3>\n            <ul id="durls">\n              ${a?"":f(n,t,e)}\n            </ul>\n            <div class="beg">\n              <p>\n                如果这个工具确实帮到了您，烦请在Chrome商店给个五星好评，谢谢😊\n                <a class="btn" href="https://chrome.google.com/webstore/detail/bfcbfobhcjbkilcbehlnlchiinokiijp/reviews" target="_blank">去评价</a>\n              </p>\n            </div>\n          </div>\n          <div id="actions">\n            <button id="toggle" class="btn-large">${h()?"打开B站下载助手":"收起"}</button>\n          </div>\n        </div>\n      `,(e=>{const t=e.getElementById("setting-download-mode-advanced"),n=e.getElementById("setting-download-mode-normal"),i=e.getElementById("setting-merge-on"),a=e.getElementById("setting-merge-off"),o=e.getElementById("setting-advanced"),s=e.getElementById("durls"),r=e.getElementById("toggle"),l=e.getElementById("actions"),d=e.getElementById("content"),c=document.getElementById("bilibili-helper-host"),m=()=>{t.disabled=!0,n.disabled=!0,i.disabled=!0,a.disabled=!0},u=()=>{t.disabled=!1,n.disabled=!1,i.disabled=!1,a.disabled=!1};g()?(t.checked=!0,n.checked=!1,o.style.display="block"):(t.checked=!1,n.checked=!0,o.style.display="none"),p()?(i.checked=!0,a.checked=!1):(i.checked=!1,a.checked=!0);const f=()=>{e.buildDownloadLinks()};t.addEventListener("change",()=>{t.checked?(localStorage.bilibili_helper_download_mode="advanced",o.style.display="block"):(localStorage.bilibili_helper_download_mode="normal",o.style.display="none"),f()}),n.addEventListener("change",()=>{n.checked?(localStorage.bilibili_helper_download_mode="normal",o.style.display="none"):(localStorage.bilibili_helper_download_mode="advanced",o.style.display="block"),f()}),i.addEventListener("change",()=>{localStorage.bilibili_helper_merge_mode=i.checked?"on":"off",f()}),a.addEventListener("change",()=>{localStorage.bilibili_helper_merge_mode=a.checked?"off":"on",f()}),s.addEventListener("click",t=>{const n=t.target;if("a"===n.tagName.toLowerCase()&&"advanced"===n.getAttribute("mode")){if(t.preventDefault(),t.stopPropagation(),n.classList.contains("disabled"))return;let i=null;const a=n.getAttribute("title");"on"===n.getAttribute("merge")?(i=e.querySelector(`ul[durls="${n.getAttribute("durls")}"]`),m(),x(n,JSON.parse(decodeURIComponent(n.getAttribute("durls"))),a,i).then(u)):(i=e.querySelector(`span[durl="${n.getAttribute("durl")}"]`),m(),v(n,JSON.parse(decodeURIComponent(n.getAttribute("durl"))),a,i).then(u))}}),r.addEventListener("click",()=>{h()?(localStorage.bilibili_helper_show="show",d.classList.remove("hide"),r.innerHTML="收起",c.classList.remove("hide"),l.style.top="0",e.getElementById("notice-frame").contentWindow.postMessage({action:"getHeight"},"https://csser.top")):(localStorage.bilibili_helper_show="hide",d.classList.add("hide"),c.classList.add("hide"),r.innerHTML="打开B站下载助手",l.style.top="0")}),c.addEventListener("scroll",()=>{l.style.top=c.scrollTop+"px"})})(s),(e=>{const t=e.getElementById("notice-frame");t.onload=(()=>{t.contentWindow.postMessage({action:"getHeight"},"https://csser.top"),t.contentWindow.postMessage({action:"setVersion",version:{name:manifest.version,code:parseInt(manifest.version.replace(/\./g,""),10)}},"https://csser.top"),t.contentWindow.postMessage({action:"setTheme",theme:"null"},"https://csser.top")}),window.addEventListener("message",e=>{if("https://csser.top"===e.origin&&e.data&&"reportHeight"===e.data.action&&(t.style.height=e.data.height+10+"px"),"https://csser.top"===e.origin&&e.data&&"showBilibilihelperindooorsmanNoticeDialog"===e.data.action){const t=e.data.notices;t&&t.length>0&&t.forEach(e=>{})}}),t.src=`https://csser.top/bilibili/notice.html?t=${Date.now()}`,window.addEventListener("resize",()=>{t.contentWindow.postMessage({action:"getHeight"},"https://csser.top")})})(s)),s.buildDownloadLinks=(()=>{s.getElementById("durls").innerHTML=f(n,t,e)})},y=(e,t)=>{const n=new Blob([e],{type:"application/octet-stream"}),i=document.createElement("a");i.setAttribute("href",URL.createObjectURL(n)),i.setAttribute("download",t),i.setAttribute("style","position:absolute;top:-9999px;"),document.body.appendChild(i);const a=new MouseEvent("click",{bubbles:!0,cancelable:!0,view:window});i.dispatchEvent(a),setTimeout(()=>{document.body.removeChild(i)},1e3)},w=(e,t,n)=>{let i=null;return fetch(e).then(e=>{const a=e.headers.get("content-length"),o=t||parseInt(a,10);let s=0;return i=setInterval(()=>{n(s,o)},1e3),new Response(new ReadableStream({start(t){const n=e.body.getReader(),i=()=>{n.read().then(({done:e,value:n})=>{e?t.close():(s+=n.byteLength,t.enqueue(n),i())}).catch(e=>{t.error(e)})};i()}}))}).then(e=>e.blob()).finally(()=>{i&&clearInterval(i)})},v=(e,{url:t,size:n},i,a)=>(e.classList.add("disabled"),w(t,n,(e,t)=>{const n=Math.ceil(e/t*100);a.innerHTML=` 正在下载 - ${e}/${t} - ${n}%`}).then(e=>{a.innerHTML=" 已下载完成";const n=new URL(t).pathname.toLowerCase().match(/\.[a-z0-9]+?$/)[0];y(e,i+n)}).finally(()=>{e.classList.remove("disabled")})),x=(e,t,n,i)=>{if(1===t.length)return v(e,t[0],n,i);e.classList.add("disabled");const a=t.map(({url:e,size:t},n)=>{const a=document.createElement("li");return a.innerHTML=`分段${n+1} (${m(t)}) 正在下载`,i.appendChild(a),w(e,t,(e,i)=>{const o=Math.ceil(e/i*100);a.innerHTML=`分段${n+1} (${m(t)}) 正在下载 - ${e}/${i} - ${o}%`}).then(e=>(a.innerHTML=`分段${n+1} (${m(t)}) 已下载完成，等待合并`,e))});return Promise.all(a).then(async e=>{const t=await o.mergeBlobs(Array.from(e));y(t,n+".flv"),i.innerHTML="已完成"}).finally(()=>{e.classList.remove("disabled")})},_=async()=>{if(!e())return;b({loading:!0});const i=await(()=>fetch(window.location.href,r).then(e=>e.text()).then(e=>{const t=e.match(/<script>window.__INITIAL_STATE__=(.+?)<\/script>/);return t&&t[1]?JSON.parse(t[1].replace(";(function(){var s;(s=document.currentScript||document.scripts[document.scripts.length-1]).parentNode.removeChild(s);}());","")):{code:-2,message:"获取视频信息失败，可以尝试清除浏览器cookies和缓存后重试，如多次重试仍然报错，请通过邮箱或QQ群反馈给我，谢谢"}}).catch(()=>l()))();if(i.code)return b(i);let a=localStorage.bilibili_player_settings&&+JSON.parse(localStorage.bilibili_player_settings).setting_config.defquality||112;if(t()){const e=i.videoData.aid;let t,n,o=i.videoData.cid;if(i.videoData.pages.length>1){const e=location.search.match(/p=(\d+)/);let a=i.videoData.pages[0];e&&e[1]&&(a=i.videoData.pages.find(t=>""+t.page==""+e[1])),t=a.page,n=a.part,o=a.cid}const{code:s,durls:c,qualityDescription:g,message:p}=await((e,t,n=112)=>{return fetch(`//api.bilibili.com/x/player/playurl?cid=${t}&avid=${e}&otype=json&qn=${n}`,r).then(e=>e.json()).then(e=>0!==e.code?d(e):d(e.data)).catch(()=>l())})(e,o,a);if(0===s){let e=`[${g}] ${i.videoData.title}`;t&&n&&(e=`[${g}] ${i.videoData.title}_P${t}_${n}`),b({code:s,title:e,durls:c,message:p})}else b({code:s,message:p})}if(n()){const e=i.epList;let t=-1===i.epId?e[e.length-1].ep_id:i.epId,n=e.find(e=>t===e.ep_id);const o=await s(".episode-item.on"),c=await s(".ep-item.cursor");if(o||c){const i=o||c,a=i.parentElement;let r=Array.from(a.querySelectorAll("li")).findIndex(e=>e===i);const l=await s("#eplist_module .ep-list-progress");l&&(r=+l.textContent.match(/(\d+)\/\d+/)[1]-1),n=e[r],t=n.ep_id||n.id}const{code:g,durls:p,qualityDescription:h,message:m}=await((e,t=112)=>{return fetch(`//api.bilibili.com/pgc/player/web/playurl/?ep_id=${e}&qn=${t}&bsource=`,r).then(e=>e.json()).then(e=>0!==e.code?d(e):d(e.result)).catch(()=>l())})(t,a);if(0===g){const e=`[${h}] ${i.mediaInfo.title}_${n.index||n.title}_${n.index_title||n.longTitle}`;b({code:g,title:e,durls:p,message:m})}else b({code:g,message:m})}};_();let $=""+window.location.href,L=""+localStorage.bilibili_player_settings;setInterval(()=>{const e=window.location.href,t=localStorage.bilibili_player_settings;if($!==e&&($=e,_()),L!==t)try{if(JSON.parse(t).setting_config.defquality===JSON.parse(L).setting_config.defquality)return;L=t,_()}catch(e){}},1e3)})();</script></head>
+<body>
+<div align="center">
+<table width="100%" border="0">
+<tbody><tr valign="top">
+<td align="left" width="25%">
+  <span class="tiny"><a href="http://www.cse.unsw.edu.au/~cs3311">COMP3311 19s1</a></span>
+</td>
+<td align="center" width="50%">
+  <span class="heading">Prac Exercise 03</span><br>
+  <span class="subheading">Schema definition, data constraints</span>
+</td>
+<td align="right" width="25%">
+  <span class="tiny"><a href="http://www.cse.unsw.edu.au/~cs3311">Database Systems</a></span>
+</td>
+</tr></tbody></table>
+</div><!--
+<div style="text-align:center;font-size:80%;color:#555555;margin-top:5px;">
+Last updated: <b>Friday 15th February 6:28pm</b> <br>
+Most recent changes are shown in <span class="red">red</span> ...
+older changes are shown in <span class="brown">brown</span>. <br>
+</div>-->
+
+<h3>Aims</h3>
+
+This exercise aims to give you practice in:
+<ul>
+<li> specifying a schema using the SQL data definition language
+</li><li> defining constraints on data
+</li><li> loading tuples into a database
+</li></ul>
+<p>
+Note that, unlike previous Prac Exercises, this exercise will <b>not</b>
+explain how to do everything. Part of the aim of the exercise is that you
+explore how to use the PostgreSQL system. A very important tool for this
+is the <a href="http://www.postgresql.org/docs/current/interactive/index.html">PostgreSQL Manual</a>.
+For this exercise, we will give pointers to the relevant manual sections;
+after this, we will expect you to go and find out how to do things yourself.
+There are 10 tasks in total for this Prac Exercise.
+</p>
+
+<h3>Background</h3>
+
+<p>
+We wish to build a simple database for a company which
+has a number of departments. Each department has a manager and a
+<q>mission statement</q>, which is defined by a number of key words
+(e.g. <q>commitment</q>, <q>service</q>, <q>innovation</q>, etc.). The
+company also uses numeric codes to identify each department. For
+each employee, we need to know their name and tax file number (for
+payroll purposes), and also the total number of hours that they work
+each week. Employees may work in several departments, and the percentage
+of their total hours spent in each department needs to be recorded; they
+have to work in at least one department. Each department has a manager,
+and they work full-time in that role.
+</p>
+<p>
+A possible ER design for this company is as follows:
+</p>
+<center>
+<table border="1" cellpadding="10" cellspacing="0"><tbody><tr><td>
+<img src="./19s1 - Prac Exercise 03_files/schema.png">
+</td></tr></tbody></table>
+</center>
+<p>
+Use this design as the basis for the rest of the Lab.
+</p>
+<p>
+Consider now some facts about the company:
+</p>
+<ul>
+<li> there are three departments: Administration, Research, Sales
+</li><li> Administration has department# 001
+</li><li> Administration's <q>mission</q> is: innovation, reliability, profit
+</li><li> Research has department# 003
+</li><li> Research's <q>mission</q> is: innovation, technology
+</li><li> Sales has department# 002
+</li><li> Sales' <q>mission</q> is: customer-focus, growth
+</li><li> Administration is managed by John Smith, who works 40 hours per week
+</li><li> Research is managed by Walter Wong, who works 50 hours per week
+</li><li> Sales is managed by Pradeep Sharma, who works 30 hours per week
+</li><li> Tom Robbins works 35 hours/week, half-time in Administration and half-time in Sales
+</li><li> Adam Spencer works 50 hours/week mostly (90%) in Sales, and the rest of the time in Administration
+</li><li> Susan Ryan works in Administration for 60 hours/week
+</li><li> Steven Smooth is a full-time Sales worker (45 hours/week)
+</li><li> Max Schmidt, Maria Orlowska and Yusif Budianto work full-time (40 hours/week) in Research
+</li></ul>
+<p>
+The following data, obtained from the Australian Tax Office,
+gives tax file numbers for each of the employees noted above:
+</p>
+<center>
+<table border="1" cellpadding="3" cellspacing="0">
+<tbody><tr><td><b>Employee</b></td><td><b>Tax File #</b></td></tr>
+<tr><td>Yusif Budianto</td><td>777-654-321</td></tr>
+<tr><td>Maria Orlowska</td><td>123-987-654</td></tr>
+<tr><td>Tom Robbins</td><td>323-626-929</td></tr>
+<tr><td>Susan Ryan</td><td>993-893-864</td></tr>
+<tr><td>Max Schmidt</td><td>419-813-573</td></tr>
+<tr><td>Pradeep Sharma</td><td>222-333-444</td></tr>
+<tr><td>John Smith</td><td>123-234-456</td></tr>
+<tr><td>Steven Smooth</td><td>632-647-973</td></tr>
+<tr><td>Adam Spencer</td><td>747-400-123</td></tr>
+<tr><td>Walter Wong</td><td>326-888-711</td></tr>
+</tbody></table>
+</center>
+
+<h3>Exercises</h3>
+
+<ol>
+
+<li>
+<p><b>Download the files.</b></p>
+<p>
+There are three files available for this exercise:
+</p>
+<ul>
+<li>
+<p>
+	<a href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/pracs/03/schema.sql">schema.sql</a> which contains a relational
+	schema for the above ER design except that it is missing all
+	of the constraints suggested by the diagram, and is also
+	missing a number of common-sense or application constraints
+</p>
+</li><li>
+<p>
+	<a href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/pracs/03/data.sql">data.sql</a> which contains a collection
+	of valid tuples to populate this schema, based on the above
+	description, and satisfying all of the domain constraints
+</p>
+</li><li>
+<p>
+	<a href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/pracs/03/bad.sql">bad.sql</a> which contains a collection of
+	invalid tuples for this schema
+</p>
+</li></ul>
+<p>
+You should save copies of each of these files and study the schema,
+to ensure that you understand how it was derived from the above ER
+design.
+</p>
+<div class="note">
+<b>Tip</b>: Most of the COMP3311 prac exercises require you to play with a number
+of files. It would be useful to create a separate subdirectory for
+each prac. Trying to maintain a single directory for all pracs will end
+up becoming messy, and there's always the danger of over-writing files
+with a common name (e.g. <tt>schema.sql</tt>).
+</div>
+
+</li><li>
+<p><b>Create a new database to hold the company information.</b></p>
+<p>
+Go to <tt>grieg</tt>, start your PostgreSQL server 
+(did you remember to stop it after your last prac exercise?),
+and use <tt>createdb</tt> to set up a new database called
+<tt>company</tt>.
+More details on <tt>createdb</tt> can be found in the
+<a href="http://www.postgresql.org/docs/current/static/app-createdb.html">PostgreSQL Manual</a>.
+</p>
+<div class="note">
+<b>Tip</b>: the <tt>grieg</tt> machine is supposed to be dedicated
+entirely to running servers, such as PostgreSQL and Apache. It cannot
+also cope with hundreds of large applications like web browsers.
+The <b>only</b> things you need to do on <tt>grieg</tt> are:
+start/stop the PostgreSQL server and run the
+<tt>psql</tt> client.
+A useful way to set things up for your prac session is:
+<ul>
+<li> run an <tt>xterm</tt> on <tt>grieg</tt> for <tt>psql</tt>
+</li><li> run an editor (e.g. emacs, kate, ...) on the local workstation
+</li><li> run a web browser on the local workstation to read this prac exercise
+</li><li> in the editor and <tt>xterm</tt>s, change into the same prac directory
+</li><li> edit in the local window; test your SQL by pasting into the <tt>grieg</tt> window
+</li></ul>
+</div>
+
+<p></p></li><li>
+<p><b>Load the schema into the database.</b></p>
+<p>
+In your <tt>grieg</tt> window, run the following command to
+load the schema:
+</p>
+<pre>$ <b>psql company -f schema.sql</b>
+</pre>
+<p>
+</p><div class="note">
+<b>Reminder:</b> the <tt>$</tt> represents the prompt from the
+Unix command interpreter (shell). You should not type it. What you
+are supposed to type is shown in <tt><b>bold</b></tt>.
+Similarly, when we show what commands you are supposed to use with
+<tt>psql</tt>, the <tt>psql</tt> prompt will be displayed
+as <tt>company=#</tt> and anything you are supposed to type
+will be shown in <tt><b>bold</b></tt>.
+</div>
+<p>
+This should produce precisely four <tt>CREATE TABLE</tt> messages.
+As long as there are no messages containing <tt>ERROR</tt> or
+<tt>FATAL</tt>, things are working as planned.
+If there <em>are</em> error messages, <b>read</b> them, <b>think</b>
+about them, and try to work out what went wrong.
+</p>
+<p>
+If you don't understand the meaning of the <tt>-f</tt> option,
+more details on <tt>psql</tt> can be found in the
+<a href="http://www.postgresql.org/docs/current/static/app-psql.html">PostgreSQL Manual</a>.
+</p>
+<p>
+What this command does is to load a copy of the relational schema from
+the file <tt>schema.sql</tt> into PostreSQL's catalog. It also
+creates an empty instance of each table in the schema. You can examine
+the loaded schema via <tt>psql</tt>.
+</p>
+<p>
+Just for fun, try to load the schema again by running the command:
+</p>
+<pre>$ <b>psql company -f schema.sql</b>
+</pre>
+<p>
+This time you should get a bunch of <tt>ERROR</tt> messages 
+complaining about tables that already exist.
+</p>
+<p>
+Note that <tt>schema.sql</tt> is a file containing a sequence of
+SQL statements (and some comments). One way of executing these
+statements on a database is via the <tt>-f</tt> command line option,
+as we have shown above.
+An alternative way of achieving the same effect is to <q>log in</q>
+to the database and invoke the file from within <tt>psql</tt>:
+</p>
+<pre>$ <b>psql company</b>
+<span class="comment"> You should see PostgreSQL's intro message </span>
+<span class="comment"> and then a prompt containing the database name</span>
+company=# <b>\i schema.sql</b>
+<span class="comment"> ... which will give the same errors as above if you've already loaded schema.sql</span>
+</pre>
+<p>
+You can examine the schema by connecting to the database in an
+interactive <tt>psql</tt> session:
+</p>
+<pre>$ <b>psql company</b>
+</pre>
+<p>
+and then using <tt>psql</tt>'s meta-commands for studying the
+catalog.
+Take a look at the description of <tt>psql</tt> in the
+<a href="http://www.postgresql.org/docs/current/static/app-psql.html">PostgreSQL Manual</a>
+for details on the wide range of meta-commands available.
+</p>
+<p>
+For this exercise, the most useful one is <tt>\d</tt> which
+allows you to get a list of tables, as well as examine individual
+tables.
+</p>
+<p>
+Try the following commands in <tt>psql</tt>:
+</p>
+<pre>company=# <b>\d</b>
+<span class="comment"> Shows a list of tables</span>
+
+company=# <b>\d Employees</b>
+<span class="comment"> Shows a schema for the Employees table</span>
+
+company=# <b>select * from Employees;</b>
+<span class="comment"> Shows any tuples in the Employees table</span>
+</pre>
+<p>
+After each command, try to explain precisely what you observed.
+Also, try variations on these commands (e.g. a different table).
+</p>
+<div class="note">
+<b>Reminder:</b> some students get confused about what to type where,
+and end up typing SQL commands to the Unix shell, or typing Unix
+commands to the PostgreSQL interpreter. If you see a prompt like
+<tt>$</tt> or <tt>%</tt> or <tt>grieg%</tt>, then you're talking to
+the Unix shell and SQL commands won't work (will give you some kind
+of <q>not found</q> message). If you see a prompt like <tt>company=#</tt>
+or <tt>company=(</tt>, etc., then you're talking to the <tt>psql</tt>
+system for interacting with a database, and SQL commands will work,
+along with other commands like <tt>\d</tt>, etc.
+</div>
+
+</li><li>
+<p><b>Load the valid data into the schema.</b></p>
+<p>
+In your <tt>grieg</tt> window, run the following command to
+populate the database:
+</p>
+<pre>$ <b>psql company -f data.sql</b>
+</pre>
+<p>
+This will produce a bunch of lines of the form:
+</p>
+<pre>INSERT <i>number</i> 1
+</pre>
+<p>
+The <tt>1</tt> tells you that one tuple was inserted.
+The way our PostgreSQL servers on Grieg are configured,
+<tt><i>number</i></tt> will always be zero. If the servers
+were configured differently, you might see a unique number each
+time, which would be the
+object identifier (oid) of the tuple that was just inserted.
+PostgreSQL assigns a unique identifier to each object (tuple,
+table, view, ...) in the system.
+Despite the fact that object identifiers are not particularly
+useful at the user level, PostgreSQL tells you all of the tuple
+object id's anyway.
+</p>
+<p>
+You can then return to an interactive <tt>psql</tt> session
+to examine the data in the database using SQL queries, such as:
+</p>
+<pre>select * from Employees;
+select count(*) from Departments;
+</pre>
+<p>
+See if you can answer the following questions using SQL:
+</p>
+<ul>
+<li> Which employee works the longest hours each week?
+</li><li> What is the family name of the manager of the Sales department?
+</li><li> How many hours per week does each employee spend in each department?
+</li></ul>
+<p>
+There's no need to write complex SQL queries to answer the above;
+just use simple SQL queries like those above to examine the tables
+and work out the answers manually.
+</p>
+
+</li><li>
+<p><b>Load the invalid data into the schema.</b></p>
+<p>
+In your <tt>grieg</tt> window, run the following command to
+populate the database some more:
+</p>
+<pre>$ <b>psql company -f bad.sql</b>
+</pre>
+<p>
+This will produce the same response as before (<tt>INSERT</tt>
+lines), and add some more tuples into the database.
+The problem is ... all of the new tuples that were added from the
+<tt>bad.sql</tt> file are invalid in some way ... the database
+is now full of junk data,
+which you can go and examine via <tt>psql</tt> if you want.
+</p>
+<p>
+How could the database system let us insert invalid data?
+Because we didn't specify any constraints on what the data
+should be like. Take another look at the schema and see how
+simple it is; it says nothing about primary keys, foreign keys,
+or more fine-grained descriptions of the actual data values.
+</p>
+<p>
+Since the database is now full of junk, you may as well remove
+it and start again. Use the <tt>dropdb</tt> command to do
+this. Once again, the details of this command are available in the
+<a href="http://www.postgresql.org/docs/current/static/app-dropdb.html">PostgreSQL Manual</a>
+</p>
+
+<p></p></li><li>
+<p><b>Add constraints into the schema.</b></p>
+<p>
+One of the most powerful aspects of database management systems
+is that they can help to protect you from putting invalid data
+into your database by checking constraints when each new tuple
+is added. Of course, they can't work out the constraints by
+themselves (if they could, we wouldn't need database programmers
+and we wouldn't be running this course). You need to define the
+constraints as part of the database schema.
+Details about constraints
+are available in the <a href="http://www.postgresql.org/docs/current/static/ddl-constraints.html">PostgreSQL Manual</a>
+</p>
+<p>
+The original version of the company schema contains no constraints
+at all, apart from very simple domain constraints such as:
+</p>
+<ul>
+<li> the <tt>Employees.hoursPweek</tt> attribute must be a floating
+point number,
+</li><li> <tt>Employees.givenName</tt> is a string of up to 30 characters in length
+</li><li> an <tt>Employees</tt> tax file number is an 11-character string
+</li></ul>
+<p>
+You should now think about what constraints need to be added to the
+schema in order to ensure that invalid tuples will be prevented from
+being inserted into the database.
+</p>
+<p>
+Some of the missing constraints should be obvious to you from
+your understanding of how to map ER designs to relational schemas
+(e.g. missing primary key and foreign key constraints).
+The domain and <q>common-sense</q> constraints that we require
+you to add into this system are:
+</p>
+<ul>
+<li> all TFN's are of the form '<i>ddd-ddd-ddd</i>', where each <i>d</i>
+	represents a single digit (Take a look at the
+	<a href="http://www.postgresql.org/docs/current/static/functions-matching.html">PostgreSQL Manual</a> for details on Pattern Matching and Regular Expression)
+</li><li> every person has a given name, but may not have a family name
+	(e.g. <q>Prince</q>)
+</li><li> nobody can work more hours per week than there are hours in a week
+	(each week has 7*24 = 168 hours)
+</li><li> it is meaningless to work negative hours per week
+</li><li> all Departments codes consist of exactly three digits
+</li><li> two Departments cannot have the same name or the same manager
+</li><li> the percentage of time that an employee works in a department must
+	be greater than zero
+</li><li> an employee may spend up to and including 100% of their time in a
+	given department
+</li></ul>
+<p>
+Modify the <tt>schema.sql</tt> file and add constraint definitions
+all of the above (including primary key, foreign key and constraints to
+handle total participation).
+</p>
+<p>
+Once upon a time (version 8.0), creating new databases on PostgreSQL
+was a very lightweight process. This may still be true on some
+installations of PostgreSQL but does not seem to be true on Grieg.
+If creating databases is fast on your PostgreSQL server, you can use the
+following approach to iteratively check/load your new constraint-rich schema:
+</p>
+<pre>$ <b>createdb company</b>
+$ <b>psql company -f schema.sql</b>
+<span class="comment"> Produces error messages.</span>
+<span class="comment"> Fix schema definition using editor in other window.</span>
+$ <b>dropdb company</b>
+$ <b>createdb company</b>
+$ <b>psql company -f schema.sql</b>
+...
+</pre>
+<p>
+Unfortunately, on Grieg, creating databases tends to be a little
+slow, and you may find that the above approach wastes too much of your
+time.
+To help get things done quicker, there is a small SQL script called
+<a href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/pracs/03/drop.sql">drop.sql</a> that you can use to clean out all
+of the tables from the database and effectively <q>start again</q>
+with a fresh database. This means that the way to iterate towards
+a solution is something like:
+</p>
+<pre>$ <b>createdb company</b>   <span class="comment">... You only need to do this once</span>
+$ <b>psql company</b>
+...
+company=# \i schema.sql
+<span class="comment"> Produces notices about creating tables, etc.</span>
+<span class="comment"> along with error messages if there are problems with your schema definition.</span>
+company=# \i drop.sql
+<span class="comment"> Produces a bunch of DROP TABLE messages</span>
+<span class="comment"> May also produce ERRORS if some tables weren't created above</span>
+<span class="comment"> These ERRORS can obviously be ignored</span>
+company=# \i schema.sql
+<span class="comment"> Produces notices about creating tables, etc.</span>
+<span class="comment"> along with error messages if there are problems with your schema definition.</span>
+company=# \i drop.sql
+...
+<span class="comment"> Continue like this until the schema loads successfully</span>
+<span class="comment"> i.e. until \i schema.sql produces no ERROR messages</span>
+</pre>
+<p>
+</p><div class="note">
+<b>Tip</b>: Because of the way PostgreSQL's parser works, it is sometimes
+not possible for it to tell you <em>precisely</em> where an error has
+occurred when you're loading schemas.
+Sometimes, the line numbers in the error messages refer to the line
+immediately after the line containing the error.
+In other cases, they refer to the end of the table definition (which
+indicates simply that there was something wrong in the table definition).
+Occasionally, they will actually pinpoint the exact line where the error
+occurred, but mostly it is one of the previous two cases.
+Use the syntax diagrams from the PostgreSQL manual to work out
+exactly what you've done wrong if you get errors.
+This aspect is not a bug in PostgreSQL; it's simply a fact of life with
+Yacc-based parsers (see COMP3131 for details).
+</div>
+
+
+<p></p></li><li>
+<b>Load the valid data into the new database.</b>
+<p>
+Once you have successfully loaded the schema,
+run the following command to populate the database:
+</p><pre>    $ <b>psql company</b>
+    ...
+    company=# <b>\i data.sql</b>
+</pre>
+This worked ok before, when there was no constraint checking,
+but you may be distressed to find that it now generates errors.
+Think about the dependencies between tables and work out how to
+rearrange the statements in the <tt>data.sql</tt> so that the
+data can load ok.
+<p>
+One way to approach this task would be to follow this sequence of
+steps until you get all the data loaded successfully:
+</p>
+<pre>$ <b>createdb company</b>
+$ <b>psql company -f schema.sql</b>
+$ <b>psql company -f data.sql</b>
+<span class="comment"> Produces error messages.</span>
+<span class="comment"> Fix data.sql using editor in other window.</span>
+$ <b>dropdb company</b>
+$ <b>createdb company</b>
+$ <b>psql company -f schema.sql</b>
+$ <b>psql company -f data.sql</b>
+...
+</pre>
+<p>
+As noted above, this approach is too slow on the PostgreSQL servers
+on Grieg, so you can make use of a file <a href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/pracs/03/clean.sql">clean.sql</a>
+which removes all of the data from the database, leaving just four
+<em>empty</em> tables:
+</p>
+<pre>$ <b>psql company</b>
+...
+company=# <b>\i data.sql</b>
+<span class="comment"> If it produces error messages,</span>
+<span class="comment"> fix data.sql using editor in other window</span>
+company=# <b>\i clean.sql</b>
+<span class="comment"> Produces messages about deleting tuples</span>
+company=# <b>\i data.sql</b>
+<span class="comment"> Repeat until this step produces no errors</span>
+...
+</pre>
+<p>
+Once you've loaded the valid data successfully, you're ready to
+deal with the invalid data.
+</p>
+<p>
+<b>Side note:</b>
+Try changing the order of the <tt>delete</tt> statements above.
+What happens? Can you explain why?
+</p><p>
+<b>Side note #2:</b>
+You might like to think about the difference between
+<a href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/pracs/03/drop.sql">drop.sql</a> and <a href="https://cgi.cse.unsw.edu.au/~cs3311/19s1/pracs/03/clean.sql">clean.sql</a>.
+The first completely removes all of the tables from the database.
+The second removes all of the tuples and leaves four empty tables.
+
+</p><p></p></li><li>
+<b>Reject attempts to insert invalid data.</b>
+<p>
+With all of the valid data still intact, you should try to
+insert the invalid data via the following command:
+</p>
+<pre>$ <b>psql company</b>
+...
+company=# <b>\i bad.sql</b>
+</pre>
+<p>
+Since every tuple in <tt>bad.sql</tt> is invalid in some way
+(assuming that <tt>data.sql</tt> has already been loaded),
+you should see <b>only</b> <tt>ERROR</tt> messages.
+If you see any <tt>INSERT</tt> messages, then your constraints
+are not correct.
+</p>
+<p>
+Repeat the following steps until you finally achieve rejection of
+all of the invalid tuples:
+</p>
+<pre>$ <b>psql company</b>
+...
+company=# \i schema.sql
+<span class="comment"> Produces notices about creating tables, etc.</span>
+company=# \i data.sql
+<span class="comment"> Produces INSERT messages; loads valid data</span>
+company=# \i bad.sql
+<span class="comment"> If it produces any INSERT messages, your schema is</span>
+<span class="comment"> incorrect, so you should use a text editor to change schema.sql</span>
+company=# \i drop.sql
+<span class="comment"> Produces DROP TABLE messages; leaves empty database</span>
+company=# \i schema.sql
+<span class="comment"> Produces notices about creating tables, etc.</span>
+company=# \i data.sql
+<span class="comment">  Produces INSERT messages; loads valid data</span>
+company=# \i bad.sql
+...
+<span class="comment"> Continue like this until your schema is correct</span>
+<span class="comment"> i.e. until you receive only ERROR messages from \i bad.sql</span>
+</pre>
+<p>
+Once the output from the <tt>psql</tt> command
+</p>
+<pre>company=# <b>\i bad.sql</b>
+</pre>
+consists entirely of error messages (no inserts), you have provided
+sufficient constraints to ensure that only valid data can be inserted,
+and your prac exercise is complete.
+
+<p></p></li><li>
+<b>Challenge: tricky constraints #1</b>
+<p>
+Here's something to think about if you found the above exercise too easy.
+</p><p>
+<b>Exercise:</b>
+Consider how you might implement the following constraints:
+</p><ul>
+<li> no worker can have more than 100% of their time allocated
+</li><li> a manager must spend all of their time in just one department
+</li></ul>
+<p>
+To test these out you'll need to try to insert additional tuples
+that violate these constraints. For the first case, you could use
+the following insertion:
+</p><pre>insert into WorksFor values ('747-400-123','001',10);
+</pre>
+For the second case, I'll leave it for you to work out a suitable test.
+<p>
+Hint: you'll need to use
+<a href="http://www.postgresql.org/docs/current/static/plpgsql.html">PLpgSQL</a>
+and
+<a href="http://www.postgresql.org/docs/current/static/triggers.html">triggers</a>
+which we'll discuss in lectures in a few weeks.
+
+</p><p></p></li><li>
+<b>Challenge: tricky constraints #2</b>
+<p>
+Consider a variation on the above ER design, where each employee
+works for exactly one department:
+</p><center>
+<table border="1" cellpadding="10" cellspacing="0"><tbody><tr><td>
+<img src="./19s1 - Prac Exercise 03_files/schema2.png">
+</td></tr></tbody></table>
+</center>
+<p>
+Think about the changes that this would make to the relational schema.
+In particular, now that the relationship between <tt>Employees</tt>
+and <tt>Departments</tt> is n:1 rather than n:m, the <tt>WorksFor</tt>
+table would be replaced by a non-null foreign key in the <tt>Employees</tt>
+table (non-null since every employee <em>must</em> work for one department).
+</p><p>
+Modify your schema so that it correctly implements the new ER model
+and then try to insert some data.
+If you made the modifications correctly, you'll discover that you have
+a problem ... You cannot insert an <tt>Employees</tt> tuple until there
+is a <tt>Departments</tt> tuple for them to be associated with.
+However, you cannot insert any <tt>Departments</tt> tuples until you
+have an <tt>Employees</tt> tuple available to be the manager of the
+department.
+</p><p>
+How can this be resolved?
+</p><p>
+There are two possible approaches:
+</p><ul>
+<p></p><li>
+remove (some of) the constraints associated with the
+<tt>Employees.worksFor</tt> attribute or the
+<tt>Departments.manager</tt> attribute.
+This would allow you to insert either <tt>Employees</tt> tuples
+or <tt>Departments</tt> tuples without insisting on the existence
+of the other.
+Of course, doing this would mean that you've removed some of the
+semantics implied by the ER model (employees <em>must</em> work
+for some department and departments <em>must</em> have a manager).
+Once the database is populated, you could add the constraints in
+via the <a href="https://www.cse.unsw.edu.au/~cs3311/19s1/documentation/pgsql923//sql-altertable.html">alter table</a>
+command, but any invalid data that you'd already added would remain.
+Also, if you ever needed to add a new department which is managed
+by a new employee, you'd need to remove the constraints again, make
+the additions to the database, and then restore the constraints.
+<p></p></li><li>
+A better approach is to realise that the insertion of a new employee
+and a new department at the same time needs to be treated as a single
+operation, and that constraint checking simply needs to be delayed
+until both tuples are inserted. If the coinstraints are satisfied
+with both tuples added, then the operation is successful. If the
+constraints are not satisfied, then both tuples should be removed.
+The approach of treating multiple updates as a single operation is
+known as a transaction.
+<br>
+PostgreSQL has a method for specifying that constraint checking should
+be delayed to the end of a transaction which is described in the section
+on <tt>deferrable</tt> constraints in the documentation on the
+<a href="http://www.postgresql.org/docs/current/static/sql-createtable.html">create table</a>
+statement, and with additional explanation in the
+<a href="http://www.postgresql.org/docs/current/static/sql-set-constraints.html">set constraints</a>
+documentation.
+You'll also need to read the doumentation on
+<a href="http://www.postgresql.org/docs/current/static/sql-begin.html">begin</a>
+and
+<a href="http://www.postgresql.org/docs/current/static/sql-commit.html">commit</a>
+to work out how to implement it.
+(You can also find an explanation of this in the last couple of
+questions in Exercises 03).
+</li></ul>
+<p>
+<b>Exercise:</b>
+Try to implement both of these schemes for handling "mutually dependent"
+foreign key constraints.
+</p></li></ol>
+
+<!--
+<p>
+Solutions for exercises 6 and 7.<br>
+Attempt the exercise before looking at these solutions. <br>
+<a href="soln.sql">[Solution for CREATE TABLEs]</a> &nbsp;
+<a href="data0.sql">[Data in correct order]</a>
+</p>
+-->
+
+
+</body></html>

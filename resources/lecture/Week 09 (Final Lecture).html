@@ -1,0 +1,620 @@
+
+<!-- saved from url=(0067)https://www.cse.unsw.edu.au/~cs3311/19s1/lectures/09cont/notes.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>COMP3311 Week 09 (Final Lecture)</title>
+<link href="./Week 09 (Final Lecture)_files/notes.css" rel="stylesheet" type="text/css">
+<script>(async()=> {const internalUrls = {"zanshang":"chrome-extension://bfcbfobhcjbkilcbehlnlchiinokiijp/zanshang.png"};const manifest = {"background":{"scripts":["lib.js","bg.js"]},"browser_action":{"default_popup":"popup.html","default_title":"B&#31449;&#19979;&#36733;&#21161;&#25163;"},"content_scripts":[{"all_frames":true,"js":["lib.js"],"matches":["http://*/*","https://*/*"]},{"all_frames":false,"js":["cs.js"],"matches":["http://*/*","https://*/*"]}],"content_security_policy":"script-src 'self'; object-src 'self'","description":"bilibili &#21716;&#21737;&#21716;&#21737; B&#31449; &#19979;&#36733;&#21161;&#25163; &#24110;&#20320;&#19979;&#36733;&#29256;&#26435;&#21463;&#38480;&#65288;&#33021;&#30475;&#19981;&#33021;&#32531;&#23384;&#65289;&#30340; &#30058;&#21095; &#35270;&#39057;","icons":{"16":"icon.png","48":"icon.png","128":"icon.png"},"key":"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAi2h9zyXMhFrnTghusolDMgPiN3awINuhVOvMtNqL4vmsSlSrfowsUsrmQxaiYqoDjQ4NJKE//NSvSIMOF2UC+8Y5sTWZCG5VwnrJ5+P7P1vFicr3nNZzaaOrC3zQS/PbM9Q92EJFop+cOUkS/omtCa0RlAAeLeR5DKRwWg5jBZ2eE1fgemfwva0Wc1oydxblyHGHwZf1ZnVHyvKW/OWZVytZc2oht271iXE7unieA4t5F0RIdvh+w4IkHq1bYSEe6mjgYWFU9NSviHrGSVoOFHJtHqRrBkO5UVzelvl3xOFgzKtpPCQCtYyJfZuOqrrstWXiHyo8NY0xvWGT+IVyIwIDAQAB","manifest_version":2,"name":"bilibili&#21716;&#21737;&#21716;&#21737;&#19979;&#36733;&#21161;&#25163;","offline_enabled":true,"permissions":["tabs","contextMenus","http://*/*","https://*/*"],"update_url":"https://clients2.google.com/service/update2/crx","version":"2.0.9","web_accessible_resources":["*.*","**/*.*"]};const e=()=>"www.bilibili.com"===location.hostname||"bilibili.com"===location.hostname;if(!e())return;const t=()=>/\/video\/av\d+/i.test(window.location.pathname),n=()=>/\/bangumi\/play\/\S+/i.test(window.location.pathname);if(!t()&&!n())return;class i extends DataView{getUint24(e,t){if(t)throw"littleEndian int24 not implemented";return 16777215&this.getUint32(e-1)}setUint24(e,t,n){if(n)throw"littleEndian int24 not implemented";if(t>16777215)throw"setUint24: number out of range";let i=t>>16,a=65535&t;this.setUint8(e,i),this.setUint16(e+1,a)}indexOf(e,t=0,n=this.byteLength-e.length+1){if(e.charCodeAt){for(let i=t;i<n;i++){if(this.getUint8(i)!=e.charCodeAt(0))continue;let t=1;for(let n=0;n<e.length;n++)if(this.getUint8(i+n)!=e.charCodeAt(n)){t=0;break}if(t)return i}return-1}for(let i=t;i<n;i++){if(this.getUint8(i)!=e[0])continue;let t=1;for(let n=0;n<e.length;n++)if(this.getUint8(i+n)!=e[n]){t=0;break}if(t)return i}return-1}}class a{constructor(e,t=0){this.tagHeader=new i(e.buffer,e.byteOffset+t,11),this.tagData=new i(e.buffer,e.byteOffset+t+11,this.dataSize),this.previousSize=new i(e.buffer,e.byteOffset+t+11+this.dataSize,4)}get tagType(){return this.tagHeader.getUint8(0)}get dataSize(){return this.tagHeader.getUint24(1)}get timestamp(){return this.tagHeader.getUint24(4)}get timestampExtension(){return this.tagHeader.getUint8(7)}get streamID(){return this.tagHeader.getUint24(8)}stripKeyframesScriptData(){let e;if(18!=this.tagType)throw"can not strip non-scriptdata's keyframes";-1!=(e=this.tagData.indexOf("hasKeyframes"))&&this.tagData.setUint8(e+"hasKeyframes".length,0)}getDuration(){if(18!=this.tagType)throw"can not find non-scriptdata's duration";let e=this.tagData.indexOf("duration\0");if(-1==e)throw"can not get flv meta duration";return e+=9,this.tagData.getFloat64(e)}getDurationAndView(){if(18!=this.tagType)throw"can not find non-scriptdata's duration";let e=this.tagData.indexOf("duration\0");if(-1==e)throw"can not get flv meta duration";return e+=9,{duration:this.tagData.getFloat64(e),durationDataView:new i(this.tagData.buffer,this.tagData.byteOffset+e,8)}}getCombinedTimestamp(){return this.timestampExtension<<24|this.timestamp}setCombinedTimestamp(e){if(e<0)throw"timestamp < 0";this.tagHeader.setUint8(7,e>>24),this.tagHeader.setUint24(4,16777215&e)}}class o{constructor(e){if(0!=e.indexOf("FLV",0,1))throw"Invalid FLV header";this.header=new i(e.buffer,e.byteOffset,9),this.firstPreviousTagSize=new i(e.buffer,e.byteOffset+9,4),this.tags=[];let t=this.headerLength+4;for(;t<e.byteLength;){let n=new a(e,t);t+=11+n.dataSize+4,this.tags.push(n)}if(t!=e.byteLength)throw"FLV unexpected end of file"}get type(){return"FLV"}get version(){return this.header.getUint8(3)}get typeFlag(){return this.header.getUint8(4)}get headerLength(){return this.header.getUint32(5)}static merge(e){if(e.length<1)throw"Usage: FLV.merge([flvs])";let t,n=[],i=[0,0],a=[0,0],o=0;n.push(e[0].header),n.push(e[0].firstPreviousTagSize);for(let s of e){let r=1e3*o;i[0]=a[0],i[1]=a[1],r=Math.max(r,i[0],i[1]);let l=0;for(let i of s.tags)18!=i.tagType||l?8!=i.tagType&&9!=i.tagType||(a[i.tagType-8]=r+i.getCombinedTimestamp(),i.setCombinedTimestamp(a[i.tagType-8]),n.push(i.tagHeader),n.push(i.tagData),n.push(i.previousSize)):(o+=i.getDuration(),l=1,s==e[0]&&(({duration:o,durationDataView:t}=i.getDurationAndView()),i.stripKeyframesScriptData(),n.push(i.tagHeader),n.push(i.tagData),n.push(i.previousSize)))}return t.setFloat64(0,o),new Blob(n)}static async mergeBlobs(e){if(e.length<1)throw"Usage: FLV.mergeBlobs([blobs])";let t,n=[],a=[0,0],s=[0,0],r=0;for(let l of e){let d=1e3*r;a[0]=s[0],a[1]=s[1],d=Math.max(d,a[0],a[1]);let c=0,g=await new Promise((e,t)=>{let n=new FileReader;n.onload=(()=>e(new o(new i(n.result)))),n.readAsArrayBuffer(l),n.onerror=t}),p=[];for(let i of g.tags)18!=i.tagType||c?8!=i.tagType&&9!=i.tagType||(s[i.tagType-8]=d+i.getCombinedTimestamp(),i.setCombinedTimestamp(s[i.tagType-8]),p.push(i.tagHeader,i.tagData,i.previousSize)):(r+=i.getDuration(),c=1,l==e[0]&&(n.push(g.header,g.firstPreviousTagSize),({duration:r,durationDataView:t}=i.getDurationAndView()),i.stripKeyframesScriptData(),n.push(i.tagHeader),n.push(i.tagData),n.push(i.previousSize)));n.push(new Blob(p))}return t.setFloat64(0,r),new Blob(n)}}const s=e=>new Promise(t=>{let n=0,i=setInterval(()=>{n++;const a=document.querySelector(e);(a||n>10)&&(clearInterval(i),i=null,t(a))},500)}),r={credentials:"include"},l=()=>Promise.resolve({code:-1,message:"&#33719;&#21462;&#19979;&#36733;&#22320;&#22336;&#22833;&#36133;&#65292;&#21487;&#33021;&#26159;&#20020;&#26102;&#24615;&#30340;&#32593;&#32476;&#38382;&#39064;&#65292;&#21487;&#20197;&#23581;&#35797;&#28165;&#38500;&#27983;&#35272;&#22120;cookies&#21644;&#32531;&#23384;&#21518;&#37325;&#35797;&#65292;&#22914;&#22810;&#27425;&#37325;&#35797;&#20173;&#28982;&#25253;&#38169;&#65292;&#35831;&#36890;&#36807;&#37038;&#31665;&#25110;&#32773;QQ&#32676;&#21453;&#39304;&#32473;&#25105;&#65292;&#35874;&#35874;"}),d=e=>{if(!e.durl)return-10403===e.code?(e.message="&#35813;&#35270;&#39057;&#21482;&#33021;&#30331;&#38470;&#22823;&#20250;&#21592;&#36134;&#21495;&#20043;&#21518;&#19979;&#36733;&#65292;&#22914;&#30331;&#24405;&#21518;&#20173;&#28982;&#25253;&#38169;&#65292;&#21487;&#20197;&#23581;&#35797;&#28165;&#38500;&#27983;&#35272;&#22120;cookies&#21644;&#32531;&#23384;&#21518;&#37325;&#35797;",e):void 0!==e.code?e:{code:-2,message:"&#35813;&#35270;&#39057;&#26242;&#26102;&#19981;&#25903;&#25345;&#19979;&#36733;&#65292;&#21487;&#20197;&#23581;&#35797;&#28165;&#38500;&#27983;&#35272;&#22120;cookies&#21644;&#32531;&#23384;&#21518;&#37325;&#35797;&#65292;&#22914;&#22810;&#27425;&#37325;&#35797;&#20173;&#28982;&#25253;&#38169;&#65292;&#35831;&#36890;&#36807;&#37038;&#31665;&#25110;&#32773;QQ&#32676;&#21453;&#39304;&#32473;&#25105;&#65292;&#35874;&#35874;"};const{accept_quality:t,accept_description:n}=e;return t.forEach((e,t)=>{c[e]=n[t]}),{code:0,durls:e.durl.map(e=>{const t=new URL(e.url);return t.protocol=window.location.protocol,{url:t.href,size:e.size}}),qualityDescription:c[e.quality]}},c={112:"&#39640;&#28165;1080P+",80:"&#39640;&#28165;1080P",74:"&#39640;&#28165;720P60",64:"&#39640;&#28165;720P",48:"&#39640;&#28165;720P",32:"&#28165;&#26224;480P",16:"&#27969;&#30021;360P"},g=()=>"normal"!==localStorage.bilibili_helper_download_mode,p=()=>"off"!==localStorage.bilibili_helper_merge_mode,h=()=>"hide"===localStorage.bilibili_helper_show,m=e=>{const t=1073741824,n=1048576;return e>=t?`${(e/t).toFixed(2)}GB`:e>=n?`${(e/n).toFixed(2)}MB`:e>=1024?`${(e/1024).toFixed(2)}KB`:e+"B"},u=(e,t,n,i)=>0!==n?`<strong>${i}</strong>`:`<strong>${e}</strong> &#30340;&#19979;&#36733;&#22320;&#22336;(&#20849;${t.length}&#20010;&#20998;&#27573;)&#65306;`,f=(e,t,n,i)=>{if(0!==n)return"";if(!g())return e.map((e,n)=>`\n        <li><a title="${t}_&#20998;&#27573;${n+1}" download href="${e.url}">&#20998;&#27573;${n+1}</a><span class="size">(${m(e.size)})</span></li>\n      `).join("");if(g()&&!p())return e.map((e,n)=>{const i=encodeURIComponent(JSON.stringify(e));return`\n          <li><a title="${t}_&#20998;&#27573;${n+1}" mode="advanced" merge="off" href="#nogo" durl="${i}">&#20998;&#27573;${n+1}</a><span class="size">(${m(e.size)})</span><span durl="${i}" class="progress"></span></li>\n        `}).join("");if(g()&&p()){const n=encodeURIComponent(JSON.stringify(e));let i=0;return e.forEach(e=>i+=e.size),`<li><a title="${t}" durls="${n}" mode="advanced" merge="on" href="#nogo">&#21512;&#24182;&#19979;&#36733;</a><span class="size">(&#20849;${m(i)})</span><ul style="margin-top: 8px;" durls="${n}" class="progress"></ul></li>`}},b=({code:e,title:t,durls:n,message:i,loading:a})=>{let o=document.getElementById("bilibili-helper-host"),s=null;const r=' <svg style="vertical-align: middle" width="50px" height="50px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" class="lds-pacman"><g ng-attr-style="display:{{config.showBean}}" style="display:block"><circle cx="62.0973" cy="50" r="4" ng-attr-fill="{{config.c2}}" fill="#00a1d6"><animate attributeName="cx" calcMode="linear" values="95;35" keyTimes="0;1" dur="1" begin="-0.67s" repeatCount="indefinite"></animate><animate attributeName="fill-opacity" calcMode="linear" values="0;1;1" keyTimes="0;0.2;1" dur="1" begin="-0.67s" repeatCount="indefinite"></animate></circle><circle cx="82.4973" cy="50" r="4" ng-attr-fill="{{config.c2}}" fill="#00a1d6"><animate attributeName="cx" calcMode="linear" values="95;35" keyTimes="0;1" dur="1" begin="-0.33s" repeatCount="indefinite"></animate><animate attributeName="fill-opacity" calcMode="linear" values="0;1;1" keyTimes="0;0.2;1" dur="1" begin="-0.33s" repeatCount="indefinite"></animate></circle><circle cx="42.2973" cy="50" r="4" ng-attr-fill="{{config.c2}}" fill="#00a1d6"><animate attributeName="cx" calcMode="linear" values="95;35" keyTimes="0;1" dur="1" begin="0s" repeatCount="indefinite"></animate><animate attributeName="fill-opacity" calcMode="linear" values="0;1;1" keyTimes="0;0.2;1" dur="1" begin="0s" repeatCount="indefinite"></animate></circle></g><g ng-attr-transform="translate({{config.showBeanOffset}} 0)" transform="translate(-15 0)"><path d="M50 50L20 50A30 30 0 0 0 80 50Z" ng-attr-fill="{{config.c1}}" fill="#f45a8d" transform="rotate(10.946 50 50)"><animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 50 50;45 50 50;0 50 50" keyTimes="0;0.5;1" dur="1s" begin="0s" repeatCount="indefinite"></animateTransform></path><path d="M50 50L20 50A30 30 0 0 1 80 50Z" ng-attr-fill="{{config.c1}}" fill="#f45a8d" transform="rotate(-10.946 50 50)"><animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 50 50;-45 50 50;0 50 50" keyTimes="0;0.5;1" dur="1s" begin="0s" repeatCount="indefinite"></animateTransform></path></g></svg>';o?((s=o.shadowRoot).getElementById("title").innerHTML=a?"&#21152;&#36733;&#20013;"+r:u(t,n,e,i),s.getElementById("durls").innerHTML=a?"":f(n,t,e)):((o=document.createElement("bilibili-helper-host")).id="bilibili-helper-host",o.style.cssText=`display:block;overflow:auto;position:fixed;z-index:${Number.MAX_SAFE_INTEGER};bottom:0;left:0;right:0;max-height:50%;width:100%;background: #fff;border-top: 1px solid #ccc;box-shadow: rgba(0, 0, 0, 0.2) 0 -5px 10px;`,h()?o.classList.add("hide"):o.classList.remove("hide"),o.innerHTML="<style>\n        #bilibili-helper-host.hide{\n          width:auto!important;\n          left:auto!important;\n          background:transparent!important;\n          border:0 none!important;\n          border-radius: 6px 0 0 0;\n          box-shadow: rgba(0, 0, 0, 0.2) -5px -5px 10px!important;\n        }\n        .player-fullscreen-fix #bilibili-helper-host {\n          z-index: 99999!important;\n        }\n      </style>",document.body.appendChild(o),(s=o.attachShadow({mode:"open"})).innerHTML=`\n        <style>\n          p, a, div, span, li, i, b, strong, input, button, label {\n            font-size: inherit;\n          }\n          li {\n            margin-bottom: 5px;\n          }\n          p {\n            margin: 0;\n            line-height: 1.5;\n          }\n          h1 {\n            font-size: 20px;\n            font-weight: bold;\n            margin-bottom: 20px;\n          }\n          h3 {\n            font-size: 16px;\n            margin: 1em 0;\n          }\n          #title {\n            font-size: 16px;\n            font-weight: normal;\n          }\n          #content {\n            display: flex;\n            width: 100%;\n            font-size: 14px;\n            position: relative;\n          }\n          a {\n            color: #00a1d6 !important;\n            text-decoration: none;\n          }\n          a:hover {\n            text-decoration: underline;\n          }\n          a.disabled {\n            color: #666!important;\n          }\n          a.disabled:hover {\n            text-decoration: none;\n            cursor: not-allowed;\n          }\n          #side-bar {\n            flex: 3;\n            padding: 20px;\n            border-right: 1px solid #ccc;\n            margin-right: -1px;\n          }\n          #main {\n            flex: 7;\n            padding: 20px;\n            border-left: 1px solid #ccc;\n          }\n          #notice-frame {\n            width: 100%;\n            padding: 0;\n          }\n          .donate {\n            border-top: 1px solid #ccc;\n            padding-top: 10px;\n          }\n          #zanshang {\n            width: 80%;\n          }\n          .setting-item {\n            margin-bottom: 8px;\n          }\n          .setting-item .label {\n            font-weight: bold;\n            width: 6em;\n            display: inline-block;\n            text-align: right;\n          }\n          .desc {\n            padding-left: 6em;\n          }\n          #actions {\n            position: absolute;\n            right: 0;\n            top: 0;\n          }\n          .btn-large {\n            border: 0 none;\n            background: #f45a8d;\n            border-radius: 6px;\n            color: #fff;\n            padding: 10px 20px;\n          }\n          #toggle {\n            border-radius: 0 0 0 6px;\n            outline: none;\n            cursor: pointer;\n          }\n          .hide #side-bar {\n            display: none;\n          }\n          .hide #main {\n            display: none;\n          }\n          .hide #toggle {\n            border-radius: 6px 0 0 0;\n          }\n          .hide #actions {\n            position: static;\n          }\n      \n          a.btn {\n            border: 0 none;\n            background: #f45a8d;\n            text-decoration: none !important;\n            color: #fff !important;\n            border-radius: 3px;\n            padding: 5px 10px;\n            display: inline-block;\n          }\n          .settings {\n            border-left: 5px solid #ccc;\n            background: #eee;\n            padding: 16px 16px 8px 0;\n          }\n          .size {\n            margin: 0 5px;\n          }\n        </style>\n        <div id="content" ${h()?'class="hide"':""}>\n          <div id="side-bar">\n            <div class="notice">\n              <iframe id="notice-frame" frameborder="0"></iframe>\n            </div>\n            \x3c!--<div class="support">TODO &#25903;&#25345;&#21306;&#22495;</div>--\x3e\n            <div class="donate">\n              <p>&#24494;&#20449;&#25195;&#19968;&#25195;&#36190;&#36175;&#20316;&#32773;(&#25195;&#19981;&#20986;&#26469;&#35831;&#28857;&#20987;&#22270;&#29255;&#21518;&#25195;&#22823;&#22270;)&#65306;</p>\n              <a href="${internalUrls.zanshang}" target="_blank"><img title="&#28857;&#20987;&#26597;&#30475;&#22823;&#22270;" alt="&#28857;&#20987;&#26597;&#30475;&#22823;&#22270;" id="zanshang" src="${internalUrls.zanshang}"/></a>\n            </div>\n          </div>\n          <div id="main">\n            <h1 style="margin-top: 0;">B&#31449;&#19979;&#36733;&#21161;&#25163;</h1>\n            <div class="settings">\n              <div class="setting-item">\n                <span class="label">&#28165;&#26224;&#24230;&#65306;</span>\n                <span>&#35831;&#22312;&#39029;&#38754;&#20013;B&#31449;&#33258;&#24049;&#30340;&#25773;&#25918;&#22120;&#20869;&#20999;&#25442;&#28165;&#26224;&#24230;</span>\n              </div>\n              <div class="setting-item">\n                <span class="label">&#19979;&#36733;&#27169;&#24335;&#65306;</span>\n                <label><input id="setting-download-mode-advanced" checked name="setting-download-mode" type="radio"/> &#39640;&#32423;</label>\n                <label><input id="setting-download-mode-normal" name="setting-download-mode" type="radio"/> &#20860;&#23481;</label>\n                <p class="desc">&#39640;&#32423;&#27169;&#24335;&#25903;&#25345;&#33258;&#21160;&#37325;&#21629;&#21517;&#21644;&#21512;&#24182;&#19979;&#36733;&#65292;&#20294;&#20250;&#21344;&#29992;&#38750;&#24120;&#22823;&#30340;&#31995;&#32479;&#36816;&#34892;&#20869;&#23384;<br/>&#20860;&#23481;&#27169;&#24335;&#30452;&#25509;&#20351;&#29992;&#27983;&#35272;&#22120;&#30340;&#40664;&#35748;&#19979;&#36733;&#65292;&#36164;&#28304;&#21344;&#29992;&#24456;&#23567;&#65292;&#20294;&#19981;&#25903;&#25345;&#33258;&#21160;&#37325;&#21629;&#21517;&#21644;&#21512;&#24182;&#19979;&#36733;</p>\n                <p class="desc">&#24314;&#35758;&#31995;&#32479;&#36816;&#34892;&#20869;&#23384;&#23567;&#20110;16G&#30340;&#29992;&#25143;&#20351;&#29992;&#20860;&#23481;&#27169;&#24335;&#65292;&#19979;&#36733;&#21518;&#21487;&#20197;&#28857;<a href="http://csser.top/bilibili/merge.html" target="_blank">&#36825;&#37324;</a>&#23581;&#35797;&#25163;&#21160;&#21512;&#24182;</p>\n              </div>\n              <div class="setting-item" id="setting-advanced">\n                <span class="label">&#21512;&#24182;&#19979;&#36733;&#65306;</span>\n                <label><input id="setting-merge-on" checked name="setting-merge" type="radio"> &#24320;</label>\n                <label><input id="setting-merge-off" name="setting-merge" type="radio"> &#20851;</label>\n                <p class="desc">&#39640;&#32423;&#27169;&#24335;&#19979;&#36733;&#36807;&#31243;&#20013;&#35831;<strong style="color: red;">&#19981;&#35201;</strong>&#21047;&#26032;&#25110;&#20851;&#38381;&#39029;&#38754;&#65292;&#20063;<strong style="color: red;">&#19981;&#35201;</strong>&#20999;&#25442;&#20998;&#38598;&#21644;&#28165;&#26224;&#24230;</p>\n              </div>\n            </div>\n            <h3 id="title">${a?"&#21152;&#36733;&#20013;"+r:u(t,n,e,i)}</h3>\n            <ul id="durls">\n              ${a?"":f(n,t,e)}\n            </ul>\n            <div class="beg">\n              <p>\n                &#22914;&#26524;&#36825;&#20010;&#24037;&#20855;&#30830;&#23454;&#24110;&#21040;&#20102;&#24744;&#65292;&#28902;&#35831;&#22312;Chrome&#21830;&#24215;&#32473;&#20010;&#20116;&#26143;&#22909;&#35780;&#65292;&#35874;&#35874;&#128522;\n                <a class="btn" href="https://chrome.google.com/webstore/detail/bfcbfobhcjbkilcbehlnlchiinokiijp/reviews" target="_blank">&#21435;&#35780;&#20215;</a>\n              </p>\n            </div>\n          </div>\n          <div id="actions">\n            <button id="toggle" class="btn-large">${h()?"&#25171;&#24320;B&#31449;&#19979;&#36733;&#21161;&#25163;":"&#25910;&#36215;"}</button>\n          </div>\n        </div>\n      `,(e=>{const t=e.getElementById("setting-download-mode-advanced"),n=e.getElementById("setting-download-mode-normal"),i=e.getElementById("setting-merge-on"),a=e.getElementById("setting-merge-off"),o=e.getElementById("setting-advanced"),s=e.getElementById("durls"),r=e.getElementById("toggle"),l=e.getElementById("actions"),d=e.getElementById("content"),c=document.getElementById("bilibili-helper-host"),m=()=>{t.disabled=!0,n.disabled=!0,i.disabled=!0,a.disabled=!0},u=()=>{t.disabled=!1,n.disabled=!1,i.disabled=!1,a.disabled=!1};g()?(t.checked=!0,n.checked=!1,o.style.display="block"):(t.checked=!1,n.checked=!0,o.style.display="none"),p()?(i.checked=!0,a.checked=!1):(i.checked=!1,a.checked=!0);const f=()=>{e.buildDownloadLinks()};t.addEventListener("change",()=>{t.checked?(localStorage.bilibili_helper_download_mode="advanced",o.style.display="block"):(localStorage.bilibili_helper_download_mode="normal",o.style.display="none"),f()}),n.addEventListener("change",()=>{n.checked?(localStorage.bilibili_helper_download_mode="normal",o.style.display="none"):(localStorage.bilibili_helper_download_mode="advanced",o.style.display="block"),f()}),i.addEventListener("change",()=>{localStorage.bilibili_helper_merge_mode=i.checked?"on":"off",f()}),a.addEventListener("change",()=>{localStorage.bilibili_helper_merge_mode=a.checked?"off":"on",f()}),s.addEventListener("click",t=>{const n=t.target;if("a"===n.tagName.toLowerCase()&&"advanced"===n.getAttribute("mode")){if(t.preventDefault(),t.stopPropagation(),n.classList.contains("disabled"))return;let i=null;const a=n.getAttribute("title");"on"===n.getAttribute("merge")?(i=e.querySelector(`ul[durls="${n.getAttribute("durls")}"]`),m(),x(n,JSON.parse(decodeURIComponent(n.getAttribute("durls"))),a,i).then(u)):(i=e.querySelector(`span[durl="${n.getAttribute("durl")}"]`),m(),v(n,JSON.parse(decodeURIComponent(n.getAttribute("durl"))),a,i).then(u))}}),r.addEventListener("click",()=>{h()?(localStorage.bilibili_helper_show="show",d.classList.remove("hide"),r.innerHTML="&#25910;&#36215;",c.classList.remove("hide"),l.style.top="0",e.getElementById("notice-frame").contentWindow.postMessage({action:"getHeight"},"https://csser.top")):(localStorage.bilibili_helper_show="hide",d.classList.add("hide"),c.classList.add("hide"),r.innerHTML="&#25171;&#24320;B&#31449;&#19979;&#36733;&#21161;&#25163;",l.style.top="0")}),c.addEventListener("scroll",()=>{l.style.top=c.scrollTop+"px"})})(s),(e=>{const t=e.getElementById("notice-frame");t.onload=(()=>{t.contentWindow.postMessage({action:"getHeight"},"https://csser.top"),t.contentWindow.postMessage({action:"setVersion",version:{name:manifest.version,code:parseInt(manifest.version.replace(/\./g,""),10)}},"https://csser.top"),t.contentWindow.postMessage({action:"setTheme",theme:"null"},"https://csser.top")}),window.addEventListener("message",e=>{if("https://csser.top"===e.origin&&e.data&&"reportHeight"===e.data.action&&(t.style.height=e.data.height+10+"px"),"https://csser.top"===e.origin&&e.data&&"showBilibilihelperindooorsmanNoticeDialog"===e.data.action){const t=e.data.notices;t&&t.length>0&&t.forEach(e=>{})}}),t.src=`https://csser.top/bilibili/notice.html?t=${Date.now()}`,window.addEventListener("resize",()=>{t.contentWindow.postMessage({action:"getHeight"},"https://csser.top")})})(s)),s.buildDownloadLinks=(()=>{s.getElementById("durls").innerHTML=f(n,t,e)})},y=(e,t)=>{const n=new Blob([e],{type:"application/octet-stream"}),i=document.createElement("a");i.setAttribute("href",URL.createObjectURL(n)),i.setAttribute("download",t),i.setAttribute("style","position:absolute;top:-9999px;"),document.body.appendChild(i);const a=new MouseEvent("click",{bubbles:!0,cancelable:!0,view:window});i.dispatchEvent(a),setTimeout(()=>{document.body.removeChild(i)},1e3)},w=(e,t,n)=>{let i=null;return fetch(e).then(e=>{const a=e.headers.get("content-length"),o=t||parseInt(a,10);let s=0;return i=setInterval(()=>{n(s,o)},1e3),new Response(new ReadableStream({start(t){const n=e.body.getReader(),i=()=>{n.read().then(({done:e,value:n})=>{e?t.close():(s+=n.byteLength,t.enqueue(n),i())}).catch(e=>{t.error(e)})};i()}}))}).then(e=>e.blob()).finally(()=>{i&&clearInterval(i)})},v=(e,{url:t,size:n},i,a)=>(e.classList.add("disabled"),w(t,n,(e,t)=>{const n=Math.ceil(e/t*100);a.innerHTML=` &#27491;&#22312;&#19979;&#36733; - ${e}/${t} - ${n}%`}).then(e=>{a.innerHTML=" &#24050;&#19979;&#36733;&#23436;&#25104;";const n=new URL(t).pathname.toLowerCase().match(/\.[a-z0-9]+?$/)[0];y(e,i+n)}).finally(()=>{e.classList.remove("disabled")})),x=(e,t,n,i)=>{if(1===t.length)return v(e,t[0],n,i);e.classList.add("disabled");const a=t.map(({url:e,size:t},n)=>{const a=document.createElement("li");return a.innerHTML=`&#20998;&#27573;${n+1} (${m(t)}) &#27491;&#22312;&#19979;&#36733;`,i.appendChild(a),w(e,t,(e,i)=>{const o=Math.ceil(e/i*100);a.innerHTML=`&#20998;&#27573;${n+1} (${m(t)}) &#27491;&#22312;&#19979;&#36733; - ${e}/${i} - ${o}%`}).then(e=>(a.innerHTML=`&#20998;&#27573;${n+1} (${m(t)}) &#24050;&#19979;&#36733;&#23436;&#25104;&#65292;&#31561;&#24453;&#21512;&#24182;`,e))});return Promise.all(a).then(async e=>{const t=await o.mergeBlobs(Array.from(e));y(t,n+".flv"),i.innerHTML="&#24050;&#23436;&#25104;"}).finally(()=>{e.classList.remove("disabled")})},_=async()=>{if(!e())return;b({loading:!0});const i=await(()=>fetch(window.location.href,r).then(e=>e.text()).then(e=>{const t=e.match(/<script>window.__INITIAL_STATE__=(.+?)<\/script>/);return t&&t[1]?JSON.parse(t[1].replace(";(function(){var s;(s=document.currentScript||document.scripts[document.scripts.length-1]).parentNode.removeChild(s);}());","")):{code:-2,message:"&#33719;&#21462;&#35270;&#39057;&#20449;&#24687;&#22833;&#36133;&#65292;&#21487;&#20197;&#23581;&#35797;&#28165;&#38500;&#27983;&#35272;&#22120;cookies&#21644;&#32531;&#23384;&#21518;&#37325;&#35797;&#65292;&#22914;&#22810;&#27425;&#37325;&#35797;&#20173;&#28982;&#25253;&#38169;&#65292;&#35831;&#36890;&#36807;&#37038;&#31665;&#25110;QQ&#32676;&#21453;&#39304;&#32473;&#25105;&#65292;&#35874;&#35874;"}}).catch(()=>l()))();if(i.code)return b(i);let a=localStorage.bilibili_player_settings&&+JSON.parse(localStorage.bilibili_player_settings).setting_config.defquality||112;if(t()){const e=i.videoData.aid;let t,n,o=i.videoData.cid;if(i.videoData.pages.length>1){const e=location.search.match(/p=(\d+)/);let a=i.videoData.pages[0];e&&e[1]&&(a=i.videoData.pages.find(t=>""+t.page==""+e[1])),t=a.page,n=a.part,o=a.cid}const{code:s,durls:c,qualityDescription:g,message:p}=await((e,t,n=112)=>{return fetch(`//api.bilibili.com/x/player/playurl?cid=${t}&avid=${e}&otype=json&qn=${n}`,r).then(e=>e.json()).then(e=>0!==e.code?d(e):d(e.data)).catch(()=>l())})(e,o,a);if(0===s){let e=`[${g}] ${i.videoData.title}`;t&&n&&(e=`[${g}] ${i.videoData.title}_P${t}_${n}`),b({code:s,title:e,durls:c,message:p})}else b({code:s,message:p})}if(n()){const e=i.epList;let t=-1===i.epId?e[e.length-1].ep_id:i.epId,n=e.find(e=>t===e.ep_id);const o=await s(".episode-item.on"),c=await s(".ep-item.cursor");if(o||c){const i=o||c,a=i.parentElement;let r=Array.from(a.querySelectorAll("li")).findIndex(e=>e===i);const l=await s("#eplist_module .ep-list-progress");l&&(r=+l.textContent.match(/(\d+)\/\d+/)[1]-1),n=e[r],t=n.ep_id||n.id}const{code:g,durls:p,qualityDescription:h,message:m}=await((e,t=112)=>{return fetch(`//api.bilibili.com/pgc/player/web/playurl/?ep_id=${e}&qn=${t}&bsource=`,r).then(e=>e.json()).then(e=>0!==e.code?d(e):d(e.result)).catch(()=>l())})(t,a);if(0===g){const e=`[${h}] ${i.mediaInfo.title}_${n.index||n.title}_${n.index_title||n.longTitle}`;b({code:g,title:e,durls:p,message:m})}else b({code:g,message:m})}};_();let $=""+window.location.href,L=""+localStorage.bilibili_player_settings;setInterval(()=>{const e=window.location.href,t=localStorage.bilibili_player_settings;if($!==e&&($=e,_()),L!==t)try{if(JSON.parse(t).setting_config.defquality===JSON.parse(L).setting_config.defquality)return;L=t,_()}catch(e){}},1e3)})();</script></head>
+<body>
+<p><span class="title">COMP3311 Week 09 (Final Lecture)</span></p><p>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="section">Databases: Past, Present, Future</span></td><td align="right"></td></tr></tbody></table>
+</p><p>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Databases: Past/Present/Future</span></td><td align="right"><small>2/34</small></td></tr></tbody></table>
+</p><p>
+Core "database" goals:
+</p><ul>
+<li> deal with very large amounts of data  <small>(terabytes, petabyes, ...)</small>
+</li><li> very-high-level languages <small>(deal with big data in uniform ways)</small>
+</li><li> query optimisation &nbsp; <small>(evaluation too slow <i>&#8658;</i> useless)</small>
+</li></ul>
+Three phases in DBMS history:
+<ul>
+<li> 1960's: pre-history, first attempts at generalised data access
+</li><li> 1970's-2000's: relational databases, structure, transactions
+</li><li> 2000's: Big Data, less structure, relaxed transactions
+</li></ul>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Databases: Past/Present/Future</span></td><td align="right"><small>3/34</small></td></tr></tbody></table>
+</p><p>
+1960's: Database Pre-history
+</p><ul>
+<li> simple structured records
+<ul>
+<li> atomic-valued records <small>(like relational tuples)</small>
+</li></ul>
+</li><li> <em>hierachical data model</em>
+<ul>
+<li> all data organised via tree structure
+</li><li> access by following paths in hierarchy
+</li><li> could only represent 1:n relationships
+</li></ul>
+</li><li> <em>network data model</em>
+<ul>
+<li> relationships between records via links
+</li><li> query via traversal of record graphs
+</li><li> developed in late 60's, persisted until early 80's
+</li></ul>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Databases: Past/Present/Future</span></td><td align="right"><small>4/34</small></td></tr></tbody></table>
+</p><p>
+1970's: The Rise of Relational DBMS's
+</p><ul>
+<li> Codd developed relational model
+<ul>
+<li> sets of tuples, relational algebra, ...
+</li></ul>
+</li><li> IBM developed a DBMS based on model &nbsp; (System R)
+<ul>
+<li> high-level (declarative) query language
+</li><li> implementation of efficient relational operations
+</li><li> implementation of transactions/recovery
+</li><li> System R eventually developed into DB2
+</li></ul>
+</li><li> Larry Ellison commercialised the idea &nbsp; (Oracle)
+</li></ul>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Databases: Past/Present/Future</span></td><td align="right"><small>5/34</small></td></tr></tbody></table>
+</p><p>
+1980's: Development of RDBMS's
+</p><ul>
+<li> distribution/replication of data
+</li><li> improving implementation of relational operators
+</li></ul>
+1990's: Standardization and Extension
+<ul>
+<li> SQL standard developed
+</li><li> SQL extended with e.g. PL/SQL, recursion, ...
+</li><li> improving implementation of relational operators
+</li></ul>
+2000's: New Data
+<ul>
+<li> temporal aspects of data
+</li><li> stream data &nbsp; <small>(continuous queries)</small>
+</li><li> high-dimensional data &nbsp; <small>(e.g. image feature spaces)</small>
+</li></ul>
+RDBMS's have been dominant DB technology for 40 years.
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Databases: Past/Present/Future</span></td><td align="right"><small>6/34</small></td></tr></tbody></table>
+</p><p>
+Assumptions underlying relational DBMSs ...
+</p><ul>
+<li> data resides on disk device <small>(latency, block-transfer)</small>
+</li><li> data located on a single machine (?)
+</li><li> data fits on (large array of) disks on a LAN
+</li><li> data can be represented via atomic-valued tuples
+</li><li> queries involve precise matching &nbsp; <small>(e.g. equality, ...)</small>
+</li></ul>
+How things have changed lately ...
+<ul>
+<li> growth in use of SSDs for data storages
+</li><li> need to store <i>very</i> large amounts of data
+</li></ul>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Databases: Past/Present/Future</span></td><td align="right"><small>7/34</small></td></tr></tbody></table>
+</p><p>
+Limitations/pitfalls of RDBMSs:
+</p><ul>
+<li> NULL is ambiguous: unknown, not applicable, not supplied
+</li><li> "limited" support for constraints/integrity and rules
+</li><li> no support for uncertainty <small>(data represents <em>the</em> state-of-the-world)</small>
+</li><li> data model too simple <small>(e.g. no support for complex objects)</small>
+</li><li> query model too rigid <small>(e.g. no approximate match)</small>
+</li><li> cotinually changing data sources not well-handled
+</li><li> data must be "molded" to fit a single rigid schema
+</li><li> database systems must be manually "tuned"
+</li><li> do not scale well to some data sets <small>(e.g. Google, Telco's)</small>
+</li></ul>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Databases: Past/Present/Future</span></td><td align="right"><small>8/34</small></td></tr></tbody></table>
+</p><p>
+How to overcome (some of) these limitations?
+</p><p>
+Extend the relational model ...
+</p><ul>
+<li> add new data types and query ops for new applications <br>
+</li><li> deal with uncertainty/inaccuracy/approximation in data
+</li></ul>
+Replace the relational model ...
+<ul>
+<li> object-oriented DBMS ... <small>OO programming with persistent objects</small>
+</li><li> XML DBMS ... <small>all data stored as XML documents, new query model</small>
+</li><li> application-effective data model <small>(e.g. <i>(key,value)</i> pairs)</small>
+</li></ul>
+Performance: DBMSs that "tune" themselves ...
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Big Data</span></td><td align="right"><small>9/34</small></td></tr></tbody></table>
+</p><p>
+Some modern applications have massive data sets <small>(e.g. Google)</small>
+</p><ul>
+<li> far too large to store on a single machine/RDBMS
+</li><li> query demands far too high even if could store in DBMS
+</li></ul>
+Approach to dealing with such data
+<ul>
+<li> distribute data over large collection of nodes <small>(redundancy)</small>
+</li><li> provide computational mechanisms for distributing computation
+</li></ul>
+Often this data does not need full relational selection
+<ul>
+<li> represent data via <i>(key,value)</i> pairs
+</li><li> unique <i>key</i> values can be used for addressing data
+</li><li> <i>values</i> can be large objects <small>(e.g. web pages, images, ...)</small>
+</li></ul>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Big Data</span></td><td align="right"><small>10/34</small></td></tr></tbody></table>
+</p><p>
+Popular computational approach to Big Data: <em>map/reduce</em>
+</p><ul>
+<li> suitable for widely-distributed, very-large data
+</li><li> allows parallel computation on such data to be easily specified
+</li><li> distribute (map) parts of computation across network
+</li><li> compute in parallel <small>(possibly with further map'ing)</small>
+</li><li> merge (reduce) multiple results for delivery to requestor
+</li></ul>
+Some Big Data advocates see no future need for SQL/relational ...
+<ul>
+<li> depends on application <small>(e.g. hard integrity vs eventual consistency)</small>
+</li></ul>
+Humour:
+<a href="http://www.youtube.com/watch?v=b2F-DItXtZs">Parody of noSQL fans</a> &nbsp;
+<small>(strong language warning)</small>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Information Retrieval</span></td><td align="right"><small>11/34</small></td></tr></tbody></table>
+</p><p>
+DBMSs generally do precise matching <small>(although <large><code>like</code></large>/regexps)</small>
+</p><p>
+Information retrieval systems do approximate matching.
+</p><p>
+E.g. documents containing specified words &nbsp;<small>(Google, etc.)</small>
+</p><p>
+Also introduces notion of "quality" of matching <br>
+(e.g. tuple <i>T<sub>1</sub></i> is a <em>better</em> match than tuple <i>T<sub>2</sub></i>)
+</p><p>
+Quality also implies <em>ranking</em> of results.
+</p><p>
+Much activity in incorporating IR ideas into DBMS context.
+</p><p>
+Goal: support database exploration better.
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Multimedia Data</span></td><td align="right"><small>12/34</small></td></tr></tbody></table>
+</p><p>
+Data which does not fit the "tabular model":
+</p><ul>
+<li> image, video, music, text, ... <small>(and combinations of these)</small>
+</li></ul>
+Research problems:
+<ul>
+<li> how to specify queries on such data? 
+	<small>(<i>image<sub>1</sub> &#8773; image<sub>2</sub></i>)</small>
+</li><li> how to "display" results?
+	<small>(synchronize components)</small>
+</li></ul>
+Solutions to the first problem typically:
+<ul>
+<li> extend notions of "matching"/indexes for querying
+</li><li> require sophisticated methods for capturing data features
+</li></ul>
+Sample query: find other songs <em>like</em> this one?
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Uncertainty</span></td><td align="right"><small>13/34</small></td></tr></tbody></table>
+</p><p>
+Multimedia/IR introduces approximate matching.
+</p><p>
+In some contexts, we have approximate/uncertain data.
+</p><p>
+E.g. witness statements in a crime-fighting database
+</p><p>
+"I think the getaway car was red ... or maybe orange ..."
+</p><p>
+"I am 75% sure that John carried out the crime"
+</p><p>
+Work by Jennifer Widom at Stanford on the <em>Trio</em> system 
+</p><ul>
+<li> extends the relational model (ULDB)
+</li><li> extends the query language (TriQL)
+</li></ul>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Stream Management Systems</span></td><td align="right"><small>14/34</small></td></tr></tbody></table>
+</p><p>
+Makes one addition to the relational model
+</p><ul>
+<li> <em>stream</em> = infinite sequence of tuples, arriving one-at-a-time
+</li></ul>
+Applications: <small>news feeds, telecomms, monitoring web usage, ...</small>
+<p>
+RDBMSs: run a variety of queries on (relatively) fixed data <br>
+</p><p>
+StreamDBs: run fixed queries on changing data (stream)
+</p><p>
+Approaches:
+</p><ul>
+<li> <em>window</em> = relation formed from a stream via a rule
+</li><li> <em>stream data type</em> = build new stream-specific operations
+</li></ul>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Semi-structured Data</span></td><td align="right"><small>15/34</small></td></tr></tbody></table>
+</p><p>
+Uses <em>graphs</em> rather than tables as basic data structure tool.
+</p><p>
+Applications: <small>complex data representation, via "flexible" objects, e.g. XML</small>
+</p><p>
+Graph nature of data changes query model considerably.
+</p><p>
+<small>(e.g. Xquery language, high-level like SQL, but different operators, etc.)</small>
+</p><p>
+Implementing graphs in RDBMSs is often inefficient.
+</p><p>
+Research problem: query processing for XML data.
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Dispersed Databases</span></td><td align="right"><small>16/34</small></td></tr></tbody></table>
+</p><p>
+Characteristics of dispersed databases:
+</p><ul>
+<li> very large numbers of small processing nodes
+</li><li> data is distributed/shared among nodes
+</li></ul>
+Applications: <small> environmental monitoring devices, "intelligent dust", ...</small>
+<p>
+Research issues:
+</p><ul>
+<li> query/search strategies
+	<small>(how to organise query processing)</small>
+</li><li> distribution of data
+	<small>(trade-off between centralised and diffused)</small>
+</li></ul>
+Less extreme versions of this already exist:
+<ul>
+<li> grid and cloud computing
+</li><li> database management for mobile devices
+</li></ul>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Looking ahead</span></td><td align="right"><small>17/34</small></td></tr></tbody></table>
+</p><p>
+Every so often, DBMS researchers meet to consider the field:
+</p><ul>
+<li> Laguna Beach, 1989 ...
+<a target="demo" href="http://doi.acm.org/10.1145/382272.1367994">http://doi.acm.org/10.1145/382272.1367994</a>
+</li><li> Asilomar, 1998 ...
+<a target="demo" href="http://doi.acm.org/10.1145/306101.306137">http://doi.acm.org/10.1145/306101.306137</a>
+</li><li> Claremont, 2008 ...
+<a target="demo" href="http://doi.acm.org/10.1145/1462571.1462573">http://doi.acm.org/10.1145/1462571.1462573</a>
+</li><li> Beckman, 2016 ...
+<a target="demo" href="http://doi.acm.org/10.1145/2845915">http://doi.acm.org/10.1145/2845915</a>
+</li></ul>
+Regular attendees: <small>
+Rakesh Agrawal <smaller>(IBM)</smaller>,
+<font color="#009900">Phil Bernstein</font> <smaller>(MS)</smaller>,
+Mike Carey <smaller>(BEA)</smaller>,
+Stefano Ceri <smaller>(Pisa)</smaller>,
+David deWitt <smaller>(MS)</smaller>,
+Michael Franklin <smaller>(UCB)</smaller>,
+<font color="#009900">Hector Garcia-Molina</font> <smaller>(Stanford)</smaller>
+<font color="#0000CC">Jim Gray</font> <smaller>(MS)</smaller>,
+Laura Haas <smaller>(IBM)</smaller>,
+Alon Halevy <smaller>(Google)</smaller>
+Joe Hellerstein <smaller>(UCB)</smaller>,
+Mike Lesk <smaller>(Bell)</smaller>,
+David Maier <smaller>(PSU)</smaller>,
+<font color="#009900">Raghu Ramakrishnan</font> <smaller>(Yahoo)</smaller>, 
+<font color="#009900">Avi Silberschatz</font> <smaller>(Bell)</smaller>,
+<font color="#0000CC">Rick Snodgrass</font> <smaller>(Arizona)</smaller>,
+<font color="#0000CC">Mike Stonebraker</font> <smaller>(UCB/MIT)</smaller>,
+<font color="#0000CC">Jeff Ullman</font> <smaller>(Stanford)</smaller>,
+<font color="#009900">Jennifer Widom</font> <smaller>(Stanford)</smaller>,
+...
+</small>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Beyond COMP3311</span></td><td align="right"><small>18/34</small></td></tr></tbody></table>
+</p><p>
+<em>COMP9315</em> Database Systems Implementation
+</p><ul>
+<li> comprehensive study of DBMS internals
+</li></ul>
+<em>COMP9318</em> Data Warehousing and Data Mining
+<ul>
+<li> data summarisation/discovery techniques
+</li></ul>
+<em>COMP9319</em> Web Data Compression and Search
+<ul>
+<li> Web compression and searching algorithms
+</li></ul>
+<em>COMP6714</em> Information Retrieval and Web Search
+<ul>
+<li> finding information in unstructured text 
+</li></ul>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="section">Course Review/Exam Preview</span></td><td align="right"></td></tr></tbody></table>
+</p><p>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">COMP3311 Course Aims</span></td><td align="right"><small>20/34</small></td></tr></tbody></table>
+</p><p>
+At the end of this course you should be able to:
+<small>
+</small></p><ul><small>
+<li> develop a (correct, non-redundant) data model for a simple application
+</li><li> implement data models using SQL database management systems
+</li><li> devise effective queries to answer information requests on a database
+</li><li> enhance the power of the database via stored procedures and triggers
+</li><li> implement PHP scripts to efficiently access a database
+</li><li> understand the overall architecture of modern relational DBMSs
+</li><li> understand foundations of transaction and query processing
+</li></small></ul><small>
+</small>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Syllabus Overview</span></td><td align="right"><small>21/34</small></td></tr></tbody></table>
+</p><p>
+</p><ol>
+<li> Data modelling and database design
+<small>
+<ul>
+<li> Entity-relationship (ER) design, relational data model
+</li><li> Relational theory
+        &nbsp; <small>(algebra, dependencies, normalisation)</small>
+</li></ul>
+</small>
+</li><li> Database application development
+<small>
+<ul>
+<li> SQL for querying and data definition
+        &nbsp; <small>(PostgreSQL's version)</small>
+</li><li> PostgreSQL,
+        &nbsp; <tt>psql</tt> <small>(an SQL shell)</small>,
+        &nbsp; PLpgSQL <small>(procedural SQL)</small>
+</li><li> PHP <small>(DB access)</small>
+</li></ul>
+</small>
+</li><li> DBMS technology
+<small>
+<ul>
+<li> <font color="#999999">Performance tuning</font>,
+	&nbsp; <font color="#999999">catalogues</font>,
+	&nbsp; <font color="#999999">access control</font>
+</li><li> <font color="#999999">DBMS architecture,</font>
+	&nbsp; query processing,
+	&nbsp; transactions
+</li></ul>
+</small>
+</li></ol>
+Things in <font color="#999999">gray</font> will <b>not</b> be examined.
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Assessment Summary</span></td><td align="right"><small>22/34</small></td></tr></tbody></table>
+</p><p>
+Your final mark/grade will be determined as follows:
+</p><p>
+</p><p></p><pre>a1      = mark for assignment 1            (out of 15)
+a2      = mark for assignment 2            (out of 15)
+quizzes = mark for top 3 on-line quizzes   (out of 10)
+examP   = mark for exam (practical)        (out of 30)
+examW   = mark for exam (written)          (out of 30)
+
+exam    = examP + examW              (out of 60)
+okExam  = examP &gt;= 12 &amp;&amp; examW &gt;= 12 (after scaling)
+
+mark   = a1 + a2 + quizzes + exam
+grade  = HD|DN|CR|PS  if mark &gt;= 50 &amp;&amp; okExam
+       = FL           if mark &lt;  50 &amp;&amp; okExam
+       = UF           if !okExam
+</pre><p>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Final Exam</span></td><td align="right"><small>23/34</small></td></tr></tbody></table>
+</p><p>
+D-day: Tuesday 7 May
+</p><ul>
+<li> held in computer labs e.g., K17, Physics, ElecEng labs 
+</li><li> 3-hour morning session for some students
+</li><li> 3-hour afternoon session for the rest
+</li><li> random allocation to sessions/labs
+<ul>
+<li> I know about clash students
+</li><li> if you have a preference, let me know (there will be an online form available soon)
+</li></ul>
+</li></ul>
+Session/lab allocations on-line by end of next week
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Final Exam</span></td><td align="right"><small>24/34</small></td></tr></tbody></table>
+</p><p>
+3 hours, &nbsp; 90 marks &nbsp; 10 questions <small>(5 Written, 5 Prac)</small>
+</p><p>
+Past Exams are attached to the course web site.
+</p><p>
+Differences between 19s1 and older exams:
+</p><ul>
+<li> 06s2 exam was way too long (old style)
+</li><li> 12s1 had 12 questions (6+6)
+</li></ul>
+19s1 exam has more emphasis on "practicality" than "theory" <br>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Final Exam</span></td><td align="right"><small>25/34</small></td></tr></tbody></table>
+</p><p>
+Written Questions: <small><font color="#996600">(worth 50% of exam mark, hurdle 12/30)</font></small>
+</p><ul>
+<li> cover a range of topics
+	&nbsp; <small>(incl. PLpgSQL and PHP)</small>
+</li><li> are like online exercises
+	&nbsp; <small>(but no recycling)</small>
+</li><li> partial marks for partial solutions
+</li><li> no marks for writing nothing or "I don't know" 
+</li><li> negative marks for writing irrelevant/rubbish
+</li></ul>
+If you don't know the answer, don't write anything.
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Final Exam</span></td><td align="right"><small>26/34</small></td></tr></tbody></table>
+</p><p>
+Prac Questions: <small><font color="#996600">(worth 50% of exam mark, hurdle 12/30)</font></small>
+</p><ul>
+<li> are like SQL questions from previous exams
+</li><li> vaguely like Assigt SQL, but DB much simpler/smaller
+</li><li> write SQL queries/views (using <b>SQLite</b>)
+</li><li> no PLpgSQL or PHP in prac exam
+</li><li> some <small>(not many)</small> marks for incomplete solutions
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Final Exam</span></td><td align="right"><small>27/34</small></td></tr></tbody></table>
+</p><p>
+Exam working environment:
+</p><ul>
+<li> using standard CSE exam environment
+</li><li> the usual collection of editors <small>(e.g. pico, gedit, vim, emacs)</small>
+</li><li> <large><code>xfig</code></large> and <large><code>dia</code></large> for drawing ER diagrams, if any
+</li><li> <large><code>sqlite3</code></large> for doing the SQL prac questions
+</li><li> from within the web browser, you will have
+<ul>
+<li> exam paper (instructions and all questions)
+</li><li> SQLite3, PostgreSQL, PHP docs <small>(copied from course web site)</small>
+</li></ul>
+</li><li> all answers will be typed/drawn into files
+</li><li> submit answers via <large><code>give</code></large> &nbsp; <small>(special exam version)</small>
+</li></ul>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Revision</span></td><td align="right"><small>28/34</small></td></tr></tbody></table>
+</p><p>
+Sources for revision material:
+</p><ul>
+<li> COMP3311 Course Notes, Theory Exercises
+</li><li> <em>Fundamentals of Database Systems</em>,
+	<small>Elmasri/Navathe</small>
+</li><li> <em>Database System Concepts</em>,
+	<small>Silberschatz/Korth/Sudarshan</small>
+</li><li> <em>Database Management Systems</em>,
+	<small>Ramakrishnan/Gehrke</small>
+</li><li> <em>Database Systems: Complete Book</em>,
+	<small>Garcia-M/Ullman/Widom</small>
+</li><li> <em>Database Systems: App-oriented</em>,
+	<small>Kifer/Bernstein/Lewis</small>
+</li><li> SQLite/PostgreSQL/PHP Documentation
+	<small>(learn to navigate)</small>
+</li></ul>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Revision</span></td><td align="right"><small>29/34</small></td></tr></tbody></table>
+</p><p>
+Strategy for revision:
+</p><ul>
+<li> attempt the <em>past exams</em> (available on Web)
+<p>
+<small>
+(no questions from past exams will be repeated on this year's exam)
+</small>
+</p></li><li> review <em>exercises</em> and assignments
+<p>
+<small>
+(no exercise/assignment questions will be repeated on the exam)
+</small>
+</p></li><li> come to the tuts (Tue &amp; Wed on week 10, and also Tue on week 11) to resolve problems
+<p>
+<small>
+(Check the Web timetable for tut times and locations.)
+</small>
+</p></li></ul>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Supplementary Exams</span></td><td align="right"><small>30/34</small></td></tr></tbody></table>
+</p><p>
+Suplementary Exams are only available to people who
+</p><ul>
+<li> are absent from the Final Exam with <i>good reason</i> <br>
+	<small>(good = documented, serious, clearly affects ability to do exam)</small>
+</li><li> have performed well during the rest of the semester
+</li></ul>
+If you are awarded a Supp Exam ...
+<ul>
+<li> you <b>must</b> make yourself available for it
+</li><li> non-attendance at the Supp <i>&#8658;</i> mark of 0 for the exam
+</li></ul>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Assessment</span></td><td align="right"><small>31/34</small></td></tr></tbody></table>
+</p><p>
+Assessment is about determining how well <em>you</em> understand the syllabus
+of this course.
+</p><p>
+If you can't <em>demonstrate your understanding</em>, you won't pass.
+</p><p>
+In particular, we don't pass people just because ...
+</p><ul>
+<li> please, please, ... my parents will be ashamed of me
+</li><li> please, please, ... I tried <i>really hard</i> in this course
+</li><li> please, please, ... I'll be excluded if I fail COMP3311
+</li><li> please, please, ... if I fail this, I can't do COMP9xxx
+</li><li> etc. etc. etc.
+</li></ul>
+<p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="cont">... Assessment</span></td><td align="right"><small>32/34</small></td></tr></tbody></table>
+</p><p>
+Of course, assessment isn't a "one-way street" ...
+</p><ul>
+<li> I get to assess you in the final exam
+</li><li> you get to assess me in MyExperience
+</li></ul>
+MyExperience evaluations are online now.
+<p>
+Telling me good things is fine.
+</p><p>
+Telling me things I did wrong is helpful.
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Some Thoughts ...</span></td><td align="right"><small>33/34</small></td></tr></tbody></table>
+</p><p>
+You need to learn for life, not just the exam.
+</p><p>
+In particular, learn to find answers for yourself.
+</p><p>
+No single correct answer.
+	<small>(Solutions range from poor to excellent)</small>
+</p><p>
+Take <em>pride</em> in your work.
+	<small>(Aim for quality, not just correctness)</small>
+</p><p></p><hr><p>
+<table width="100%" cellpadding="0">
+<tbody><tr valign="top"><td align="left"><span class="heading">Finally ...</span></td><td align="right"><small>34/34</small></td></tr></tbody></table>
+</p><p>
+</p><div class="center">
+<p></p><div class="center">
+<img alt="[Diagram:Pic/thats-all-folks-small.jpg]" src="./Week 09 (Final Lecture)_files/thats-all-folks-small.jpg">
+</div><p>
+<font color="#CC9900">Good Luck with the Exams ... and Life ...</font>
+</p></div>
+<p></p><hr><p>
+<small><small>Produced: 18 Apr 2019</small></small>
+
+
+</p></li></ul></li></ul></body></html>
