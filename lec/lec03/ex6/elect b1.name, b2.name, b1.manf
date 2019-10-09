@@ -1,0 +1,30 @@
+        name         |           name           
+---------------------+--------------------------
+ Amber Ale           | Porter
+ Amber Ale           | Pilsener
+ Amber Ale           | India Pale Ale
+ Bigfoot Barley Wine | Pale Ale
+ Crown Lager         | Victoria Bitter
+ Crown Lager         | Melbourne Bitter
+ Crown Lager         | Invalid Stout
+ Crown Lager         | Fosters Lager
+ Fosters Lager       | Victoria Bitter
+ Fosters Lager       | Melbourne Bitter
+ Fosters Lager       | Invalid Stout
+ India Pale Ale      | Porter
+ India Pale Ale      | Pilsener
+ Invalid Stout       | Victoria Bitter
+ Invalid Stout       | Melbourne Bitter
+ Melbourne Bitter    | Victoria Bitter
+ New                 | Sheaf Stout
+ New                 | Red
+ New                 | Old
+ Old                 | Sheaf Stout
+ Old                 | Red
+ Old Admiral         | Three Sheets
+ Pilsener            | Porter
+ Red                 | Sheaf Stout
+ Sink the Bismarck   | Tactical Nuclear Penguin
+ Sparkling Ale       | Stout
+(26 rows)
+
