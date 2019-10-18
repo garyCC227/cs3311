@@ -4,11 +4,17 @@
 -- Question:
 --	1. what is ordering?
 
+--Global Helper: 
+-- Movies View
+create or replace view Movies
+as
+select * from titles where format = 'movie';
+
 -- Q1 Which movies are more than 6 hours long? 
 
 create or replace view Q1(title)
 as
-...
+select main_title from Movies where runtime > 360;
 ;
 
 
@@ -16,7 +22,7 @@ as
 
 create or replace view Q2(format, ntitles)
 as
-...
+select format, count(*) from titles group by format;
 ;
 
 
@@ -24,7 +30,12 @@ as
 
 create or replace view Q3(title, rating, nvotes)
 as
-..
+select main_title,rating, nvotes from Movies
+where nvotes > 1000
+order by 
+	rating desc,
+	main_title
+limit 10
 ;
 
 
