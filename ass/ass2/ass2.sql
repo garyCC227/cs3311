@@ -1,5 +1,8 @@
 -- COMP3311 19T3 Assignment 2
--- Written by <<insert your name here>>
+-- Written by <<Linchen Chen, z5163479>>
+
+-- Question:
+--	1. what is ordering?
 
 -- Q1 Which movies are more than 6 hours long? 
 
