@@ -1,9 +1,6 @@
 -- COMP3311 19T3 Assignment 2
 -- Written by <<Linchen Chen, z5163479>>
 
--- Question:
---	1. what is ordering?
-
 --Global Helper: 
 -- Movies View
 create or replace view Movies
@@ -136,6 +133,7 @@ join movies m on m.id = b.title_id
 ;
 
 -- Q9 Who was the youngest person to have an acting role in a movie, and how old were they when the movie started?
+-- view for actor with theri id and acting age
 create or replace view ActingAge
 as
 select a.name_id, min(m.start_year - n.birth_year) as age
@@ -153,18 +151,6 @@ where a.age = (select min(age) from actingage)
 ;
 
 -- Q10 Write a PLpgSQL function that, given part of a title, shows the full title and the total size of the cast and crew
-select t.id,t.main_title from titles t  
-join principals a on t.id = a.title_id
-where t.main_title ilike '%1.3%'
-union                                 
-select t.id,t.main_title from titles t  
-join actor_roles a on t.id = a.title_id
-where t.main_title ilike '%1.3%'
-union
-select t.id,t.main_title from titles t
-join crew_roles c on t.id = c.title_id
-where t.main_title ilike '%1.3%'
-;
 
 create type MyTitle as (id integer, main_title text);
 
@@ -175,8 +161,10 @@ declare
 	title MyTitle;
 	_count integer;
 begin
+	-- find all the title that match the 'partial_title'
+	-- then loop through each title -> to find the total size of crew and cast
 	for title in (
-		select t.id,t.main_title from titles t  
+		select t.id,t.main_title from titles t 
 		join principals a on t.id = a.title_id
 		where t.main_title ilike ('%'|| partial_title ||'%')
 		union                                 
