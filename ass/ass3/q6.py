@@ -60,7 +60,7 @@ def q6(conn):
 
 def connect():
   try:
-    conn = psycopg2.connect("dbname=a3 user=postgres password=chenqq227")
+    conn = psycopg2.connect("dbname=a3")
     q6(conn)
     conn.close()
   except Exception as e:
