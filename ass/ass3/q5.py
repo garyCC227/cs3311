@@ -28,7 +28,7 @@ def q5(conn,key):
     
 def connect(key):
   try:
-    conn = psycopg2.connect("dbname=a3 user=postgres password=chenqq227") #TODO: delete
+    conn = psycopg2.connect("dbname=a3")
 
     #run q5
     q5(conn, key)

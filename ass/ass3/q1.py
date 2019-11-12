@@ -22,7 +22,7 @@ def q1(conn):
 
 def connect():
   try:
-    conn = psycopg2.connect("dbname=a3 user=postgres password=chenqq227") #TODO: delete
+    conn = psycopg2.connect("dbname=a3")
     # run q1() for solutions
     q1(conn)
   except Exception as e:

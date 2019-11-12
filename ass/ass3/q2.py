@@ -35,12 +35,20 @@ def q2(conn, incommon):
   
   for num_code in sorted(common_dict):
     if(common_dict[num_code]['count'] == incommon):
-      print("{}: {}".format(num_code, sorted(common_dict[num_code]['char'])))
+      print("{}: ".format(num_code), end="")
+      for index,code in enumerate(sorted(common_dict[num_code]['char'])):
+      	# end of list, dont print space at the end
+      	if index == incommon-1:
+      		print(code, end="")
+      		break
+      	print(code, end=" ")
+      #new line
+      print('')
 
 
 def connect(incommon):
   try:
-    conn = psycopg2.connect("dbname=a3 user=postgres password=chenqq227") #TODO: delete
+    conn = psycopg2.connect("dbname=a3") 
 
     q2(conn, incommon)
 
