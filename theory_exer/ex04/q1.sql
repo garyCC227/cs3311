@@ -19,3 +19,9 @@ where  S.address='221 Packer Street'
                     from   Parts P, Catalog C
                     where  P.color='red' and P.pid=C.pid
                    )
+
+----
+
+
+
+--- 3.a can review
