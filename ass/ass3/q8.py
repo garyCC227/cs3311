@@ -204,15 +204,25 @@ def find_early_class(tts):
 
     
 def find_final_tt(tts, lt_day): 
+  
+  #get the latest hour for first timetable
   curr_t = tts[0]
-  lt_hr =  sorted(curr_t.tt[lt_day], key=lambda x:(x[0], x[1]))[-1][1]
-  for t in tts[1:]:
-    curr_lt_hr = sorted(t.tt[lt_day], key=lambda x:(x[0], x[1]))[-1][1]
+  lt_hr = find_latest_hour(curr_t)
+  for t in tts[1:]: 
+    curr_lt_hr = find_latest_hour(curr_t)
     if curr_lt_hr < lt_hr:
       lt_hr = curr_lt_hr
       curr_t = t
-  
+      
   return curr_t
+
+#if the latest day are the same, we use this method to find the eariest leave school time
+def find_latest_hour(one_tt):
+  lt_hour = 100000
+  for day in one_tt.tt.keys():
+    curr_lt_hour = sorted(one_tt.tt[day], key=lambda x:(x[0], x[1]))[-1][1]
+    lt_hour = min(curr_lt_hour, lt_hour)
+  return lt_hour
   
 #tt = timetable
 def permute_tt(tts, classes):
@@ -312,7 +322,7 @@ def reset_format(classes):
     result.append(list(each_cl.values()))
   
   return result
-    
+  
 def connect(codes):
   try:
     conn = psycopg2.connect("dbname=a3") #TODO: delete
