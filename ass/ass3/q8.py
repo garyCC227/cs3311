@@ -16,7 +16,25 @@ DAYMAP2 = {
   4:'Thu',
   5:'Fri'
 }
-
+class Class:
+  def __init__(self, cl_id, cl_ty, code, day, start, end):
+    self.cl_id = cl_id
+    self.classes = [(start, end, day,code, cl_ty)]
+  
+  #same class?
+  def is_same(self, cl_id):
+    return self.cl_id == cl_id
+  
+  def add(self, cl_ty, code, day, start, end):
+    self.classes.append((start, end, day,code, cl_ty))
+  
+  def __str__(self):
+    string = "{}\n".format(self.cl_id)
+    for start, end, day,code, cl_ty in self.classes:
+      string += "  {} {}:{} {}-{}\n".format(code, cl_ty, day,start, end)
+    
+    return string
+  
 class TT:
   def __init__(self):
     '''
@@ -57,18 +75,20 @@ class TT:
     return self.t_hours
       
   #return true if clash
-  def clash(self, day, start, end):
-    # check day
-    if day not in self.tt.keys():
-      return False
-    
-    # check all the time in that day
-    for old_start, old_end, *_ in self.tt[day]:
-      if start >= old_end or end <= old_start:
+  def clash(self,cl):
+    for start, end, char_day, *_ in cl.classes:
+      # check day
+      day = DAYMAP[char_day]
+      if day not in self.tt.keys():
         continue
-      else:
-        return True
-    
+
+      # check all the time in that day
+      for old_start, old_end, *_ in self.tt[day]:
+        if start >= old_end or end <= old_start:
+          continue
+        else:
+          return True
+
     return False
   
   # return as hours for wk1-10
@@ -80,21 +100,28 @@ class TT:
     # return as hours
     return hr + extra
   
-  def add(self, cl_id, cl_ty,code, day, start, end):
-    self.cl_ids.add(cl_id)
-    self.days.add(day)
-    self.lt_day = max(day, self.lt_day)
-    
-    # add to timetable
-    if day in self.tt.keys():
-      self.tt[day].append((start, end, code, cl_ty, cl_id))
-    else:
-      self.tt[day] = [(start, end, code, cl_ty, cl_id)]
+  def add(self, cl):
+    self.cl_ids.add(cl.cl_id)
+    for start, end, char_day, code,cl_ty in cl.classes:
+      day = DAYMAP[char_day]
+      
+      self.days.add(day)
+      self.lt_day = max(day, self.lt_day)
+
+      # add to timetable
+      if day in self.tt.keys():
+        self.tt[day].append((start, end, code, cl_ty, cl.cl_id))
+      else:
+        self.tt[day] = [(start, end, code, cl_ty, cl.cl_id)]
     
 def q8(conn, codes):
   cur = conn.cursor()
   # find all possible class time
   class_time = find_class_time(cur,codes)
+#   for cl in class_time: #TODO:delete
+#     for i in cl:
+#       print(i)
+#   return
   
   #permute all possible timetable
   empty_tt = TT()
@@ -109,6 +136,7 @@ def q8(conn, codes):
   #find the best timetable
   tt = find_best_tt(temp_tts)
   print(tt)
+
 
 '''
 - In cases where two timetables generate the same number of hours spent on campus or commuting, 
@@ -195,38 +223,43 @@ def permute_tt(tts, classes):
   # build time table dict
   new_tts = []
   seen_class = set()
-  for cl_id,code,cl_ty,day, start, end in classes:
+  for cl in classes:
+#     print(cl_id, code, cl_ty, day, start, end)
     # if the class in not seen 
-    if cl_id not in seen_class:
+    if cl.cl_id not in seen_class:
       for tt in tts:
         # if not clash, we build a new timetable
-        if not tt.clash(DAYMAP[day], start, end):
+        if not tt.clash(cl):
           #add to seen class
-          seen_class.add(cl_id)
+          seen_class.add(cl.cl_id)
           temp_tt = copy.deepcopy(tt)
-          temp_tt.add(cl_id,cl_ty, code, DAYMAP[day], start, end)
+          temp_tt.add(cl)
           new_tts.append(temp_tt)
         else:
         # if clash, we ignore this timetable
           continue
+          
       
     else:
     # if the class is seen
       # loop through the new_tt, and add the class into that tt
+      pending_remove = []
       for tt in new_tts:
         #ignore the irrelevant timetable
         if cl_id not in tt.cl_ids:
           continue
         
         #so we find the timetable here
-        # NOTE:we assume each class is distinct, so it can only be added into timetable once!
-        if tt.clash(DAYMAP[day], start, end):
-          new_tts.remove(tt)
-          break
+        if tt.clash(cl):
+          pending_remove.append(tt)
         else:
-          tt.add(cl_id,cl_ty,code,DAYMAP[day], start, end)
-    
-    seen_class.add(cl_id)
+          tt.add(cl)
+      
+      if not pending_remove:
+        for rm_tt in pending_remove:
+          new_tts.remove(rm_tt)
+      
+    seen_class.add(cl.cl_id)
     
   return new_tts
           
@@ -265,10 +298,25 @@ def find_class_time(cur, codes):
         classes.insert(0, rows)
       else:
         classes.append(rows)    
-        
-  return classes
+  
+  
+  return reset_format(classes)
 
-
+def reset_format(classes):
+  result = []
+  for cls in classes: 
+    #each rows
+    each_cl = {}
+    for cl_id, code, cl_ty, day, start, end in cls:
+      if cl_id not in each_cl.keys():
+        each_cl[cl_id] = Class(cl_id, cl_ty, code, day, start, end)
+      else:
+        each_cl[cl_id].add(cl_ty, code, day, start, end)
+    
+    result.append(list(each_cl.values()))
+  
+  return result
+    
 def connect(codes):
   try:
     conn = psycopg2.connect("dbname=a3 user=postgres password=chenqq227") #TODO: delete
