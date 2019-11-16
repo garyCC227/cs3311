@@ -51,12 +51,12 @@ class TT:
     '''
     self.cl_ids = set()
     self.days = set()
-    self.t_hours = 0
+    self.t_hours = 0.0
     self.lt_day = 0
     self.tt = {}
   
   def __str__(self):
-    string = "Total hours:{}\n".format(self.total_hour())
+    string = "Total hours: {0:.1F}\n".format(self.total_hour())
     for day, classes in sorted(self.tt.items(), key=lambda kv:kv[0]):
       string += "  {}\n".format(DAYMAP2[day])
       for start, end, code, cl_type, *_ in sorted(classes, key=lambda x: (x[0], x[1])):
@@ -66,7 +66,7 @@ class TT:
   
   
   def total_hour(self):
-    self.t_hours = 0
+    self.t_hours = 0.0
     for day, classes in self.tt.items():
       sorted_cl = sorted(classes, key=lambda x:(x[0], x[1]))
       # latest end - earliest start
@@ -118,11 +118,7 @@ def q8(conn, codes):
   cur = conn.cursor()
   # find all possible class time
   class_time = find_class_time(cur,codes)
-#   for cl in class_time: #TODO:delete
-#     for i in cl:
-#       print(i)
-#   return
-  
+
   #permute all possible timetable
   empty_tt = TT()
   temp_tts = [empty_tt]
@@ -319,7 +315,7 @@ def reset_format(classes):
     
 def connect(codes):
   try:
-    conn = psycopg2.connect("dbname=a3 user=postgres password=chenqq227") #TODO: delete
+    conn = psycopg2.connect("dbname=a3") #TODO: delete
 
     q8(conn, codes)
 

@@ -73,7 +73,7 @@ def count_time(time, wk):
   
 def connect(key):
   try:
-    conn = psycopg2.connect("dbname=a3 user=postgres password=chenqq227") #TODO: delete
+    conn = psycopg2.connect("dbname=a3 ") #TODO: delete
 
     q7(conn, key)
 

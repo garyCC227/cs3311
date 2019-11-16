@@ -149,21 +149,3 @@ select sum(count) from (
 (select count(*) from rooms where code ~* '^K-.*' group by id)) as Foo;
 
 
-
-
---- q8 sections
-select c.id, cl.id as class_id,s.code, ct.name, cl.tag, m.day, m.start_time, m.end_time from courses c
-join subjects s on c.subject_id = s.id
-join classes cl on c.id = cl.course_id
-join classtypes ct on cl.type_id = ct.id
-join meetings m on m.class_id = cl.id
-where c.term_id = 5199 and s.code='COMP1511'
-order by ct.name,  m.day,cl.tag desc,m.start_time, m.end_time;
-
-
-select ct.name from courses c
-join classes cl on cl.course_id = c.id
-join classtypes ct on cl.type_id = ct.id
-join subjects s on c.subject_id = s.id
-where c.term_id = 5199 and s.code='COMP1511'
-group by ct.name;
