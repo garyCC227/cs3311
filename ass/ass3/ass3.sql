@@ -24,40 +24,40 @@ group by class_id;
 
 --q7 sections
 -- binary string OR funciton
--- create or replace function BinaryOR(left_ text, right_ text) returns text
--- as
--- $$
--- declare
---   result text = '';
---   r_arr text[];
---   l_arr text[];
---   i int;
--- begin
---   if left_ = '' then
---     return right_;
---   end if;
+create or replace function BinaryOR(left_ text, right_ text) returns text
+as
+$$
+declare
+  result text = '';
+  r_arr text[];
+  l_arr text[];
+  i int;
+begin
+  if left_ = '' then
+    return right_;
+  end if;
 
---   select regexp_split_to_array(left_,'') into l_arr;
---   select regexp_split_to_array(right_,'') into r_arr;
---   for i in 1..11
---   loop
---     if l_arr[i] = '1' or r_arr[i] = '1' then
---       result = result || '1';
---     else
---       result = result || '0';
---     end if;
---   end loop;
---   return result;
--- end;
--- $$ language plpgsql;
+  select regexp_split_to_array(left_,'') into l_arr;
+  select regexp_split_to_array(right_,'') into r_arr;
+  for i in 1..11
+  loop
+    if l_arr[i] = '1' or r_arr[i] = '1' then
+      result = result || '1';
+    else
+      result = result || '0';
+    end if;
+  end loop;
+  return result;
+end;
+$$ language plpgsql;
 
--- drop aggregate if exists BinaryORRows(text);
+drop aggregate if exists BinaryORRows(text);
 
--- create aggregate BinaryORRows(text)(
---   stype = text,
---   initcond = '',
---   sfunc = BinaryOR
--- );
+create aggregate BinaryORRows(text)(
+  stype = text,
+  initcond = '',
+  sfunc = BinaryOR
+);
 
 --view for room used in 19T3
 create or replace view T3Rooms
@@ -69,7 +69,7 @@ select
   m.start_time as starting,
   m.end_time as ending,
   m.weeks_binary as weeks
-from meetings m 
+from meetings m  
 join
   (
     select c.id as class_id, T3C.name as term from classes c 
@@ -138,14 +138,22 @@ r.code, m.day, m.start_time, m.end_time;
 
 -- better view for room used in 19T3
 -- no double booking, no overlap class which has the same start_time and end_time
--- create or replace view T3Rooms2
--- as
--- select room,day,starting,ending, BinaryORrows(weeks) from T3rooms 
--- group by room, day, starting, ending;
+create or replace view T3Rooms2
+as
+select room,day,starting,ending, BinaryORrows(weeks) as weeks from T3rooms 
+group by room, day, starting, ending;
+
+create or replace view T2Rooms2
+as
+select room,day,starting,ending, BinaryORrows(weeks) as weeks from T2rooms 
+group by room, day, starting, ending;
+
+create or replace view T1Rooms2
+as
+select room,day,starting,ending, BinaryORrows(weeks) as weeks from T1rooms 
+group by room, day, starting, ending;
 
 
 -- Count total Room- 508
-select sum(count) from (
-(select count(*) from rooms where code ~* '^K-.*' group by id)) as Foo;
 
 
