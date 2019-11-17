@@ -16,15 +16,13 @@ DAYMAP2 = {
   4:'Thu',
   5:'Fri'
 }
+
 class Class:
   def __init__(self, cl_id, cl_ty, code, day, start, end):
     self.cl_id = cl_id
+    #classes format : a list of (start, end , day, COMP1511, Lecture)
     self.classes = [(start, end, day,code, cl_ty)]
-  
-  #same class?
-  def is_same(self, cl_id):
-    return self.cl_id == cl_id
-  
+    
   def add(self, cl_ty, code, day, start, end):
     self.classes.append((start, end, day,code, cl_ty))
   
@@ -64,7 +62,7 @@ class TT:
     
     return string
   
-  
+  # calculating total_hour
   def total_hour(self):
     self.t_hours = 0.0
     for day, classes in self.tt.items():
@@ -184,7 +182,7 @@ def find_fewer_days(tts):
   else:
     print("this should never happend")
 
-    
+#compare latest day for each timetable
 def find_early_class(tts):
   lt_day = 10000
   for tt in tts:
@@ -202,14 +200,14 @@ def find_early_class(tts):
   else:
     print("this should never happend")
 
-    
+#find the timetable as early as possible in the week
 def find_final_tt(tts, lt_day): 
   
   #get the latest hour for first timetable
   curr_t = tts[0]
   lt_hr = find_latest_hour(curr_t)
-  for t in tts[1:]: 
-    curr_lt_hr = find_latest_hour(curr_t)
+  for t in tts[1:]:
+    curr_lt_hr = find_latest_hour(t)
     if curr_lt_hr < lt_hr:
       lt_hr = curr_lt_hr
       curr_t = t
@@ -218,54 +216,29 @@ def find_final_tt(tts, lt_day):
 
 #if the latest day are the same, we use this method to find the eariest leave school time
 def find_latest_hour(one_tt):
-  lt_hour = 100000
+  lt_hour = -1
   for day in one_tt.tt.keys():
     curr_lt_hour = sorted(one_tt.tt[day], key=lambda x:(x[0], x[1]))[-1][1]
-    lt_hour = min(curr_lt_hour, lt_hour)
+    lt_hour = max(curr_lt_hour, lt_hour)
+
   return lt_hour
   
 #tt = timetable
 def permute_tt(tts, classes):
-  # build time table dict
+  # build time table
+
   new_tts = []
-  seen_class = set()
   for cl in classes:
-#     print(cl_id, code, cl_ty, day, start, end)
-    # if the class in not seen 
-    if cl.cl_id not in seen_class:
-      for tt in tts:
-        # if not clash, we build a new timetable
-        if not tt.clash(cl):
-          #add to seen class
-          seen_class.add(cl.cl_id)
-          temp_tt = copy.deepcopy(tt)
-          temp_tt.add(cl)
-          new_tts.append(temp_tt)
-        else:
-        # if clash, we ignore this timetable
-          continue
-          
-      
-    else:
-    # if the class is seen
-      # loop through the new_tt, and add the class into that tt
-      pending_remove = []
-      for tt in new_tts:
-        #ignore the irrelevant timetable
-        if cl_id not in tt.cl_ids:
-          continue
-        
-        #so we find the timetable here
-        if tt.clash(cl):
-          pending_remove.append(tt)
-        else:
-          tt.add(cl)
-      
-      if not pending_remove:
-        for rm_tt in pending_remove:
-          new_tts.remove(rm_tt)
-      
-    seen_class.add(cl.cl_id)
+    for tt in tts:
+      # if not clash, we build a new timetable
+      if not tt.clash(cl):
+        temp_tt = copy.deepcopy(tt)
+        temp_tt.add(cl)
+        new_tts.append(temp_tt)
+      else:
+      # if clash, we ignore this timetable
+        continue
+
     
   return new_tts
           
@@ -308,6 +281,7 @@ def find_class_time(cur, codes):
   
   return reset_format(classes)
 
+#re-arrange all the classes which have the same class id
 def reset_format(classes):
   result = []
   for cls in classes: 
@@ -322,7 +296,7 @@ def reset_format(classes):
     result.append(list(each_cl.values()))
   
   return result
-  
+    
 def connect(codes):
   try:
     conn = psycopg2.connect("dbname=a3") #TODO: delete
