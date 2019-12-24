@@ -1,0 +1,31 @@
+# COMP3311 12s1 Exam Q11
+
+(a)
+A->BC, DE->F, ADE->G
+
+(b)
+  ABCDEFG
+  key = ADE
+  (1) use: A->BC
+      table(1): ABC, fds ={A->BC}
+      table(2): ADEFG, fds = {DE->F, ADE->G}
+
+  (2) by table(2), use : DE->F
+  table(3): DEF, fds = {DE->F}
+  table(4): ADEG, fds = {ADE->G}
+
+  conclusion: for BCNF schema
+    table(1): ABC, fds ={A->BC}
+    table(3): DEF, fds = {DE->F}
+    table(4): ADEG, fds = {ADE->G}
+
+(c)
+  BCNF:
+    1. those tables eliminates all redundancy and recomposite back to 
+      original table will not lost any infomation
+    2. but it will not keep all the original functional dependencies
+
+  3NF:
+    1. eliminates most redundacy due to fds
+    2. keyy all the original functional dependencies
+

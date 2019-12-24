@@ -1,0 +1,30 @@
+# COMP3311 12s1 Exam Q10
+
+(a)
+print out list of players with 
+how many goals are scored by each player.
+include those players have no goals
+(b)
+501
+
+(c)
+import sqlite3
+
+conn = sqlite3.connect("footy.db")
+
+query = """
+select p.name, f.goals from 
+(select p.id, count(*) as goals from Goals g 
+join players p on g.scoredBy = p.id
+group by p.id
+) as f 
+join players p on p.id = f.id
+;
+"""
+
+
+c1 = conn.cursor()
+
+c1.execute(query)
+for name, goals in c1.fetchall():
+	print(name, goals);

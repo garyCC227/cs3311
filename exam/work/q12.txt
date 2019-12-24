@@ -1,0 +1,19 @@
+# COMP3311 12s1 Exam Q12
+
+(a)
+-- select * from employees where payRate > 20;
+Res = proj[eno, ename](sel[payRate > 20](Employees));
+
+(b)
+Tmp1 = Employees join Department; (on eno)
+Res = proj[ename](Tmp1)
+
+(c)
+Tmp1 = Sel[day='sat' or day='sun']Timesheet
+Tmp2 = Proj[eno,day]Timesheet
+Tmp3 = Tmp2 / Tmp1
+Tmp4 = Employees Join Tmp3  (on eno)
+Res  = Proj[ename]Tmp4
+
+
+

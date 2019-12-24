@@ -145,7 +145,5 @@ r.code, m.day, m.start_time, m.end_time;
 
 
 -- Count total Room- 508
-select sum(count) from (
-(select count(*) from rooms where code ~* '^K-.*' group by id)) as Foo;
 
 

@@ -1,0 +1,73 @@
+# COMP3311 12s1 Exam Q8
+
+(a)
+create table Employee(
+    id integer,
+    position text,
+    name text,
+    primary key(id)
+);
+
+create table PartTime(
+    id integer references Employee(id),
+    fraction float check (fraction > 0.0 and fraction < 1.0),
+    primary key (id)
+);
+
+create table Casual(
+    id integer references Employee(id),
+    primary key (id)
+);
+
+create table Worked(
+    id integer references Casual(id),
+    onDate date references Hours(onDate),
+    primary key (id, onDate)
+);
+
+create table Hours(
+    id integer references Casual(id),
+    starting time,
+    ending  time,
+    onDate date,
+    primary key (id, onDate),
+    constraint timing check (ending > starting)
+);
+we could not enforce the total participation, since Employee may not have
+associated subclass tuple. 
+
+could not enfore disjoint, 
+since an Employee may have serval associated subclass tuple.
+
+(b)
+create table Employee(
+    id integer,
+    name text,
+    position text,
+    fraction float check (fraction > 0.0 and fraction < 1.0),
+    etype text not null check (etype in ('part-time','casual')),
+    primary key (id),
+
+    constraint Valid check (
+        (etype = 'part-time' and fraction is not null)
+        or
+        (etype = 'casual' and fraction is null)
+    )
+);
+
+create table Hours(
+    id integer references Employee(id),
+    starting time,
+    ending  time,
+    onDate date,
+    primary key (id, onDate),
+    constraint timing check (ending > starting)
+);
+we can enfore total participation by set not null in etype. so every 
+Employee must be part-time or casual.
+
+the constraint Valid allow us to enforce disjoint. e.g
+if is 'part-time', the fraction attribute must be not null.
+
+but if is 'casual', the fraction attribute must be null.
+since fraction attraibute is only occurs in 'part-time'
